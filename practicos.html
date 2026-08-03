@@ -15,15 +15,8 @@
                 <img src="images/logo2.png" alt="DigitalDuck Logo" class="logo-dd">
                 <img src="images/logouach.png" alt="UACH Logo" class="logo-uach">
             </div> 
-            <!-- Menú principal (igual que index.html) -->
-            <ul class="nav-links" id="navLinks">
-                <li><a href="index.html#inicio">INICIO</a></li>
-                <li><a href="index.html#sobre">SOBRE DIGITALDUCK</a></li>
-                <li><a href="index.html#caracteristicas">CARACTERÍSTICAS</a></li>
-                <li><a href="index.html#contenido">CONTENIDO</a></li>
-                <li><a href="index.html#practicos">PRÁCTICOS</a></li>
-                <li><a href="index.html#contacto">CONTACTO</a></li>
-            </ul>
+            <!-- Menú principal: markup generado por js/nav.js (misma fuente que index.html) -->
+            <ul class="nav-links" id="navLinks"></ul>
 
             <div class="nav-buttons">
                 <!-- Botón hamburguesa para prácticos -->
@@ -63,7 +56,10 @@
         </div>
     </footer>
 
+    <script src="js/nav.js"></script>
     <script>
+        renderNav('index.html');
+
         // Lista de prácticos: agregar aquí una entrada = aparece en el menú y en la grilla, ambos a la vez.
         const PRACTICOS = [
             { file: 'pra1.html', num: '01', name: 'Introducción', title: 'Introducción a la Patología Digital', icon: '🔬',

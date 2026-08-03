@@ -15,14 +15,7 @@
                 <img src="images/logo2.png" alt="DigitalDuck Logo" class="logo-dd">
                 <img src="images/logouach.png" alt="UACH Logo" class="logo-uach">
             </div>  
-            <ul class="nav-links" id="navLinks">
-                <li><a href="#inicio">INICIO</a></li>
-                <li><a href="#sobre">SOBRE DIGITALDUCK</a></li>
-                <li><a href="#caracteristicas">CARACTERÍSTICAS</a></li>
-                <li><a href="#contenido">CONTENIDO</a></li>
-                <li><a href="#practicos">PRÁCTICOS</a></li>
-                <li><a href="#contacto">CONTACTO</a></li>
-            </ul>
+            <ul class="nav-links" id="navLinks"></ul>
             <button class="menu-toggle" id="menuToggle">
                 <span></span>
                 <span></span>
@@ -216,7 +209,10 @@
         </div>
     </footer>
 
+    <script src="js/nav.js"></script>
     <script>
+        renderNav('');
+
         // Menu Toggle
         const menuToggle = document.getElementById('menuToggle');
         const navLinks = document.getElementById('navLinks');

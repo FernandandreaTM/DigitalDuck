@@ -94,6 +94,50 @@ const OBJLIST_FIELDS = {
   resources: {key:'platforms', label:'Recursos', itemLabel:'Recurso', fields:[['name','Nombre'],['url','URL'],['purpose','Descripción']]}
 };
 
+function validateSlide(slide) {
+  const c = slide.content || {};
+  const issues = [];
+  const reqText = (val, label) => { if (!val || !String(val).trim()) issues.push(label); };
+  const reqList = (arr, label) => { if (!arr || !arr.length) issues.push(label); };
+  switch (slide.type) {
+    case 'title':
+      reqText(c.title,'Título'); reqText(c.instructor,'Instructor/a'); reqText(c.email,'Email'); break;
+    case 'objectives':
+      reqText(c.title,'Título'); reqList(c.items,'Objetivos'); break;
+    case 'content':
+      reqText(c.title,'Título'); reqList(c.items,'Puntos'); break;
+    case 'process':
+      reqText(c.title,'Título'); reqList(c.steps,'Pasos'); break;
+    case 'platform':
+      reqText(c.title,'Título'); reqText(c.url,'URL'); reqList(c.features,'Características'); break;
+    case 'tutorial':
+      reqText(c.title,'Título'); reqList(c.steps,'Pasos'); break;
+    case 'activity':
+      reqText(c.title,'Título'); reqList(c.instructions,'Instrucciones'); break;
+    case 'case':
+      reqText(c.title,'Título'); reqText(c.concept,'Concepto');
+      if (c.clinical) { reqText(c.clinical.patient,'Paciente'); reqText(c.clinical.symptoms,'Síntomas'); reqText(c.clinical.labs,'Laboratorio'); }
+      else issues.push('Información clínica');
+      reqList(c.questions,'Preguntas'); reqList(c.links,'Enlaces');
+      break;
+    case 'comparison':
+      reqText(c.title,'Título');
+      if (!c.headers || c.headers.length < 2) issues.push('Encabezados (mínimo 2)');
+      reqList(c.rows,'Filas');
+      break;
+    case 'assessment':
+      reqText(c.title,'Título'); reqList(c.items,'Evaluaciones'); break;
+    case 'resources':
+      reqText(c.title,'Título'); reqList(c.platforms,'Recursos'); break;
+    case 'qa':
+      reqText(c.title,'Título');
+      if (c.contact) reqText(c.contact.email,'Email de contacto');
+      else issues.push('Contacto');
+      break;
+  }
+  return issues;
+}
+
 function defaultContent(type) {
   switch(type) {
     case 'title': return {title:'', subtitle:'', instructor: state.meta.instructor||'', email: state.meta.email||''};
@@ -116,8 +160,13 @@ function defaultContent(type) {
 
 const DRAFT_KEY = 'digitalduck_practico_draft';
 
+function emptyMeta() {
+  return {title:'', courseLabel:'Patología Básica - UACh', date:'', instructor:'', email:'', office:'', hours:'',
+    indexIcon:'', indexMenuName:'', indexDescription:'', indexNum:''};
+}
+
 let state = {
-  meta: {title:'', courseLabel:'Patología Básica - UACh', date:'', instructor:'', email:'', office:'', hours:''},
+  meta: emptyMeta(),
   objectives: [],
   bibliography: [],
   slides: []
@@ -218,6 +267,17 @@ function renderTabGeneral() {
     <button id="btnAplicarGeneral" class="mt-5 bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
       <i data-lucide="check" class="w-4 h-4"></i> Aplicar a láminas de Portada y Contacto
     </button>
+
+    <div class="mt-8 pt-5 border-t">
+      <h3 class="text-sm font-bold text-gray-700 mb-1">Datos para el índice del portal (opcional)</h3>
+      <p class="text-xs text-gray-500 mb-3">Se usan si vas a agregar este práctico al índice de practicos.html (pestaña 4. Generar).</p>
+      <div class="grid md:grid-cols-2 gap-4 max-w-3xl">
+        <div><label class="field-label">Número</label><input class="field-input" data-meta="indexNum" value="${escAttr(m.indexNum)}" placeholder="09"></div>
+        <div><label class="field-label">Ícono (emoji)</label><input class="field-input" data-meta="indexIcon" value="${escAttr(m.indexIcon)}" placeholder="🔬"></div>
+        <div><label class="field-label">Nombre corto (menú)</label><input class="field-input" data-meta="indexMenuName" value="${escAttr(m.indexMenuName)}" placeholder="Ej: Inflamación"></div>
+        <div class="md:col-span-2"><label class="field-label">Descripción breve (tarjeta)</label><textarea class="field-input" rows="2" data-meta="indexDescription" placeholder="1-2 frases para la tarjeta del índice">${escHtml(m.indexDescription)}</textarea></div>
+      </div>
+    </div>
   `;
 }
 
@@ -318,6 +378,8 @@ function renderSlideList() {
   wrap.innerHTML = state.slides.map((s,i) => {
     const typeInfo = SLIDE_TYPES.find(t => t.id === s.type) || {label:s.type, icon:'file'};
     const title = s.content.title || '(sin título)';
+    const issues = validateSlide(s);
+    const warn = issues.length ? `<span title="Falta: ${escAttr(issues.join(', '))}" class="flex items-center gap-1 text-amber-600 flex-shrink-0"><i data-lucide="alert-triangle" class="w-4 h-4"></i></span>` : '';
     return `
       <div class="slide-card rounded-lg p-3 flex items-center gap-3">
         <span class="text-xs font-mono text-gray-400 w-6">${i+1}</span>
@@ -326,6 +388,7 @@ function renderSlideList() {
           <p class="text-sm font-medium text-gray-800 truncate">${escHtml(title)}</p>
           <p class="text-xs text-gray-400">${typeInfo.label}</p>
         </div>
+        ${warn}
         <button class="p-1.5 hover:bg-gray-100 rounded" data-move-up="${i}" title="Subir"><i data-lucide="chevron-up" class="w-4 h-4"></i></button>
         <button class="p-1.5 hover:bg-gray-100 rounded" data-move-down="${i}" title="Bajar"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
         <button class="p-1.5 hover:bg-purple-100 rounded text-purple-700" data-edit="${i}" title="Editar"><i data-lucide="pencil" class="w-4 h-4"></i></button>
@@ -472,10 +535,26 @@ function renderComparisonRows(i) {
 
 /* ================= TAB 4: GENERAR ================= */
 
+function renderValidationSummary() {
+  const rows = state.slides.map((s,i) => ({i, issues: validateSlide(s)})).filter(r => r.issues.length);
+  if (!rows.length) {
+    return `<div class="bg-green-50 border border-green-200 text-green-800 rounded-lg p-3 mb-4 text-sm flex items-center gap-2">
+      <i data-lucide="check-circle" class="w-4 h-4 flex-shrink-0"></i> Todas las láminas tienen sus campos principales completos.
+    </div>`;
+  }
+  return `<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm">
+    <p class="text-amber-800 font-semibold flex items-center gap-2 mb-1"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Revisa antes de publicar:</p>
+    <ul class="text-amber-700 space-y-0.5">
+      ${rows.map(r => `<li>Lámina ${r.i+1}: falta ${escHtml(r.issues.join(', '))}</li>`).join('')}
+    </ul>
+  </div>`;
+}
+
 function renderTabGenerar() {
   return `
     <h2 class="text-lg font-bold text-gray-800 mb-1">Generar práctico</h2>
     <p class="text-sm text-gray-500 mb-4">Vista previa exacta del archivo final. ${state.slides.length} lámina(s).</p>
+    ${renderValidationSummary()}
     <div class="flex gap-2 mb-4 flex-wrap">
       <button id="btnActualizarPreview" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
         <i data-lucide="refresh-cw" class="w-4 h-4"></i> Actualizar vista previa
@@ -486,6 +565,10 @@ function renderTabGenerar() {
       <button id="btnDescargarJSON" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
         <i data-lucide="file-json" class="w-4 h-4"></i> Descargar JSON
       </button>
+      <button id="btnActualizarIndice" class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="list-plus" class="w-4 h-4"></i> Actualizar índice (practicos.html)
+      </button>
+      <input type="file" id="fileIndexInput" accept=".html,.htm" class="hidden">
     </div>
     <div class="border rounded-xl overflow-hidden" style="height:70vh;">
       <iframe id="previewFrame" class="w-full h-full" title="Vista previa"></iframe>
@@ -1402,6 +1485,69 @@ function importHTML(file) {
   reader.readAsText(file);
 }
 
+/* ================= ACTUALIZAR INDICE DEL PORTAL (practicos.html) ================= */
+
+function extractPracticosArray(text) {
+  const marker = 'const PRACTICOS = ';
+  const idx = text.indexOf(marker);
+  if (idx === -1) return null;
+  const arrStart = idx + marker.length;
+  if (text[arrStart] !== '[') return null;
+  const arrEnd = findMatchingBracket(text, arrStart);
+  if (arrEnd === -1) return null;
+  try {
+    const arr = new Function('"use strict"; return (' + text.slice(arrStart, arrEnd + 1) + ');')();
+    return {arr, arrStart, arrEnd};
+  } catch(e) {
+    console.error('Error al interpretar PRACTICOS', e);
+    return null;
+  }
+}
+
+function serializePracticosArray(arr) {
+  const lines = arr.map(p =>
+    '            { file: ' + JSON.stringify(p.file) + ', num: ' + JSON.stringify(p.num) + ', name: ' + JSON.stringify(p.name) + ', title: ' + JSON.stringify(p.title) + ', icon: ' + JSON.stringify(p.icon) + ',\n' +
+    '              description: ' + JSON.stringify(p.description) + ' }'
+  );
+  return '[\n' + lines.join(',\n') + '\n        ]';
+}
+
+function updatePracticosHTML(htmlText, entry) {
+  const found = extractPracticosArray(htmlText);
+  if (!found) return null;
+  const arr = found.arr;
+  const idx = arr.findIndex(p => p.file === entry.file);
+  if (idx === -1) arr.push(entry); else arr[idx] = entry;
+  return htmlText.slice(0, found.arrStart) + serializePracticosArray(arr) + htmlText.slice(found.arrEnd + 1);
+}
+
+function updateIndex(file) {
+  if (!state.meta.title) {
+    alert('Completa el título del práctico en la pestaña "1. Información General" primero.');
+    return;
+  }
+  const entry = {
+    file: slugify(state.meta.title) + '.html',
+    num: state.meta.indexNum || '',
+    name: state.meta.indexMenuName || state.meta.title,
+    title: state.meta.title,
+    icon: state.meta.indexIcon || '📘',
+    description: state.meta.indexDescription || ''
+  };
+  const reader = new FileReader();
+  reader.onload = () => {
+    const updated = updatePracticosHTML(String(reader.result), entry);
+    if (!updated) {
+      alert('No se encontró el listado de prácticos (PRACTICOS) en el archivo subido. ¿Es el practicos.html correcto?');
+      return;
+    }
+    downloadBlob(updated, 'practicos.html', 'text/html');
+    alert('practicos.html actualizado y descargado. Reemplaza el archivo en la carpeta del proyecto.');
+  };
+  reader.onerror = () => alert('No se pudo leer el archivo.');
+  reader.readAsText(file);
+}
+
 function importJSON(file) {
   const reader = new FileReader();
   reader.onload = () => {
@@ -1508,6 +1654,15 @@ function wireTabEvents() {
     if (btnDl) btnDl.addEventListener('click', downloadHTML);
     const btnDlJson = document.getElementById('btnDescargarJSON');
     if (btnDlJson) btnDlJson.addEventListener('click', exportJSON);
+    const btnIdx = document.getElementById('btnActualizarIndice');
+    const fileIdx = document.getElementById('fileIndexInput');
+    if (btnIdx && fileIdx) {
+      btnIdx.addEventListener('click', () => fileIdx.click());
+      fileIdx.addEventListener('change', (e) => {
+        if (e.target.files[0]) updateIndex(e.target.files[0]);
+        e.target.value = '';
+      });
+    }
   }
 }
 
@@ -1524,7 +1679,7 @@ document.getElementById('fileJsonInput').addEventListener('change', (e) => {
 
 document.getElementById('btnNuevo').addEventListener('click', () => {
   if (confirm('¿Empezar un práctico nuevo? Se perderá el borrador actual (a menos que lo hayas descargado).')) {
-    state = {meta:{title:'', courseLabel:'Patología Básica - UACh', date:'', instructor:'', email:'', office:'', hours:''}, objectives:[], bibliography:[], slides:[]};
+    state = {meta: emptyMeta(), objectives:[], bibliography:[], slides:[]};
     editingIndex = null;
     activeTab = 'general';
     saveDraft();

@@ -30,7 +30,15 @@
         <p class="text-purple-200 text-xs md:text-sm">Crea un práctico digital interactivo sin programar</p>
       </div>
     </div>
-    <div class="flex gap-2">
+    <div class="flex gap-2 flex-wrap">
+      <button id="btnCargarHTML" class="bg-purple-800 hover:bg-purple-700 text-sm px-3 py-2 rounded-lg flex items-center gap-1">
+        <i data-lucide="upload" class="w-4 h-4"></i> Cargar HTML
+      </button>
+      <button id="btnCargarJSON" class="bg-purple-800 hover:bg-purple-700 text-sm px-3 py-2 rounded-lg flex items-center gap-1">
+        <i data-lucide="file-json" class="w-4 h-4"></i> Cargar JSON
+      </button>
+      <input type="file" id="fileHtmlInput" accept=".html,.htm" class="hidden">
+      <input type="file" id="fileJsonInput" accept=".json" class="hidden">
       <button id="btnNuevo" class="bg-purple-800 hover:bg-purple-700 text-sm px-3 py-2 rounded-lg flex items-center gap-1">
         <i data-lucide="file-plus" class="w-4 h-4"></i> Nuevo
       </button>
@@ -468,12 +476,15 @@ function renderTabGenerar() {
   return `
     <h2 class="text-lg font-bold text-gray-800 mb-1">Generar práctico</h2>
     <p class="text-sm text-gray-500 mb-4">Vista previa exacta del archivo final. ${state.slides.length} lámina(s).</p>
-    <div class="flex gap-2 mb-4">
+    <div class="flex gap-2 mb-4 flex-wrap">
       <button id="btnActualizarPreview" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
         <i data-lucide="refresh-cw" class="w-4 h-4"></i> Actualizar vista previa
       </button>
       <button id="btnDescargar" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
         <i data-lucide="download" class="w-4 h-4"></i> Descargar HTML
+      </button>
+      <button id="btnDescargarJSON" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="file-json" class="w-4 h-4"></i> Descargar JSON
       </button>
     </div>
     <div class="border rounded-xl overflow-hidden" style="height:70vh;">
@@ -1284,6 +1295,135 @@ function downloadHTML() {
   URL.revokeObjectURL(url);
 }
 
+function downloadBlob(content, filename, mime) {
+  const blob = new Blob([content], {type:mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function exportJSON() {
+  downloadBlob(JSON.stringify(state, null, 2), slugify(state.meta.title) + '.json', 'application/json');
+}
+
+/* ================= IMPORTAR / RECICLAR ================= */
+
+function findMatchingBracket(text, startIdx) {
+  let depth = 0, inString = false, quoteChar = null, escaped = false;
+  for (let i = startIdx; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === quoteChar) inString = false;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === '`') { inString = true; quoteChar = ch; continue; }
+    if (ch === '[') depth++;
+    else if (ch === ']') { depth--; if (depth === 0) return i; }
+  }
+  return -1;
+}
+
+function extractSlidesFromHTML(text) {
+  const marker = 'const slides = ';
+  const idx = text.indexOf(marker);
+  if (idx === -1) return null;
+  const arrStart = idx + marker.length;
+  if (text[arrStart] !== '[') return null;
+  const arrEnd = findMatchingBracket(text, arrStart);
+  if (arrEnd === -1) return null;
+  const literalText = text.slice(arrStart, arrEnd + 1);
+  try {
+    const slides = new Function('"use strict"; return (' + literalText + ');')();
+    return normalizeSlides(slides);
+  } catch(e) {
+    console.error('Error al interpretar el arreglo de láminas', e);
+    return null;
+  }
+}
+
+/* Prácticos anteriores al generador guardaban los enlaces de "caso" como un objeto
+   fijo {caso,histologia,medline,msd}; el generador usa una lista flexible [{label,url}]. */
+function normalizeSlides(slides) {
+  const legacyLabels = {caso:'Caso Clínico', histologia:'Histología Referencia', medline:'MedlinePlus', msd:'MSD Manuals'};
+  return (slides||[]).map(s => {
+    if (s.type === 'case' && s.content && s.content.links && !Array.isArray(s.content.links)) {
+      const linksObj = s.content.links;
+      const newLinks = Object.keys(linksObj).map(k => ({label: legacyLabels[k] || k, url: linksObj[k]}));
+      return Object.assign({}, s, {content: Object.assign({}, s.content, {links: newLinks})});
+    }
+    return s;
+  });
+}
+
+function deriveMetaFromSlides() {
+  const titleSlide = state.slides.find(s => s.type === 'title');
+  if (titleSlide) {
+    state.meta.title = titleSlide.content.title || state.meta.title;
+    state.meta.instructor = titleSlide.content.instructor || state.meta.instructor;
+    state.meta.email = titleSlide.content.email || state.meta.email;
+  }
+  const qaSlide = state.slides.find(s => s.type === 'qa');
+  if (qaSlide && qaSlide.content.contact) {
+    state.meta.email = qaSlide.content.contact.email || state.meta.email;
+    state.meta.office = qaSlide.content.contact.office || state.meta.office;
+    state.meta.hours = qaSlide.content.contact.hours || state.meta.hours;
+  }
+  const objSlide = state.slides.find(s => s.type === 'objectives');
+  if (objSlide) state.objectives = (objSlide.content.items || []).slice();
+  const resSlide = state.slides.find(s => s.type === 'resources');
+  if (resSlide) state.bibliography = (resSlide.content.platforms || []).map(p => Object.assign({}, p));
+}
+
+function importHTML(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const slides = extractSlidesFromHTML(String(reader.result));
+    if (!slides || !Array.isArray(slides)) {
+      alert('No se pudo encontrar el arreglo de láminas en este archivo HTML. ¿Es un práctico de DigitalDuck?');
+      return;
+    }
+    if (state.slides.length && !confirm('Esto reemplazará el práctico actual (' + state.slides.length + ' lámina(s)) por las ' + slides.length + ' láminas encontradas en el archivo. ¿Continuar?')) return;
+    state.slides = slides;
+    deriveMetaFromSlides();
+    editingIndex = null;
+    activeTab = 'laminas';
+    saveDraft();
+    render();
+    alert('Importado: ' + slides.length + ' lámina(s). Puedes editarlas en la pestaña Láminas.');
+  };
+  reader.onerror = () => alert('No se pudo leer el archivo.');
+  reader.readAsText(file);
+}
+
+function importJSON(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    let parsed;
+    try { parsed = JSON.parse(String(reader.result)); }
+    catch(e) { alert('El archivo no es un JSON válido.'); return; }
+    if (!parsed || !Array.isArray(parsed.slides)) {
+      alert('Este JSON no tiene el formato esperado (falta "slides").');
+      return;
+    }
+    if (state.slides.length && !confirm('Esto reemplazará el práctico actual. ¿Continuar?')) return;
+    parsed.slides = normalizeSlides(parsed.slides);
+    state = Object.assign({meta:{title:'', courseLabel:'Patología Básica - UACh', date:'', instructor:'', email:'', office:'', hours:''}, objectives:[], bibliography:[], slides:[]}, parsed);
+    editingIndex = null;
+    activeTab = 'laminas';
+    saveDraft();
+    render();
+  };
+  reader.onerror = () => alert('No se pudo leer el archivo.');
+  reader.readAsText(file);
+}
+
 /* ================= EVENT WIRING ================= */
 
 function wireTabEvents() {
@@ -1366,8 +1506,21 @@ function wireTabEvents() {
     if (btnUpd) btnUpd.addEventListener('click', () => { frame.srcdoc = generateFullHTML(); });
     const btnDl = document.getElementById('btnDescargar');
     if (btnDl) btnDl.addEventListener('click', downloadHTML);
+    const btnDlJson = document.getElementById('btnDescargarJSON');
+    if (btnDlJson) btnDlJson.addEventListener('click', exportJSON);
   }
 }
+
+document.getElementById('btnCargarHTML').addEventListener('click', () => document.getElementById('fileHtmlInput').click());
+document.getElementById('fileHtmlInput').addEventListener('change', (e) => {
+  if (e.target.files[0]) importHTML(e.target.files[0]);
+  e.target.value = '';
+});
+document.getElementById('btnCargarJSON').addEventListener('click', () => document.getElementById('fileJsonInput').click());
+document.getElementById('fileJsonInput').addEventListener('change', (e) => {
+  if (e.target.files[0]) importJSON(e.target.files[0]);
+  e.target.value = '';
+});
 
 document.getElementById('btnNuevo').addEventListener('click', () => {
   if (confirm('¿Empezar un práctico nuevo? Se perderá el borrador actual (a menos que lo hayas descargado).')) {

@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Prácticos - DigitalDuck</title>
+<link rel="icon" type="image/png" href="images/favicon.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  body { font-family: ui-sans-serif, system-ui, sans-serif; background:#f9f4f2; }
+  .tab-btn.active { background:#4c1d95; color:white; }
+  .field-label { display:block; font-size:0.8rem; font-weight:600; color:#4b5563; margin-bottom:0.25rem; }
+  .field-input { width:100%; border:1px solid #d1d5db; border-radius:0.5rem; padding:0.5rem 0.75rem; font-size:0.9rem; }
+  .field-input:focus { outline:2px solid #7c3aed; outline-offset:1px; }
+  .slide-card { border:1px solid #e5e7eb; }
+  .slide-card.selected { border-color:#7c3aed; box-shadow:0 0 0 2px #ddd6fe; }
+  .type-btn { border:1px solid #e5e7eb; transition:all .15s; }
+  .type-btn:hover { border-color:#7c3aed; background:#f5f3ff; }
+</style>
+</head>
+<body>
+<div class="max-w-7xl mx-auto p-4 md:p-6">
+
+  <header class="bg-purple-900 text-white rounded-xl p-4 md:p-5 mb-5 flex flex-wrap items-center justify-between gap-3 shadow-lg">
+    <div class="flex items-center gap-3">
+      <i data-lucide="microscope" class="w-7 h-7 text-yellow-400"></i>
+      <div>
+        <h1 class="font-bold text-lg md:text-xl">Generador de Prácticos - DigitalDuck</h1>
+        <p class="text-purple-200 text-xs md:text-sm">Crea un práctico digital interactivo sin programar</p>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button id="btnNuevo" class="bg-purple-800 hover:bg-purple-700 text-sm px-3 py-2 rounded-lg flex items-center gap-1">
+        <i data-lucide="file-plus" class="w-4 h-4"></i> Nuevo
+      </button>
+      <span id="autosaveIndicator" class="text-xs text-purple-300 self-center hidden md:inline"></span>
+    </div>
+  </header>
+
+  <nav class="flex gap-2 mb-5 flex-wrap" id="tabNav"></nav>
+
+  <main id="tabContent" class="bg-white rounded-xl shadow p-4 md:p-6 min-h-[400px]"></main>
+
+</div>
+
+<script>
+lucide.createIcons();
+
+/* ================= SLIDE TYPE DEFINITIONS ================= */
+
+const SLIDE_TYPES = [
+  {id:'title', label:'Portada', icon:'type'},
+  {id:'objectives', label:'Objetivos', icon:'target'},
+  {id:'content', label:'Contenido (lista)', icon:'list'},
+  {id:'process', label:'Proceso (pasos)', icon:'flask-conical'},
+  {id:'platform', label:'Plataforma externa', icon:'monitor'},
+  {id:'tutorial', label:'Tutorial (pasos)', icon:'compass'},
+  {id:'activity', label:'Actividad', icon:'pencil'},
+  {id:'case', label:'Caso clínico', icon:'microscope'},
+  {id:'comparison', label:'Tabla comparativa', icon:'git-compare'},
+  {id:'assessment', label:'Evaluaciones', icon:'clipboard-check'},
+  {id:'resources', label:'Recursos / Bibliografía', icon:'library'},
+  {id:'qa', label:'Contacto / Preguntas', icon:'message-circle'}
+];
+
+const SIMPLE_FIELDS = {
+  title: [['title','Título','text'],['subtitle','Subtítulo','text'],['instructor','Instructor/a','text'],['email','Email','text']],
+  objectives: [['title','Título','text'],['items','Objetivos (uno por línea)','list']],
+  content: [['title','Título','text'],['subtitle','Subtítulo (opcional)','text'],['items','Puntos (uno por línea, admite <strong>negrita</strong>)','list']],
+  process: [['title','Título','text'],['subtitle','Subtítulo','text'],['image','URL de imagen (opcional)','text']],
+  platform: [['title','Título','text'],['url','URL','text'],['features','Características (una por línea)','list']],
+  tutorial: [['title','Título','text'],['steps','Pasos (uno por línea)','list']],
+  activity: [['title','Título','text'],['instructions','Instrucciones (una por línea)','list']],
+  case: [['title','Título (ej. Lámina 1: Metaplasia)','text'],['concept','Concepto clave (ej. METAPLASIA)','text'],['clinical.patient','Paciente','text'],['clinical.symptoms','Síntomas','text'],['clinical.labs','Laboratorio / Exámenes','text'],['questions','Preguntas de análisis (una por línea)','list']],
+  comparison: [['title','Título','text'],['subtitle','Subtítulo','text'],['headers','Encabezados de columna (separados por coma)','csv']],
+  assessment: [['title','Título','text']],
+  resources: [['title','Título','text']],
+  qa: [['title','Título','text'],['subtitle','Subtítulo','text'],['contact.email','Email','text'],['contact.office','Oficina','text'],['contact.hours','Horario','text']]
+};
+
+const OBJLIST_FIELDS = {
+  process: {key:'steps', label:'Pasos', itemLabel:'Paso', fields:[['number','N°'],['title','Título'],['description','Descripción']]},
+  case: {key:'links', label:'Enlaces de estudio', itemLabel:'Enlace', fields:[['label','Nombre del enlace'],['url','URL']]},
+  assessment: {key:'items', label:'Evaluaciones', itemLabel:'Evaluación', fields:[['name','Nombre'],['date','Fecha'],['content','Contenido'],['weight','Ponderación']]},
+  resources: {key:'platforms', label:'Recursos', itemLabel:'Recurso', fields:[['name','Nombre'],['url','URL'],['purpose','Descripción']]}
+};
+
+function defaultContent(type) {
+  switch(type) {
+    case 'title': return {title:'', subtitle:'', instructor: state.meta.instructor||'', email: state.meta.email||''};
+    case 'objectives': return {title:'Objetivos del Práctico', items:[]};
+    case 'content': return {title:'', subtitle:'', items:[]};
+    case 'process': return {title:'', subtitle:'', image:'', steps:[]};
+    case 'platform': return {title:'', url:'', features:[]};
+    case 'tutorial': return {title:'', steps:[]};
+    case 'activity': return {title:'', instructions:[]};
+    case 'case': return {title:'', concept:'', clinical:{patient:'',symptoms:'',labs:''}, questions:[], links:[]};
+    case 'comparison': return {title:'', subtitle:'', headers:['Característica','Opción A','Opción B'], rows:[]};
+    case 'assessment': return {title:'Evaluaciones Prácticas', items:[]};
+    case 'resources': return {title:'Recursos del Curso', platforms:[]};
+    case 'qa': return {title:'¿Preguntas?', subtitle:'Momento para resolver dudas', contact:{email: state.meta.email||'', office: state.meta.office||'', hours: state.meta.hours||''}};
+    default: return {};
+  }
+}
+
+/* ================= STATE ================= */
+
+const DRAFT_KEY = 'digitalduck_practico_draft';
+
+let state = {
+  meta: {title:'', courseLabel:'Patología Básica - UACh', date:'', instructor:'', email:'', office:'', hours:''},
+  objectives: [],
+  bibliography: [],
+  slides: []
+};
+
+let activeTab = 'general';
+let editingIndex = null;
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.meta) state = parsed;
+    }
+  } catch(e) { console.warn('No se pudo cargar borrador', e); }
+}
+
+function saveDraft() {
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(state));
+  const ind = document.getElementById('autosaveIndicator');
+  if (ind) {
+    ind.textContent = 'Guardado ' + new Date().toLocaleTimeString('es-CL');
+    ind.classList.remove('hidden');
+  }
+}
+
+/* ================= HELPERS ================= */
+
+function getPath(obj, path) {
+  return path.split('.').reduce((o,k) => (o==null? o : o[k]), obj);
+}
+function setPath(obj, path, value) {
+  const parts = path.split('.');
+  let o = obj;
+  for (let i=0; i<parts.length-1; i++) {
+    if (!o[parts[i]]) o[parts[i]] = {};
+    o = o[parts[i]];
+  }
+  o[parts[parts.length-1]] = value;
+}
+function escAttr(s) {
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function escHtml(s) {
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function listToText(arr) { return (arr||[]).join('\n'); }
+function textToList(txt) { return txt.split('\n').map(s=>s.trim()).filter(Boolean); }
+function csvToList(txt) { return txt.split(',').map(s=>s.trim()).filter(Boolean); }
+
+/* ================= RENDER: APP SHELL ================= */
+
+const TABS = [
+  {id:'general', label:'1. Información General', icon:'settings'},
+  {id:'contenidos', label:'2. Contenidos', icon:'book-open'},
+  {id:'laminas', label:'3. Láminas', icon:'layers'},
+  {id:'generar', label:'4. Generar', icon:'download'}
+];
+
+function render() {
+  const nav = document.getElementById('tabNav');
+  nav.innerHTML = TABS.map(t => `
+    <button class="tab-btn ${activeTab===t.id?'active':'bg-white text-gray-700 border'} px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2" data-tab="${t.id}">
+      <i data-lucide="${t.icon}" class="w-4 h-4"></i> ${t.label}
+    </button>
+  `).join('');
+  nav.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => { activeTab = btn.dataset.tab; editingIndex = null; render(); });
+  });
+
+  const content = document.getElementById('tabContent');
+  if (activeTab === 'general') content.innerHTML = renderTabGeneral();
+  else if (activeTab === 'contenidos') content.innerHTML = renderTabContenidos();
+  else if (activeTab === 'laminas') content.innerHTML = renderTabLaminas();
+  else if (activeTab === 'generar') content.innerHTML = renderTabGenerar();
+
+  wireTabEvents();
+  lucide.createIcons();
+}
+
+/* ================= TAB 1: GENERAL ================= */
+
+function renderTabGeneral() {
+  const m = state.meta;
+  return `
+    <h2 class="text-lg font-bold text-gray-800 mb-1">Información General</h2>
+    <p class="text-sm text-gray-500 mb-4">Estos datos se usan para pre-llenar las láminas de Portada y Contacto.</p>
+    <div class="grid md:grid-cols-2 gap-4 max-w-3xl">
+      <div><label class="field-label">Título del práctico</label><input class="field-input" data-meta="title" value="${escAttr(m.title)}"></div>
+      <div><label class="field-label">Etiqueta de curso (barra superior)</label><input class="field-input" data-meta="courseLabel" value="${escAttr(m.courseLabel)}"></div>
+      <div><label class="field-label">Fecha</label><input class="field-input" data-meta="date" value="${escAttr(m.date)}" placeholder="Miércoles 01 de Octubre, 2025"></div>
+      <div><label class="field-label">Instructor/a</label><input class="field-input" data-meta="instructor" value="${escAttr(m.instructor)}"></div>
+      <div><label class="field-label">Email</label><input class="field-input" data-meta="email" value="${escAttr(m.email)}"></div>
+      <div><label class="field-label">Oficina</label><input class="field-input" data-meta="office" value="${escAttr(m.office)}"></div>
+      <div><label class="field-label">Horario de atención</label><input class="field-input" data-meta="hours" value="${escAttr(m.hours)}"></div>
+    </div>
+    <button id="btnAplicarGeneral" class="mt-5 bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+      <i data-lucide="check" class="w-4 h-4"></i> Aplicar a láminas de Portada y Contacto
+    </button>
+  `;
+}
+
+function upsertSlideOfType(type, contentPatch, insertAt) {
+  let idx = state.slides.findIndex(s => s.type === type);
+  if (idx === -1) {
+    const slide = {type, content: Object.assign(defaultContent(type), contentPatch)};
+    if (insertAt === 'start') state.slides.unshift(slide);
+    else if (insertAt === 'end') state.slides.push(slide);
+    else state.slides.push(slide);
+  } else {
+    Object.assign(state.slides[idx].content, contentPatch);
+  }
+}
+
+/* ================= TAB 2: CONTENIDOS ================= */
+
+function renderTabContenidos() {
+  return `
+    <h2 class="text-lg font-bold text-gray-800 mb-1">Contenidos</h2>
+    <p class="text-sm text-gray-500 mb-4">Objetivos de aprendizaje y bibliografía. Se aplican a las láminas de Objetivos y Recursos.</p>
+    <div class="mb-6">
+      <label class="field-label">Objetivos de aprendizaje (uno por línea)</label>
+      <textarea id="objetivosText" class="field-input" rows="5">${escHtml(listToText(state.objectives))}</textarea>
+    </div>
+    <div class="mb-4">
+      <label class="field-label mb-2">Bibliografía / Recursos</label>
+      <div id="bibliografiaList" class="space-y-2"></div>
+      <button id="btnAddBib" class="mt-2 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1">
+        <i data-lucide="plus" class="w-4 h-4"></i> Agregar recurso
+      </button>
+    </div>
+    <button id="btnAplicarContenidos" class="mt-3 bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+      <i data-lucide="check" class="w-4 h-4"></i> Aplicar a láminas de Objetivos y Recursos
+    </button>
+  `;
+}
+
+function renderBibliografiaList() {
+  const wrap = document.getElementById('bibliografiaList');
+  if (!wrap) return;
+  wrap.innerHTML = state.bibliography.map((b,i) => `
+    <div class="flex gap-2 items-start bg-gray-50 p-2 rounded-lg" data-bib-row="${i}">
+      <input class="field-input" placeholder="Nombre" data-bib="${i}.name" value="${escAttr(b.name)}">
+      <input class="field-input" placeholder="URL" data-bib="${i}.url" value="${escAttr(b.url)}">
+      <input class="field-input" placeholder="Descripción" data-bib="${i}.purpose" value="${escAttr(b.purpose)}">
+      <button class="text-red-500 hover:text-red-700 p-2" data-bib-remove="${i}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+    </div>
+  `).join('') || '<p class="text-sm text-gray-400">Sin recursos aún.</p>';
+  wrap.querySelectorAll('[data-bib]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const [i,key] = inp.dataset.bib.split('.');
+      state.bibliography[+i][key] = inp.value;
+      saveDraft();
+    });
+  });
+  wrap.querySelectorAll('[data-bib-remove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.bibliography.splice(+btn.dataset.bibRemove, 1);
+      renderBibliografiaList(); saveDraft(); lucide.createIcons();
+    });
+  });
+  lucide.createIcons();
+}
+
+/* ================= TAB 3: LAMINAS ================= */
+
+function renderTabLaminas() {
+  if (editingIndex !== null && state.slides[editingIndex]) {
+    return renderSlideEditor(editingIndex);
+  }
+  return `
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-bold text-gray-800">Láminas del práctico (${state.slides.length})</h2>
+    </div>
+    <div id="slideList" class="space-y-2 mb-6"></div>
+    <div class="border-t pt-4">
+      <p class="field-label mb-2">Agregar lámina</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2" id="addSlideGrid">
+        ${SLIDE_TYPES.map(t => `
+          <button class="type-btn rounded-lg p-3 text-left flex items-center gap-2" data-add-type="${t.id}">
+            <i data-lucide="${t.icon}" class="w-5 h-5 text-purple-600 flex-shrink-0"></i>
+            <span class="text-sm text-gray-700">${t.label}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderSlideList() {
+  const wrap = document.getElementById('slideList');
+  if (!wrap) return;
+  if (state.slides.length === 0) {
+    wrap.innerHTML = '<p class="text-sm text-gray-400">Aún no hay láminas. Agrega una abajo.</p>';
+    return;
+  }
+  wrap.innerHTML = state.slides.map((s,i) => {
+    const typeInfo = SLIDE_TYPES.find(t => t.id === s.type) || {label:s.type, icon:'file'};
+    const title = s.content.title || '(sin título)';
+    return `
+      <div class="slide-card rounded-lg p-3 flex items-center gap-3">
+        <span class="text-xs font-mono text-gray-400 w-6">${i+1}</span>
+        <i data-lucide="${typeInfo.icon}" class="w-5 h-5 text-purple-600 flex-shrink-0"></i>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-800 truncate">${escHtml(title)}</p>
+          <p class="text-xs text-gray-400">${typeInfo.label}</p>
+        </div>
+        <button class="p-1.5 hover:bg-gray-100 rounded" data-move-up="${i}" title="Subir"><i data-lucide="chevron-up" class="w-4 h-4"></i></button>
+        <button class="p-1.5 hover:bg-gray-100 rounded" data-move-down="${i}" title="Bajar"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
+        <button class="p-1.5 hover:bg-purple-100 rounded text-purple-700" data-edit="${i}" title="Editar"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+        <button class="p-1.5 hover:bg-red-100 rounded text-red-600" data-delete="${i}" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+      </div>
+    `;
+  }).join('');
+
+  wrap.querySelectorAll('[data-move-up]').forEach(b => b.addEventListener('click', () => {
+    const i = +b.dataset.moveUp; if (i>0) { [state.slides[i-1],state.slides[i]]=[state.slides[i],state.slides[i-1]]; saveDraft(); renderSlideList(); lucide.createIcons(); }
+  }));
+  wrap.querySelectorAll('[data-move-down]').forEach(b => b.addEventListener('click', () => {
+    const i = +b.dataset.moveDown; if (i<state.slides.length-1) { [state.slides[i+1],state.slides[i]]=[state.slides[i],state.slides[i+1]]; saveDraft(); renderSlideList(); lucide.createIcons(); }
+  }));
+  wrap.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => {
+    editingIndex = +b.dataset.edit; render();
+  }));
+  wrap.querySelectorAll('[data-delete]').forEach(b => b.addEventListener('click', () => {
+    if (confirm('¿Eliminar esta lámina?')) { state.slides.splice(+b.dataset.delete,1); saveDraft(); renderSlideList(); lucide.createIcons(); }
+  }));
+  lucide.createIcons();
+}
+
+function renderSlideEditor(i) {
+  const slide = state.slides[i];
+  const typeInfo = SLIDE_TYPES.find(t => t.id === slide.type);
+  const simple = SIMPLE_FIELDS[slide.type] || [];
+  const objlist = OBJLIST_FIELDS[slide.type];
+
+  let fieldsHtml = simple.map(([path,label,ftype]) => {
+    const val = getPath(slide.content, path);
+    if (ftype === 'list') {
+      return `<div class="mb-3"><label class="field-label">${label}</label><textarea class="field-input" rows="4" data-slide-field="${path}" data-slide-type="list">${escHtml(listToText(val))}</textarea></div>`;
+    }
+    if (ftype === 'csv') {
+      return `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" data-slide-field="${path}" data-slide-type="csv" value="${escAttr((val||[]).join(', '))}"></div>`;
+    }
+    return `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" data-slide-field="${path}" data-slide-type="text" value="${escAttr(val)}"></div>`;
+  }).join('');
+
+  let objlistHtml = '';
+  if (objlist) {
+    objlistHtml = `<div class="mb-3 border-t pt-3">
+      <label class="field-label mb-2">${objlist.label}</label>
+      <div id="objlistItems"></div>
+      <button id="btnAddObjItem" class="mt-2 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1">
+        <i data-lucide="plus" class="w-4 h-4"></i> Agregar ${objlist.itemLabel.toLowerCase()}
+      </button>
+    </div>`;
+  }
+
+  let comparisonHtml = '';
+  if (slide.type === 'comparison') {
+    comparisonHtml = `<div class="mb-3 border-t pt-3">
+      <label class="field-label mb-2">Filas (una celda por columna)</label>
+      <div id="comparisonRows"></div>
+      <button id="btnAddRow" class="mt-2 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1">
+        <i data-lucide="plus" class="w-4 h-4"></i> Agregar fila
+      </button>
+    </div>`;
+  }
+
+  return `
+    <div class="flex items-center gap-2 mb-4">
+      <button id="btnVolverLista" class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+      <i data-lucide="${typeInfo.icon}" class="w-5 h-5 text-purple-600"></i>
+      <h2 class="text-lg font-bold text-gray-800">Editando: ${typeInfo.label} (lámina ${i+1})</h2>
+    </div>
+    <div class="max-w-2xl">
+      ${fieldsHtml}
+      ${objlistHtml}
+      ${comparisonHtml}
+    </div>
+    <button id="btnGuardarLamina" class="mt-4 bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+      <i data-lucide="check" class="w-4 h-4"></i> Guardar y volver
+    </button>
+  `;
+}
+
+function renderObjListItems(i) {
+  const slide = state.slides[i];
+  const objlist = OBJLIST_FIELDS[slide.type];
+  const wrap = document.getElementById('objlistItems');
+  if (!wrap || !objlist) return;
+  const items = slide.content[objlist.key] || (slide.content[objlist.key] = []);
+  wrap.innerHTML = items.map((item, idx) => `
+    <div class="bg-gray-50 p-3 rounded-lg mb-2 flex gap-2 items-start flex-wrap">
+      ${objlist.fields.map(([key,label]) => `
+        <div class="flex-1 min-w-[120px]">
+          <label class="text-xs text-gray-500">${label}</label>
+          <input class="field-input" data-obj-field="${idx}.${key}" value="${escAttr(item[key])}">
+        </div>
+      `).join('')}
+      <button class="p-2 text-red-500 hover:text-red-700 self-end" data-obj-remove="${idx}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+    </div>
+  `).join('') || '<p class="text-sm text-gray-400 mb-2">Sin elementos aún.</p>';
+
+  wrap.querySelectorAll('[data-obj-field]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const [idx,key] = inp.dataset.objField.split('.');
+      items[+idx][key] = inp.value;
+      saveDraft();
+    });
+  });
+  wrap.querySelectorAll('[data-obj-remove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      items.splice(+btn.dataset.objRemove, 1);
+      saveDraft(); renderObjListItems(i); lucide.createIcons();
+    });
+  });
+  lucide.createIcons();
+}
+
+function renderComparisonRows(i) {
+  const slide = state.slides[i];
+  const wrap = document.getElementById('comparisonRows');
+  if (!wrap) return;
+  const headers = slide.content.headers || [];
+  const rows = slide.content.rows || (slide.content.rows = []);
+  wrap.innerHTML = rows.map((row, ridx) => `
+    <div class="bg-gray-50 p-2 rounded-lg mb-2 flex gap-2 items-center flex-wrap">
+      ${headers.map((h, cidx) => `
+        <input class="field-input" placeholder="${escAttr(h)}" data-row-cell="${ridx}.${cidx}" value="${escAttr(row[cidx])}">
+      `).join('')}
+      <button class="p-2 text-red-500 hover:text-red-700" data-row-remove="${ridx}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+    </div>
+  `).join('') || '<p class="text-sm text-gray-400 mb-2">Sin filas aún.</p>';
+
+  wrap.querySelectorAll('[data-row-cell]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const [ridx,cidx] = inp.dataset.rowCell.split('.');
+      rows[+ridx][+cidx] = inp.value;
+      saveDraft();
+    });
+  });
+  wrap.querySelectorAll('[data-row-remove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      rows.splice(+btn.dataset.rowRemove, 1);
+      saveDraft(); renderComparisonRows(i); lucide.createIcons();
+    });
+  });
+  lucide.createIcons();
+}
+
+/* ================= TAB 4: GENERAR ================= */
+
+function renderTabGenerar() {
+  return `
+    <h2 class="text-lg font-bold text-gray-800 mb-1">Generar práctico</h2>
+    <p class="text-sm text-gray-500 mb-4">Vista previa exacta del archivo final. ${state.slides.length} lámina(s).</p>
+    <div class="flex gap-2 mb-4">
+      <button id="btnActualizarPreview" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Actualizar vista previa
+      </button>
+      <button id="btnDescargar" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="download" class="w-4 h-4"></i> Descargar HTML
+      </button>
+    </div>
+    <div class="border rounded-xl overflow-hidden" style="height:70vh;">
+      <iframe id="previewFrame" class="w-full h-full" title="Vista previa"></iframe>
+    </div>
+  `;
+}
+
+/* ================= SLIDE RENDER ENGINE (embebido en el HTML final) ================= */
+
+function getSlideHTML(slide) {
+    const linkPalette = [
+        {icon:'microscope', color:'purple'}, {icon:'book-open', color:'purple'},
+        {icon:'activity', color:'green'}, {icon:'clipboard-plus', color:'green'},
+        {icon:'link', color:'blue'}, {icon:'globe', color:'blue'}
+    ];
+    switch(slide.type) {
+        case 'title':
+            return `
+                <div class="h-full bg-gradient-to-br from-purple-50 to-indigo-50 flex items-center justify-center p-6 md:p-8">
+                    <div class="text-center max-w-4xl animate-slide-up w-full">
+                        <div class="mb-8 flex justify-center">
+                            <i data-lucide="microscope" class="w-20 h-20 md:w-32 md:h-32 text-yellow-400"></i>
+                        </div>
+                        <h1 class="mobile-title md:text-5xl lg:text-6xl font-bold mb-6 text-gray-800 leading-tight">${slide.content.title}</h1>
+                        <h2 class="mobile-subtitle md:text-3xl lg:text-4xl font-light mb-8 text-purple-600">${slide.content.subtitle||''}</h2>
+                        <div class="mobile-text md:text-xl lg:text-2xl space-y-3">
+                            <p class="font-medium text-gray-800">${slide.content.instructor||''}</p>
+                            <p class="text-purple-600">${slide.content.email||''}</p>
+                        </div>
+                    </div>
+                </div>`;
+
+        case 'objectives':
+            return `
+                <div class="h-full bg-gradient-to-br from-green-50 to-emerald-50 md:overflow-y-hidden">
+                    <div class="mobile-content md:hidden">
+                        <div class="text-center mb-6">
+                            <i data-lucide="target" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                            <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                        </div>
+                        <div class="space-y-3">
+                            ${(slide.content.items||[]).map(item => `
+                                <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+                                    <div class="flex items-start space-x-3">
+                                        <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0"></i>
+                                        <p class="mobile-text text-gray-700">${item}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="hidden md:block desktop-fit desktop-compact">
+                        <div class="desktop-title-with-icon">
+                            <i data-lucide="target" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                            <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 max-w-5xl mx-auto">
+                            ${(slide.content.items||[]).map(item => `
+                                <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+                                    <div class="flex items-start space-x-3">
+                                        <i data-lucide="check-circle" class="w-6 h-6 text-green-500 mt-0.5 flex-shrink-0"></i>
+                                        <p class="text-gray-700">${item}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>`;
+
+        case 'process':
+            return `
+                <div class="h-full bg-gradient-to-br from-blue-50 to-indigo-50 md:overflow-y-hidden">
+                    <div class="mobile-content md:hidden">
+                        <div class="text-center mb-4">
+                            <i data-lucide="flask-conical" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                            <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                            <h2 class="mobile-subtitle text-purple-600 mt-2">${slide.content.subtitle||''}</h2>
+                        </div>
+                        <div class="space-y-3 mb-4">
+                            ${(slide.content.steps||[]).map(step => `
+                                <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                                    <div class="flex items-start space-x-3">
+                                        <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">${step.number}</span>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800">${step.title}</h3>
+                                            <p class="mobile-small text-gray-600">${step.description}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ${slide.content.image ? `
+                            <div class="bg-gray-100 rounded-lg p-2 flex items-center justify-center">
+                                <img src="${slide.content.image}" alt="${slide.content.subtitle||''}" class="max-w-full h-auto max-h-48 object-contain rounded-md shadow-sm">
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="hidden md:block desktop-fit desktop-compact">
+                        <div class="desktop-title-with-icon">
+                            <i data-lucide="flask-conical" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                            <div>
+                                <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                                <h2 class="text-xl text-purple-600">${slide.content.subtitle||''}</h2>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-6 max-w-5xl mx-auto">
+                            <div class="space-y-4">
+                                ${(slide.content.steps||[]).map(step => `
+                                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-purple-500">
+                                        <div class="flex items-start space-x-4">
+                                            <span class="bg-purple-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">${step.number}</span>
+                                            <div>
+                                                <h3 class="text-lg font-semibold text-gray-800 mb-1">${step.title}</h3>
+                                                <p class="text-gray-600">${step.description}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="bg-gray-100 rounded-lg flex items-center justify-center p-4">
+                                ${slide.content.image ? `<img src="${slide.content.image}" alt="${slide.content.subtitle||''}" class="max-w-full h-auto max-h-64 object-contain rounded-md shadow-sm">` : '<p class="text-gray-500">Espacio para imagen</p>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+        case 'content':
+            return `
+                <div class="h-full bg-gradient-to-br from-purple-50 to-indigo-50 md:overflow-y-hidden">
+                    <div class="mobile-content md:hidden">
+                        <div class="text-center mb-6">
+                            <i data-lucide="list" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                            <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                            ${slide.content.subtitle ? `<h2 class="mobile-subtitle text-purple-600 mt-2">${slide.content.subtitle}</h2>` : ''}
+                        </div>
+                        <div class="space-y-3">
+                            ${(slide.content.items||[]).map(item => `
+                                <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                                    <p class="mobile-text text-gray-700">${item}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="hidden md:block desktop-fit desktop-compact">
+                        <div class="desktop-title-with-icon">
+                            <i data-lucide="list" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                            <div>
+                                <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                                ${slide.content.subtitle ? `<h2 class="text-xl text-purple-600">${slide.content.subtitle}</h2>` : ''}
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 max-w-5xl mx-auto">
+                            ${(slide.content.items||[]).map(item => `
+                                <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                                    <p class="text-gray-700">${item}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>`;
+
+        case 'platform':
+            return `
+                <div class="h-full bg-gradient-to-br from-blue-50 to-cyan-50 md:overflow-y-hidden">
+                    <div class="mobile-content md:hidden">
+                        <div class="text-center mb-6">
+                            <i data-lucide="monitor" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                            <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                        </div>
+                        <div class="bg-purple-100 p-4 rounded-lg mb-4">
+                            <p class="mobile-text font-semibold text-purple-800 break-words">🌐 ${slide.content.url}</p>
+                        </div>
+                        <div class="space-y-3">
+                            ${(slide.content.features||[]).map(feature => `
+                                <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                                        <p class="mobile-text text-gray-700">${feature}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="hidden md:block desktop-fit desktop-compact">
+                        <div class="desktop-title-with-icon">
+                            <i data-lucide="monitor" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                            <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                        </div>
+                        <div class="max-w-4xl mx-auto">
+                            <div class="bg-purple-100 p-4 rounded-lg mb-6">
+                                <p class="text-lg font-semibold text-purple-800">🌐 ${slide.content.url}</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                ${(slide.content.features||[]).map(feature => `
+                                    <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                                            <p class="text-gray-700">${feature}</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+        case 'tutorial':
+            return `
+                <div class="h-full bg-gradient-to-br from-amber-50 to-yellow-50 md:overflow-y-hidden">
+                    <div class="mobile-content md:hidden">
+                        <div class="text-center mb-6">
+                            <i data-lucide="compass" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                            <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                        </div>
+                        <div class="space-y-3">
+                            ${(slide.content.steps||[]).map((step, index) => `
+                                <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                                    <div class="flex items-start space-x-3">
+                                        <span class="bg-purple-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold text-sm flex-shrink-0">${index+1}</span>
+                                        <p class="mobile-text text-gray-700">${step}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="hidden md:block desktop-fit desktop-compact">
+                        <div class="desktop-title-with-icon">
+                            <i data-lucide="compass" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                            <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 max-w-5xl mx-auto">
+                            ${(slide.content.steps||[]).map((step, index) => `
+                                <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                                    <div class="flex items-start space-x-3">
+                                        <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">${index+1}</span>
+                                        <p class="text-gray-700">${step}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>`;
+
+        case 'activity':
+            return `
+                <div class="h-full bg-gradient-to-br from-yellow-50 to-amber-50 md:overflow-y-hidden">
+                    <div class="mobile-content md:hidden">
+                        <div class="text-center mb-6">
+                            <i data-lucide="pencil" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                            <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                        </div>
+                        <div class="bg-yellow-100 p-4 rounded-xl border-2 border-yellow-300">
+                            <div class="space-y-3">
+                                ${(slide.content.instructions||[]).map((instruction, index) => `
+                                    <div class="flex items-start space-x-3">
+                                        <span class="bg-yellow-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold text-sm flex-shrink-0">${index+1}</span>
+                                        <p class="mobile-text text-gray-800">${instruction}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden md:block desktop-fit desktop-compact">
+                        <div class="desktop-title-with-icon">
+                            <i data-lucide="pencil" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                            <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                        </div>
+                        <div class="bg-yellow-100 p-6 rounded-xl border-2 border-yellow-300 max-w-4xl mx-auto">
+                            <div class="grid grid-cols-2 gap-4">
+                                ${(slide.content.instructions||[]).map((instruction, index) => `
+                                    <div class="flex items-start space-x-3 bg-white p-4 rounded-lg">
+                                        <span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">${index+1}</span>
+                                        <p class="text-gray-800">${instruction}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+        case 'case':
+            return `
+                <div class="h-full bg-gradient-to-br from-purple-50 to-indigo-50 md:overflow-y-hidden">
+                    <div class="mobile-content md:hidden">
+                        <div class="text-center mb-4">
+                            <div class="inline-flex items-center justify-center bg-purple-100 px-4 py-2 rounded-full mb-4">
+                                <i data-lucide="microscope" class="w-5 h-5 text-yellow-500 mr-2"></i>
+                                <span class="text-purple-800 font-bold mobile-small">${slide.content.concept||''}</span>
+                            </div>
+                            <h1 class="mobile-title font-bold text-gray-800 mb-2">${slide.content.title}</h1>
+                        </div>
+                        <div class="mb-6">
+                            <div class="bg-yellow-50 p-4 rounded-xl border-l-4 border-yellow-500">
+                                <h3 class="mobile-text font-bold text-yellow-800 mb-4 flex items-center">
+                                    <i data-lucide="link" class="w-5 h-5 mr-2"></i> Enlaces de Estudio
+                                </h3>
+                                <div class="grid grid-cols-1 gap-3">
+                                    ${(slide.content.links||[]).map((lnk, idx) => {
+                                        const p = linkPalette[idx % linkPalette.length];
+                                        return `
+                                        <a href="${lnk.url}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
+                                            <div class="flex items-center">
+                                                <i data-lucide="${p.icon}" class="w-5 h-5 text-${p.color}-600 mr-3 flex-shrink-0"></i>
+                                                <span class="mobile-text font-medium text-${p.color}-600">${lnk.label}</span>
+                                            </div>
+                                        </a>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-purple-50 p-4 rounded-xl border-l-4 border-purple-500">
+                                <h3 class="mobile-text font-bold text-purple-800 mb-3 flex items-center">
+                                    <i data-lucide="user" class="w-5 h-5 mr-2"></i> Información Clínica
+                                </h3>
+                                <div class="space-y-2">
+                                    <p class="mobile-small"><strong>Paciente:</strong> ${slide.content.clinical.patient}</p>
+                                    <p class="mobile-small"><strong>Síntomas:</strong> ${slide.content.clinical.symptoms}</p>
+                                    <p class="mobile-small"><strong>Laboratorio:</strong> ${slide.content.clinical.labs}</p>
+                                </div>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500">
+                                <h3 class="mobile-text font-bold text-green-800 mb-3 flex items-center">
+                                    <i data-lucide="help-circle" class="w-5 h-5 mr-2"></i> Preguntas de Análisis
+                                </h3>
+                                <ol class="space-y-2">
+                                    ${(slide.content.questions||[]).map((q, i) => `
+                                        <li class="flex items-start gap-3">
+                                            <span class="bg-green-200 text-green-800 rounded-full w-6 h-6 flex items-center justify-center mobile-small font-bold flex-shrink-0 mt-0.5">${i+1}</span>
+                                            <span class="mobile-small text-gray-700 leading-relaxed">${q}</span>
+                                        </li>
+                                    `).join('')}
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden md:block desktop-fit desktop-compact">
+                        <div class="flex flex-wrap items-center justify-between mb-4">
+                            <h1 class="font-bold text-gray-800 text-xl md:text-2xl lg:text-3xl mb-2 md:mb-0">${slide.content.title}</h1>
+                            <div class="flex items-center bg-purple-100 px-3 py-1 rounded-full">
+                                <i data-lucide="microscope" class="w-5 h-5 text-yellow-500 mr-2"></i>
+                                <span class="text-purple-800 font-bold text-sm md:text-base">${slide.content.concept||''}</span>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="bg-yellow-50 p-4 rounded-xl border-l-4 border-yellow-500">
+                                <h3 class="font-bold text-yellow-800 mb-3 flex items-center">
+                                    <i data-lucide="link" class="w-5 h-5 mr-2"></i> Enlaces de Estudio
+                                </h3>
+                                <div class="grid grid-cols-2 gap-3">
+                                    ${(slide.content.links||[]).map((lnk, idx) => {
+                                        const p = linkPalette[idx % linkPalette.length];
+                                        return `
+                                        <a href="${lnk.url}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
+                                            <div class="flex items-center">
+                                                <i data-lucide="${p.icon}" class="w-4 h-4 text-${p.color}-600 mr-2 flex-shrink-0"></i>
+                                                <span class="text-sm font-medium text-${p.color}-600">${lnk.label}</span>
+                                            </div>
+                                        </a>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <div class="bg-purple-50 p-4 rounded-xl border-l-4 border-purple-500">
+                                <h3 class="font-bold text-purple-800 mb-3 flex items-center">
+                                    <i data-lucide="user" class="w-5 h-5 mr-2"></i> Información Clínica
+                                </h3>
+                                <div class="space-y-2">
+                                    <p class="text-sm"><strong>Paciente:</strong> ${slide.content.clinical.patient}</p>
+                                    <p class="text-sm"><strong>Síntomas:</strong> ${slide.content.clinical.symptoms}</p>
+                                    <p class="text-sm"><strong>Laboratorio:</strong> ${slide.content.clinical.labs}</p>
+                                </div>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500">
+                                <h3 class="font-bold text-green-800 mb-3 flex items-center">
+                                    <i data-lucide="help-circle" class="w-5 h-5 mr-2"></i> Preguntas de Análisis
+                                </h3>
+                                <ol class="space-y-2">
+                                    ${(slide.content.questions||[]).map((q, i) => `
+                                        <li class="flex items-start gap-2">
+                                            <span class="bg-green-200 text-green-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">${i+1}</span>
+                                            <span class="text-sm text-gray-700 leading-relaxed">${q}</span>
+                                        </li>
+                                    `).join('')}
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+        case 'comparison':
+            return `
+                <div class="h-full md:overflow-y-hidden">
+                    <div class="mobile-content md:hidden">
+                        <div class="text-center mb-6">
+                            <i data-lucide="git-compare" class="w-16 h-16 mx-auto mb-4 text-purple-600"></i>
+                            <h1 class="mobile-title font-bold text-gray-800 mb-2">${slide.content.title}</h1>
+                            <p class="mobile-text text-gray-600">${slide.content.subtitle||''}</p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto">
+                            <div class="overflow-x-auto">
+                                <table class="w-full border-collapse">
+                                    <thead class="bg-purple-100"><tr>
+                                        ${(slide.content.headers||[]).map(h => `<th class="px-4 py-3 text-left text-purple-800 font-bold border-b">${h}</th>`).join('')}
+                                    </tr></thead>
+                                    <tbody>
+                                        ${(slide.content.rows||[]).map((row,i) => `
+                                            <tr class="${i%2===0?'bg-gray-50':'bg-white'}">
+                                                ${row.map((cell,ci) => `<td class="px-4 py-3 text-gray-700 border-b ${ci===0?'font-medium':''}">${cell}</td>`).join('')}
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden md:block desktop-fit desktop-compact">
+                        <div class="desktop-title-with-icon">
+                            <i data-lucide="git-compare" class="desktop-title-icon w-12 h-12 text-purple-600"></i>
+                            <h1 class="desktop-main-title font-bold text-gray-800">${slide.content.title}</h1>
+                        </div>
+                        <p class="text-center text-gray-600 mb-6">${slide.content.subtitle||''}</p>
+                        <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+                            <table class="w-full border-collapse">
+                                <thead class="bg-purple-100"><tr>
+                                    ${(slide.content.headers||[]).map(h => `<th class="px-6 py-4 text-left text-lg font-bold text-purple-800">${h}</th>`).join('')}
+                                </tr></thead>
+                                <tbody>
+                                    ${(slide.content.rows||[]).map((row,i) => `
+                                        <tr class="${i%2===0?'bg-gray-50':'bg-white'}">
+                                            ${row.map((cell,ci) => `<td class="px-6 py-4 text-gray-700 ${ci===0?'font-medium':''}">${cell}</td>`).join('')}
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>`;
+
+        case 'assessment':
+            return `
+                <div class="h-full bg-gradient-to-br from-red-50 to-orange-50 md:overflow-y-hidden">
+                    <div class="mobile-content md:hidden">
+                        <div class="text-center mb-6">
+                            <i data-lucide="clipboard-check" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                            <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                        </div>
+                        <div class="space-y-3">
+                            ${(slide.content.items||[]).map(item => `
+                                <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-red-500">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h3 class="font-semibold text-gray-800">${item.name}</h3>
+                                        <span class="bg-purple-100 px-2 py-1 rounded-full text-purple-800 font-semibold text-xs">${item.weight}</span>
+                                    </div>
+                                    <p class="mobile-small text-gray-600 mb-1">${item.content}</p>
+                                    <p class="mobile-small text-purple-600 font-semibold">📅 ${item.date}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="hidden md:block desktop-fit desktop-compact">
+                        <div class="desktop-title-with-icon">
+                            <i data-lucide="clipboard-check" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                            <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                        </div>
+                        <div class="space-y-4 max-w-4xl mx-auto">
+                            ${(slide.content.items||[]).map(item => `
+                                <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-red-500">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3 class="text-xl font-semibold text-gray-800 mb-1">${item.name}</h3>
+                                            <p class="text-gray-600 mb-1">${item.content}</p>
+                                            <p class="text-purple-600 font-semibold">📅 ${item.date}</p>
+                                        </div>
+                                        <span class="bg-purple-100 px-3 py-1 rounded-full text-purple-800 font-semibold">${item.weight}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>`;
+
+        case 'resources':
+            return `
+                <div class="h-full bg-gradient-to-br from-indigo-50 to-purple-50 md:overflow-y-hidden">
+                    <div class="mobile-content md:hidden">
+                        <div class="text-center mb-6">
+                            <i data-lucide="library" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                            <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                        </div>
+                        <div class="space-y-3">
+                            ${(slide.content.platforms||[]).map((platform, index) => {
+                                const colors = ['purple','green','blue']; const color = colors[index % colors.length];
+                                return `
+                                <div class="link-card bg-white p-4 rounded-lg shadow-sm border-l-4 border-${color}-500">
+                                    <div class="flex items-start space-x-3">
+                                        <i data-lucide="book-open" class="w-5 h-5 text-${color}-500 mt-0.5 flex-shrink-0"></i>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800 mb-1">${platform.name}</h3>
+                                            <p class="mobile-small text-purple-600 mb-1 break-words">🌐 ${platform.url}</p>
+                                            <p class="mobile-small text-gray-600">${platform.purpose}</p>
+                                        </div>
+                                    </div>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                    <div class="hidden md:block desktop-fit desktop-compact">
+                        <div class="desktop-title-with-icon">
+                            <i data-lucide="library" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                            <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                        </div>
+                        <div class="space-y-4 max-w-4xl mx-auto">
+                            ${(slide.content.platforms||[]).map((platform, index) => {
+                                const colors = ['purple','green','blue']; const color = colors[index % colors.length];
+                                return `
+                                <div class="link-card bg-white p-5 rounded-lg shadow-sm border-l-4 border-${color}-500">
+                                    <div class="flex items-start space-x-4">
+                                        <i data-lucide="book-open" class="w-6 h-6 text-${color}-500 mt-0.5 flex-shrink-0"></i>
+                                        <div>
+                                            <h3 class="text-xl font-semibold text-gray-800 mb-1">${platform.name}</h3>
+                                            <p class="text-purple-600 mb-1">🌐 ${platform.url}</p>
+                                            <p class="text-gray-600">${platform.purpose}</p>
+                                        </div>
+                                    </div>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>`;
+
+        case 'qa':
+            return `
+                <div class="h-full bg-gradient-to-br from-indigo-50 to-purple-50 md:overflow-y-hidden">
+                    <div class="mobile-content md:hidden">
+                        <div class="text-center mb-6">
+                            <i data-lucide="message-circle" class="w-16 h-16 mx-auto mb-4 text-yellow-400"></i>
+                            <h1 class="mobile-title font-bold text-gray-800 mb-3">${slide.content.title}</h1>
+                            <h2 class="mobile-subtitle text-purple-600">${slide.content.subtitle||''}</h2>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-lg text-center">
+                            <h3 class="font-bold text-gray-800 mb-4">Información de Contacto</h3>
+                            <div class="space-y-3">
+                                <p class="mobile-text text-gray-700">📧 ${slide.content.contact.email}</p>
+                                <p class="mobile-text text-gray-700">🏢 ${slide.content.contact.office}</p>
+                                <p class="mobile-text text-gray-700">🕐 ${slide.content.contact.hours}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden md:flex desktop-fit items-center justify-center">
+                        <div class="text-center max-w-2xl">
+                            <i data-lucide="message-circle" class="w-20 h-20 mx-auto mb-6 text-yellow-400"></i>
+                            <h1 class="text-5xl font-bold text-gray-800 mb-4">${slide.content.title}</h1>
+                            <h2 class="text-2xl text-purple-600 mb-8">${slide.content.subtitle||''}</h2>
+                            <div class="bg-white p-8 rounded-xl shadow-lg">
+                                <h3 class="text-xl font-bold text-gray-800 mb-6">Información de Contacto</h3>
+                                <div class="space-y-4">
+                                    <p class="text-lg text-gray-700">📧 ${slide.content.contact.email}</p>
+                                    <p class="text-lg text-gray-700">🏢 ${slide.content.contact.office}</p>
+                                    <p class="text-lg text-gray-700">🕐 ${slide.content.contact.hours}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+        default:
+            return `<div class="h-full flex items-center justify-center p-6"><p class="text-2xl text-gray-500">Contenido no disponible</p></div>`;
+    }
+}
+
+/* ================= GENERATE FULL STANDALONE HTML ================= */
+
+function generateFullHTML() {
+  const courseLabel = escHtml(state.meta.courseLabel || 'Patología Básica - UACh');
+  const pageTitle = escHtml(state.meta.title || 'Práctico');
+  const slidesJSON = JSON.stringify(state.slides, null, 4);
+  const engineSource = getSlideHTML.toString();
+
+  const headStyles = `
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        body, html { margin: 0; padding: 0; font-family: ui-sans-serif, system-ui, sans-serif; overflow-x: hidden; height: 100vh; }
+        .slide-container { height: 100vh; display: flex; flex-direction: column; background: white; }
+        @media (max-width: 768px) {
+            .slide-container { min-height: 100vh; height: auto; }
+            .mobile-title { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+            .mobile-subtitle { font-size: 1.25rem !important; line-height: 1.75rem !important; }
+            .mobile-text { font-size: 1rem !important; line-height: 1.5rem !important; }
+            .mobile-small { font-size: 0.875rem !important; line-height: 1.25rem !important; }
+        }
+        .content-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        @media (max-width: 768px) {
+            .content-area { padding: 0; }
+            .mobile-content { padding: 1rem; min-height: 100%; display: flex; flex-direction: column; }
+            .mobile-no-center { justify-content: flex-start !important; align-items: stretch !important; }
+        }
+        .nav-button { min-height: 44px; min-width: 44px; touch-action: manipulation; }
+        .transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .link-card { transition: all 0.2s ease; transform: scale(1); }
+        .link-card:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+        .link-card:active { transform: scale(0.98); }
+        @media (min-width: 769px) {
+            body { background-color: #f9f4f2; }
+            .slide-container { margin: 1rem; height: calc(100vh - 2rem); border-radius: 0.75rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; }
+            .content-area { overflow-y: auto; }
+            .desktop-fit { display: flex; flex-direction: column; height: 100%; justify-content: center; padding: 1.25rem; }
+            .desktop-compact h1 { font-size: 2.5rem !important; margin-bottom: 1rem !important; }
+            .desktop-compact h2 { font-size: 1.5rem !important; margin-bottom: 1rem !important; }
+            .desktop-compact h3 { font-size: 1.25rem !important; margin-bottom: 0.75rem !important; }
+            .desktop-compact p, .desktop-compact li { font-size: 1rem !important; line-height: 1.4 !important; }
+            .desktop-compact .space-y-6 > * + * { margin-top: 1rem !important; }
+            .desktop-compact .space-y-4 > * + * { margin-top: 0.75rem !important; }
+            .desktop-compact .space-y-3 > * + * { margin-top: 0.5rem !important; }
+            .desktop-title-with-icon { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+            .desktop-title-icon { flex-shrink: 0; }
+            .desktop-main-title { text-align: left; }
+        }
+        .swipe-hint { display: none; }
+        @media (max-width: 768px) {
+            .swipe-hint { display: block; position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.7); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.75rem; z-index: 1000; animation: fadeIn 2s ease-in-out; }
+        }`;
+
+  const bodyShell = `
+    <div class="slide-container">
+        <div class="bg-purple-900 text-white p-3 md:p-4 flex justify-between items-center relative z-10 shadow-lg">
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <i data-lucide="microscope" class="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 text-yellow-400"></i>
+                <span class="text-sm md:text-base lg:text-lg font-semibold truncate">${courseLabel}</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span id="slide-counter" class="text-sm md:text-base font-mono">1 / ${state.slides.length}</span>
+            </div>
+        </div>
+        <div id="slideContent" class="content-area animate-fade-in"></div>
+        <div class="bg-purple-900 text-white relative z-10 shadow-lg">
+            <div class="hidden md:flex px-6 py-3 justify-between items-center">
+                <button id="prevBtn" class="nav-button flex items-center hover:text-yellow-200 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="chevron-left" class="w-5 h-5 mr-1 text-yellow-400"></i><span class="text-sm">Anterior</span>
+                </button>
+                <div id="pagination" class="flex space-x-2 max-w-xs"></div>
+                <button id="nextBtn" class="nav-button flex items-center hover:text-yellow-200 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span class="text-sm">Siguiente</span><i data-lucide="chevron-right" class="w-5 h-5 ml-1 text-yellow-400"></i>
+                </button>
+            </div>
+            <div class="md:hidden flex items-center justify-between p-4">
+                <button id="prevBtnMobile" class="nav-button flex items-center justify-center w-12 h-12 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="chevron-left" class="w-6 h-6 text-yellow-400"></i>
+                </button>
+                <div id="paginationMobile" class="flex space-x-1 overflow-x-auto px-2"></div>
+                <button id="nextBtnMobile" class="nav-button flex items-center justify-center w-12 h-12 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="chevron-right" class="w-6 h-6 text-yellow-400"></i>
+                </button>
+            </div>
+            <div class="md:hidden">
+                <div class="w-full bg-purple-800 h-1"><div id="progressBar" class="bg-yellow-300 h-1 transition-all duration-300 ease-out"></div></div>
+            </div>
+        </div>
+    </div>
+    <div id="swipeHint" class="swipe-hint">
+        <i data-lucide="move-horizontal" class="w-4 h-4 inline mr-1 text-yellow-400"></i> Desliza para navegar
+    </div>`;
+
+  const navScript = `
+        let currentSlide = 0;
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            renderSlide();
+            updateNavigation();
+            setupTouchHandling();
+            hideSwipeHint();
+        });
+
+        function hideSwipeHint() {
+            setTimeout(() => {
+                const hint = document.getElementById('swipeHint');
+                if (hint) { hint.style.opacity = '0'; setTimeout(() => hint.remove(), 300); }
+            }, 5000);
+        }
+
+        function setupTouchHandling() {
+            const slideContent = document.getElementById('slideContent');
+            slideContent.addEventListener('touchstart', handleTouchStart, { passive: true });
+            slideContent.addEventListener('touchmove', handleTouchMove, { passive: true });
+            slideContent.addEventListener('touchend', handleTouchEnd, { passive: true });
+        }
+        function handleTouchStart(e) { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; }
+        function handleTouchMove(e) {
+            const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+            const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+            if (deltaX > deltaY && deltaX > 10) e.preventDefault();
+        }
+        function handleTouchEnd(e) {
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+                if (deltaX > 0 && currentSlide > 0) previousSlide();
+                else if (deltaX < 0 && currentSlide < slides.length - 1) nextSlide();
+            }
+        }
+
+        function renderSlide() {
+            const slide = slides[currentSlide];
+            const container = document.getElementById('slideContent');
+            container.innerHTML = getSlideHTML(slide);
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            lucide.createIcons();
+        }
+
+        function createPagination() {
+            const pagination = document.getElementById('pagination');
+            const paginationMobile = document.getElementById('paginationMobile');
+            pagination.innerHTML = '';
+            for (let i = 0; i < slides.length; i++) {
+                const dot = document.createElement('button');
+                dot.className = 'w-3 h-3 rounded-full transition-smooth ' + (i === currentSlide ? 'bg-white scale-125' : 'bg-purple-400 hover:bg-purple-300');
+                dot.addEventListener('click', () => goToSlide(i));
+                pagination.appendChild(dot);
+            }
+            paginationMobile.innerHTML = '';
+            for (let i = 0; i < slides.length; i++) {
+                const dot = document.createElement('button');
+                dot.className = 'w-2 h-2 rounded-full transition-smooth ' + (i === currentSlide ? 'bg-white scale-125' : 'bg-purple-400');
+                dot.addEventListener('click', () => goToSlide(i));
+                paginationMobile.appendChild(dot);
+            }
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const prevBtnMobile = document.getElementById('prevBtnMobile');
+            const nextBtnMobile = document.getElementById('nextBtnMobile');
+            document.getElementById('slide-counter').textContent = (currentSlide + 1) + ' / ' + slides.length;
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === slides.length - 1;
+            prevBtnMobile.disabled = currentSlide === 0;
+            nextBtnMobile.disabled = currentSlide === slides.length - 1;
+            createPagination();
+        }
+
+        function previousSlide() { if (currentSlide > 0) { currentSlide--; renderSlide(); updateNavigation(); } }
+        function nextSlide() { if (currentSlide < slides.length - 1) { currentSlide++; renderSlide(); updateNavigation(); } }
+        function goToSlide(index) { if (index >= 0 && index < slides.length) { currentSlide = index; renderSlide(); updateNavigation(); } }
+
+        document.getElementById('prevBtn').addEventListener('click', previousSlide);
+        document.getElementById('nextBtn').addEventListener('click', nextSlide);
+        document.getElementById('prevBtnMobile').addEventListener('click', previousSlide);
+        document.getElementById('nextBtnMobile').addEventListener('click', nextSlide);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') previousSlide();
+            else if (e.key === 'ArrowRight') nextSlide();
+            else if (e.key === 'Home') goToSlide(0);
+            else if (e.key === 'End') goToSlide(slides.length - 1);
+        });`;
+
+  return [
+    '<!DOCTYPE html>',
+    '<html lang="es">',
+    '<head>',
+    '<meta charset="UTF-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+    '<title>' + pageTitle + ' - DigitalDuck</title>',
+    '<script src="https://cdn.tailwindcss.com"><\/script>',
+    '<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"><\/script>',
+    '<script>',
+    'tailwind.config = { theme: { extend: { animation: { "fade-in": "fadeIn 0.5s ease-in-out", "slide-up": "slideUp 0.3s ease-out" } } } }',
+    '<\/script>',
+    '<style>' + headStyles + '</style>',
+    '</head>',
+    '<body>',
+    bodyShell,
+    '<script>',
+    'const slides = ' + slidesJSON + ';',
+    engineSource,
+    navScript,
+    '<\/script>',
+    '</body>',
+    '</html>'
+  ].join('\n');
+}
+
+/* ================= DOWNLOAD ================= */
+
+function slugify(s) {
+  return (s||'practico').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'practico';
+}
+
+function downloadHTML() {
+  const html = generateFullHTML();
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = slugify(state.meta.title) + '.html';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/* ================= EVENT WIRING ================= */
+
+function wireTabEvents() {
+  if (activeTab === 'general') {
+    document.querySelectorAll('[data-meta]').forEach(inp => {
+      inp.addEventListener('input', () => { state.meta[inp.dataset.meta] = inp.value; saveDraft(); });
+    });
+    const btn = document.getElementById('btnAplicarGeneral');
+    if (btn) btn.addEventListener('click', () => {
+      upsertSlideOfType('title', {title: state.meta.title, instructor: state.meta.instructor, email: state.meta.email}, 'start');
+      upsertSlideOfType('qa', {contact: {email: state.meta.email, office: state.meta.office, hours: state.meta.hours}}, 'end');
+      saveDraft();
+      alert('Aplicado a las láminas de Portada y Contacto.');
+    });
+  }
+  else if (activeTab === 'contenidos') {
+    renderBibliografiaList();
+    const objText = document.getElementById('objetivosText');
+    if (objText) objText.addEventListener('input', () => { state.objectives = textToList(objText.value); saveDraft(); });
+    const btnAddBib = document.getElementById('btnAddBib');
+    if (btnAddBib) btnAddBib.addEventListener('click', () => { state.bibliography.push({name:'',url:'',purpose:''}); renderBibliografiaList(); saveDraft(); });
+    const btnAplicar = document.getElementById('btnAplicarContenidos');
+    if (btnAplicar) btnAplicar.addEventListener('click', () => {
+      upsertSlideOfType('objectives', {items: state.objectives.slice()});
+      upsertSlideOfType('resources', {platforms: state.bibliography.map(b=>({...b}))});
+      saveDraft();
+      alert('Aplicado a las láminas de Objetivos y Recursos.');
+    });
+  }
+  else if (activeTab === 'laminas') {
+    if (editingIndex !== null) {
+      const i = editingIndex;
+      document.querySelectorAll('[data-slide-field]').forEach(inp => {
+        inp.addEventListener('input', () => {
+          const path = inp.dataset.slideField;
+          const ftype = inp.dataset.slideType;
+          let val = inp.value;
+          if (ftype === 'list') val = textToList(val);
+          else if (ftype === 'csv') val = csvToList(val);
+          setPath(state.slides[i].content, path, val);
+          saveDraft();
+        });
+      });
+      renderObjListItems(i);
+      renderComparisonRows(i);
+      const btnAddObj = document.getElementById('btnAddObjItem');
+      if (btnAddObj) btnAddObj.addEventListener('click', () => {
+        const objlist = OBJLIST_FIELDS[state.slides[i].type];
+        const empty = {}; objlist.fields.forEach(([k]) => empty[k]='');
+        (state.slides[i].content[objlist.key] ||= []).push(empty);
+        saveDraft(); renderObjListItems(i); lucide.createIcons();
+      });
+      const btnAddRow = document.getElementById('btnAddRow');
+      if (btnAddRow) btnAddRow.addEventListener('click', () => {
+        const headers = state.slides[i].content.headers || [];
+        (state.slides[i].content.rows ||= []).push(headers.map(()=>''));
+        saveDraft(); renderComparisonRows(i); lucide.createIcons();
+      });
+      const btnVolver = document.getElementById('btnVolverLista');
+      if (btnVolver) btnVolver.addEventListener('click', () => { editingIndex = null; render(); });
+      const btnGuardar = document.getElementById('btnGuardarLamina');
+      if (btnGuardar) btnGuardar.addEventListener('click', () => { editingIndex = null; saveDraft(); render(); });
+    } else {
+      renderSlideList();
+      document.querySelectorAll('[data-add-type]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const type = btn.dataset.addType;
+          state.slides.push({type, content: defaultContent(type)});
+          editingIndex = state.slides.length - 1;
+          saveDraft();
+          render();
+        });
+      });
+    }
+  }
+  else if (activeTab === 'generar') {
+    const frame = document.getElementById('previewFrame');
+    if (frame) frame.srcdoc = state.slides.length ? generateFullHTML() : '<p style="font-family:sans-serif;padding:2rem;color:#666">Agrega al menos una lámina en la pestaña "3. Láminas" para ver la vista previa.</p>';
+    const btnUpd = document.getElementById('btnActualizarPreview');
+    if (btnUpd) btnUpd.addEventListener('click', () => { frame.srcdoc = generateFullHTML(); });
+    const btnDl = document.getElementById('btnDescargar');
+    if (btnDl) btnDl.addEventListener('click', downloadHTML);
+  }
+}
+
+document.getElementById('btnNuevo').addEventListener('click', () => {
+  if (confirm('¿Empezar un práctico nuevo? Se perderá el borrador actual (a menos que lo hayas descargado).')) {
+    state = {meta:{title:'', courseLabel:'Patología Básica - UACh', date:'', instructor:'', email:'', office:'', hours:''}, objectives:[], bibliography:[], slides:[]};
+    editingIndex = null;
+    activeTab = 'general';
+    saveDraft();
+    render();
+  }
+});
+
+/* ================= INIT ================= */
+
+loadDraft();
+render();
+</script>
+</body>
+</html>

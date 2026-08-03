@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prácticos - DigitalDuck</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/practicos.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo-container">
+                <img src="images/logo2.png" alt="DigitalDuck Logo" class="logo-dd">
+                <img src="images/logouach.png" alt="UACH Logo" class="logo-uach">
+            </div> 
+            <!-- Menú principal (igual que index.html) -->
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html#inicio">INICIO</a></li>
+                <li><a href="index.html#sobre">SOBRE DIGITALDUCK</a></li>
+                <li><a href="index.html#caracteristicas">CARACTERÍSTICAS</a></li>
+                <li><a href="index.html#contenido">CONTENIDO</a></li>
+                <li><a href="index.html#practicos">PRÁCTICOS</a></li>
+                <li><a href="index.html#contacto">CONTACTO</a></li>
+            </ul>
+
+            <div class="nav-buttons">
+                <!-- Botón hamburguesa para prácticos -->
+                <button class="practicos-toggle" id="practicosToggle" aria-label="Menú de prácticos">
+                    <span class="practicos-icon">📋</span>
+                    <span class="practicos-text">Prácticos</span>
+                </button>
+
+                <!-- Botón hamburguesa para menú principal (móvil) -->
+                <button class="menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Menú desplegable de prácticos -->
+        <div class="practicos-dropdown" id="practicosDropdown">
+            <div class="practicos-dropdown-content">
+                <a href="pra1.html" class="practico-item">
+                    <span class="practico-num">01</span>
+                    <span class="practico-name">Introducción</span>
+                </a>
+                <a href="pra2.html" class="practico-item">
+                    <span class="practico-num">02</span>
+                    <span class="practico-name">Adaptación</span>
+                </a>
+                <a href="pra3.html" class="practico-item">
+                    <span class="practico-num">03</span>
+                    <span class="practico-name">Lesión</span>
+                </a>
+                <a href="pra4.html" class="practico-item">
+                    <span class="practico-num">04</span>
+                    <span class="practico-name">Muerte</span>
+                </a>
+                <a href="pra5.html" class="practico-item">
+                    <span class="practico-num">05</span>
+                    <span class="practico-name">Inflamación</span>
+                </a>
+                <a href="pra6.html" class="practico-item">
+                    <span class="practico-num">06</span>
+                    <span class="practico-name">Neoplasias Benignas</span>
+                </a>
+                <a href="pra7.html" class="practico-item">
+                    <span class="practico-num">07</span>
+                    <span class="practico-name">Neoplasias Malignas</span>
+                </a>
+                <a href="pra8.html" class="practico-item">
+                    <span class="practico-num">08</span>
+                    <span class="practico-name">Trombosis e Infarto</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-header">
+        <h1>PRÁCTICOS DIGITALES</h1>
+        <p>Explora nuestros prácticos interactivos de patología. Cada uno está diseñado para desarrollar tus habilidades de observación microscópica y comprensión de procesos patológicos fundamentales.</p>
+    </div>
+
+    <div class="practicos-container">
+        <div class="practicos-grid">
+            <!-- Práctico 1 -->
+            <div class="practico-card">
+                <div class="practico-header">
+                    <div class="practico-number">01</div>
+                    <h3 class="practico-title">Introducción a la Patología Digital</h3>
+                </div>
+                <div class="practico-body">
+                    <div class="practico-icon">🔬</div>
+                    <p class="practico-description">
+                        Aprende los fundamentos del laboratorio de anatomía patológica y familiarízate con 
+                        el proceso de obtención, procesamiento y observación de muestras histológicas. 
+                        Descubre cómo la patología digital revoluciona el aprendizaje tradicional.
+                    </p>
+                    <a href="pra1.html" target="_blank" class="practico-link">ACCEDER AL PRÁCTICO</a>
+                </div>
+            </div>
+
+            <!-- Práctico 2 -->
+            <div class="practico-card">
+                <div class="practico-header">
+                    <div class="practico-number">02</div>
+                    <h3 class="practico-title">Adaptación Celular</h3>
+                </div>
+                <div class="practico-body">
+                    <div class="practico-icon">🔄</div>
+                    <p class="practico-description">
+                        Explora los mecanismos de adaptación celular frente a estímulos diversos. 
+                        Identifica cambios de hipertrofia, hiperplasia, atrofia y metaplasia en 
+                        preparaciones histológicas reales y comprende su significado patológico.
+                    </p>
+                    <a href="pra2.html" target="_blank" class="practico-link">ACCEDER AL PRÁCTICO</a>
+                </div>
+            </div>
+
+            <!-- Práctico 3 -->
+            <div class="practico-card">
+                <div class="practico-header">
+                    <div class="practico-number">03</div>
+                    <h3 class="practico-title">Lesión Celular</h3>
+                </div>
+                <div class="practico-body">
+                    <div class="practico-icon">⚠️</div>
+                    <p class="practico-description">
+                        Reconoce los signos microscópicos de lesión celular reversible e irreversible. 
+                        Estudia las alteraciones morfológicas que preceden a la muerte celular y 
+                        comprende los mecanismos bioquímicos subyacentes.
+                    </p>
+                    <a href="pra3.html" target="_blank" class="practico-link">ACCEDER AL PRÁCTICO</a>
+                </div>
+            </div>
+
+            <!-- Práctico 4 -->
+            <div class="practico-card">
+                <div class="practico-header">
+                    <div class="practico-number">04</div>
+                    <h3 class="practico-title">Muerte Celular</h3>
+                </div>
+                <div class="practico-body">
+                    <div class="practico-icon">💀</div>
+                    <p class="practico-description">
+                        Diferencia los tipos de muerte celular: necrosis, apoptosis y autofagia. 
+                        Identifica las características histológicas distintivas de cada tipo y 
+                        comprende sus implicaciones clínicas y fisiopatológicas.
+                    </p>
+                    <a href="pra4.html" target="_blank" class="practico-link">ACCEDER AL PRÁCTICO</a>
+                </div>
+            </div>
+
+            <!-- Práctico 5 -->
+            <div class="practico-card">
+                <div class="practico-header">
+                    <div class="practico-number">05</div>
+                    <h3 class="practico-title">Inflamación</h3>
+                </div>
+                <div class="practico-body">
+                    <div class="practico-icon">🔥</div>
+                    <p class="practico-description">
+                        Analiza el proceso inflamatorio agudo y crónico a nivel microscópico. 
+                        Identifica los componentes celulares del infiltrado inflamatorio y 
+                        comprende los patrones de respuesta tisular ante diferentes agresiones.
+                    </p>
+                    <a href="pra5.html" target="_blank" class="practico-link">ACCEDER AL PRÁCTICO</a>
+                </div>
+            </div>
+
+            <!-- Práctico 6 -->
+            <div class="practico-card">
+                <div class="practico-header">
+                    <div class="practico-number">06</div>
+                    <h3 class="practico-title">Neoplasias Benignas</h3>
+                </div>
+                <div class="practico-body">
+                    <div class="practico-icon">🧬</div>
+                    <p class="practico-description">
+                        Estudia las características histológicas de los tumores benignos. 
+                        Aprende a diferenciarlos de tejidos normales, reconoce patrones de 
+                        crecimiento organizados y comprende su comportamiento clínico favorable.
+                    </p>
+                    <a href="pra6.html" target="_blank" class="practico-link">ACCEDER AL PRÁCTICO</a>
+                </div>
+            </div>
+
+            <!-- Práctico 7 -->
+            <div class="practico-card">
+                <div class="practico-header">
+                    <div class="practico-number">07</div>
+                    <h3 class="practico-title">Neoplasias Malignas</h3>
+                </div>
+                <div class="practico-body">
+                    <div class="practico-icon">☠️</div>
+                    <p class="practico-description">
+                        Identifica las características de malignidad en preparaciones histológicas. 
+                        Reconoce atipia celular, mitosis anormales, patrón de crecimiento invasivo 
+                        y comprende los criterios diagnósticos de cáncer.
+                    </p>
+                    <a href="pra7.html" target="_blank" class="practico-link">ACCEDER AL PRÁCTICO</a>
+                </div>
+            </div>
+
+            <!-- Práctico 8 -->
+            <div class="practico-card">
+                <div class="practico-header">
+                    <div class="practico-number">08</div>
+                    <h3 class="practico-title">Trombosis e Infarto</h3>
+                </div>
+                <div class="practico-body">
+                    <div class="practico-icon">🩸</div>
+                    <p class="practico-description">
+                        Examina las alteraciones hemodinámicas y sus consecuencias tisulares. 
+                        Identifica trombos, estudia la evolución del infarto y comprende los 
+                        mecanismos de isquemia, necrosis y reparación vascular.
+                    </p>
+                    <a href="pra8.html" target="_blank" class="practico-link">ACCEDER AL PRÁCTICO</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-text">
+            <p>&copy; 2025 DigitalDuck - Universidad Austral de Chile, Puerto Montt</p>
+            <p>TecMedHUB & Escuela de Tecnología Médica</p>
+        </div>
+    </footer>
+
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        const practicosToggle = document.getElementById('practicosToggle');
+        const practicosDropdown = document.getElementById('practicosDropdown');
+
+        // Toggle menú principal (móvil)
+        menuToggle.addEventListener('click', function() {
+            this.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            // Cerrar menú de prácticos si está abierto
+            practicosDropdown.classList.remove('active');
+            practicosToggle.classList.remove('active');
+        });
+
+        // Toggle menú de prácticos
+        practicosToggle.addEventListener('click', function() {
+            this.classList.toggle('active');
+            practicosDropdown.classList.toggle('active');
+            // Cerrar menú principal si está abierto
+            navLinks.classList.remove('active');
+            menuToggle.classList.remove('active');
+        });
+
+        // Cerrar menús al hacer click fuera
+        document.addEventListener('click', function(e) {
+            if (!practicosToggle.contains(e.target) && !practicosDropdown.contains(e.target)) {
+                practicosDropdown.classList.remove('active');
+                practicosToggle.classList.remove('active');
+            }
+        });
+
+        // Cerrar menú móvil al hacer click en un link
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (navLinks.classList.contains('active')) {
+                    navLinks.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

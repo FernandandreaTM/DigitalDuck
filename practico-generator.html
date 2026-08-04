@@ -33,19 +33,24 @@
         <p class="text-purple-200 text-xs md:text-sm">Crea un práctico digital interactivo sin programar</p>
       </div>
     </div>
-    <div class="flex gap-2 flex-wrap">
-      <button id="btnCargarHTML" class="bg-purple-800 hover:bg-purple-700 text-sm px-3 py-2 rounded-lg flex items-center gap-1">
-        <i data-lucide="upload" class="w-4 h-4"></i> Cargar HTML
+    <div class="flex gap-2 flex-wrap items-center">
+      <button id="btnCambiarModo" style="display:none" class="bg-purple-800 hover:bg-purple-700 text-sm px-3 py-2 rounded-lg flex items-center gap-1">
+        <i data-lucide="repeat" class="w-4 h-4"></i> Cambiar de modo
       </button>
-      <button id="btnCargarJSON" class="bg-purple-800 hover:bg-purple-700 text-sm px-3 py-2 rounded-lg flex items-center gap-1">
-        <i data-lucide="file-json" class="w-4 h-4"></i> Cargar JSON
-      </button>
-      <input type="file" id="fileHtmlInput" accept=".html,.htm" class="hidden">
-      <input type="file" id="fileJsonInput" accept=".json" class="hidden">
-      <button id="btnNuevo" class="bg-purple-800 hover:bg-purple-700 text-sm px-3 py-2 rounded-lg flex items-center gap-1">
-        <i data-lucide="file-plus" class="w-4 h-4"></i> Nuevo
-      </button>
-      <span id="autosaveIndicator" class="text-xs text-purple-300 self-center hidden md:inline"></span>
+      <div id="headerActionsFull" style="display:none" class="flex gap-2 flex-wrap items-center">
+        <button id="btnCargarHTML" class="bg-purple-800 hover:bg-purple-700 text-sm px-3 py-2 rounded-lg flex items-center gap-1">
+          <i data-lucide="upload" class="w-4 h-4"></i> Cargar HTML
+        </button>
+        <button id="btnCargarJSON" class="bg-purple-800 hover:bg-purple-700 text-sm px-3 py-2 rounded-lg flex items-center gap-1">
+          <i data-lucide="file-json" class="w-4 h-4"></i> Cargar JSON
+        </button>
+        <input type="file" id="fileHtmlInput" accept=".html,.htm" class="hidden">
+        <input type="file" id="fileJsonInput" accept=".json" class="hidden">
+        <button id="btnNuevo" class="bg-purple-800 hover:bg-purple-700 text-sm px-3 py-2 rounded-lg flex items-center gap-1">
+          <i data-lucide="file-plus" class="w-4 h-4"></i> Nuevo
+        </button>
+        <span id="autosaveIndicator" class="text-xs text-purple-300 self-center hidden md:inline"></span>
+      </div>
     </div>
   </header>
 
@@ -85,7 +90,7 @@ const SIMPLE_FIELDS = {
   platform: [['title','Título','text'],['url','URL','text'],['features','Características (una por línea)','list']],
   tutorial: [['title','Título','text'],['steps','Pasos (uno por línea)','list']],
   activity: [['title','Título','text'],['instructions','Instrucciones (una por línea)','list']],
-  case: [['title','Título (ej. Lámina 1: Metaplasia)','text'],['concept','Concepto clave (ej. METAPLASIA)','text'],['clinical.patient','Paciente','text'],['clinical.symptoms','Síntomas','text'],['clinical.labs','Laboratorio / Exámenes','text'],['questions','Preguntas de análisis (una por línea)','list']],
+  case: [['title','Título (ej. Lámina 1: Metaplasia)','text'],['concept','Concepto clave (ej. METAPLASIA)','text'],['clinical.patient','Paciente','text'],['clinical.symptoms','Síntomas','text'],['clinical.labs','Laboratorio / Exámenes','text'],['questions','Preguntas de análisis','chiplist']],
   comparison: [['title','Título','text'],['subtitle','Subtítulo','text'],['headers','Encabezados de columna (separados por coma)','csv']],
   assessment: [['title','Título','text']],
   resources: [['title','Título','text']],
@@ -921,6 +926,28 @@ const LAMINAS_BANK = {
   ]
 }.laminas;
 
+/* Preguntas de análisis reutilizables. Las 3 primeras son las que más se repiten en las
+   19 láminas ya cargadas (data/laminas.json); el resto son variantes frecuentes o
+   sugeridas. El docente puede sumar preguntas propias, que quedan guardadas en este
+   navegador (localStorage) para reusarlas después. */
+const PRESET_QUESTIONS = [
+  'Relacione los hallazgos morfológicos con el contexto clínico',
+  'Investigue cómo podría progresar esta alteración',
+  'Describa el mecanismo fisiopatológico asociado a este caso particular',
+  'Realice una descripción histológica de los hallazgos observados',
+  '¿Qué complicaciones podría desarrollar este paciente?',
+  'Describa la etiología de la lesión'
+];
+const CUSTOM_QUESTIONS_KEY = 'digitalduck_preguntas_frecuentes';
+function loadCustomQuestions() {
+  try { return JSON.parse(localStorage.getItem(CUSTOM_QUESTIONS_KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveCustomQuestion(q) {
+  const list = loadCustomQuestions();
+  if (!list.includes(q)) { list.push(q); localStorage.setItem(CUSTOM_QUESTIONS_KEY, JSON.stringify(list)); }
+}
+
 function validateSlide(slide) {
   const c = slide.content || {};
   const issues = [];
@@ -1004,6 +1031,21 @@ let editingIndex = null;
 let libraryOpen = false;
 let libraryFilter = '';
 
+// genMode: null = pantalla de elección, 'quick' = caso rápido, 'full' = práctico completo
+let genMode = null;
+let quickCase = defaultContent('case');
+
+const QUICKCASE_DRAFT_KEY = 'digitalduck_quickcase_draft';
+function loadQuickDraft() {
+  try {
+    const raw = localStorage.getItem(QUICKCASE_DRAFT_KEY);
+    if (raw) { const parsed = JSON.parse(raw); if (parsed) quickCase = parsed; }
+  } catch(e) { console.warn('No se pudo cargar el borrador de caso rápido', e); }
+}
+function saveQuickDraft() {
+  localStorage.setItem(QUICKCASE_DRAFT_KEY, JSON.stringify(quickCase));
+}
+
 function loadDraft() {
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
@@ -1058,6 +1100,26 @@ const TABS = [
 
 function render() {
   const nav = document.getElementById('tabNav');
+  const btnModo = document.getElementById('btnCambiarModo');
+  const headerFull = document.getElementById('headerActionsFull');
+  btnModo.style.display = genMode === null ? 'none' : 'inline-flex';
+  headerFull.style.display = genMode === 'full' ? 'flex' : 'none';
+
+  if (genMode === null) {
+    nav.innerHTML = '';
+    document.getElementById('tabContent').innerHTML = renderModeSelector();
+    wireModeSelector();
+    lucide.createIcons();
+    return;
+  }
+  if (genMode === 'quick') {
+    nav.innerHTML = '';
+    document.getElementById('tabContent').innerHTML = renderQuickCase();
+    wireQuickCase();
+    lucide.createIcons();
+    return;
+  }
+
   nav.innerHTML = TABS.map(t => `
     <button class="tab-btn ${activeTab===t.id?'active':'bg-white text-gray-700 border'} px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2" data-tab="${t.id}">
       <i data-lucide="${t.icon}" class="w-4 h-4"></i> ${t.label}
@@ -1075,6 +1137,167 @@ function render() {
 
   wireTabEvents();
   lucide.createIcons();
+}
+
+/* ================= PANTALLA DE ELECCIÓN DE MODO ================= */
+
+function renderModeSelector() {
+  return `
+    <div class="max-w-3xl mx-auto py-6">
+      <h2 class="text-xl font-bold text-gray-800 text-center mb-2">¿Qué quieres crear?</h2>
+      <p class="text-sm text-gray-500 text-center mb-8">Puedes cambiar de modo cuando quieras.</p>
+      <div class="grid md:grid-cols-2 gap-5">
+        <button data-mode="quick" class="text-left border-2 border-purple-200 hover:border-purple-500 rounded-xl p-6 bg-purple-50 transition">
+          <i data-lucide="zap" class="w-8 h-8 text-purple-700 mb-3"></i>
+          <h3 class="font-bold text-gray-800 mb-1">Caso clínico rápido</h3>
+          <p class="text-sm text-gray-600">Crea una sola lámina: descárgala, súmala a un práctico existente o guárdala para más tarde. Sin armar un práctico completo.</p>
+        </button>
+        <button data-mode="full" class="text-left border-2 border-gray-200 hover:border-purple-500 rounded-xl p-6 bg-white transition">
+          <i data-lucide="layout-template" class="w-8 h-8 text-purple-700 mb-3"></i>
+          <h3 class="font-bold text-gray-800 mb-1">Práctico completo</h3>
+          <p class="text-sm text-gray-600">Arma un práctico con portada, objetivos, láminas, actividades y evaluación — el flujo de 4 pasos.</p>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function wireModeSelector() {
+  document.querySelectorAll('[data-mode]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      genMode = btn.dataset.mode;
+      if (genMode === 'full') activeTab = 'general';
+      render();
+    });
+  });
+}
+
+/* ================= MODO: CASO CLÍNICO RÁPIDO ================= */
+
+function renderQuickCase() {
+  const c = quickCase;
+  const simple = SIMPLE_FIELDS.case;
+  const objlist = OBJLIST_FIELDS.case;
+
+  const fieldsHtml = simple.map(([path,label,ftype]) => {
+    if (ftype === 'chiplist') {
+      return `<div class="mb-3" data-qc-chipfield="${path}"><label class="field-label">${label}</label><div id="qcChipsBox_${path.replace(/\./g,'_')}"></div></div>`;
+    }
+    return `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" data-qc-field="${path}" value="${escAttr(getPath(c, path))}"></div>`;
+  }).join('');
+
+  return `
+    <div class="flex items-center gap-2 mb-1">
+      <i data-lucide="zap" class="w-5 h-5 text-purple-600"></i>
+      <h2 class="text-lg font-bold text-gray-800">Caso clínico rápido</h2>
+    </div>
+    <p class="text-sm text-gray-500 mb-4">Una sola lámina, lista para descargar, guardar o sumar a un práctico.</p>
+    <div class="max-w-2xl">
+      ${fieldsHtml}
+      <div class="mb-3 border-t pt-3">
+        <label class="field-label mb-2">${objlist.label}</label>
+        <div id="qcObjlistItems"></div>
+        <button id="qcBtnAddLink" class="mt-2 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1">
+          <i data-lucide="plus" class="w-4 h-4"></i> Agregar enlace
+        </button>
+      </div>
+    </div>
+    <div id="qcValidation" class="max-w-2xl"></div>
+    <div class="flex gap-2 flex-wrap mt-4">
+      <button id="qcBtnDescargarJSON" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="file-json" class="w-4 h-4"></i> Descargar JSON de la lámina
+      </button>
+      <button id="qcBtnAgregarPractico" class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="list-plus" class="w-4 h-4"></i> Agregar a un práctico existente
+      </button>
+      <button id="qcBtnPreview" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="eye" class="w-4 h-4"></i> Vista previa
+      </button>
+      <input type="file" id="qcFilePracticoInput" accept=".html,.htm" class="hidden">
+    </div>
+    <div id="qcPreviewWrap" class="border rounded-xl overflow-hidden mt-4 hidden" style="height:60vh;">
+      <iframe id="qcPreviewFrame" class="w-full h-full" title="Vista previa"></iframe>
+    </div>
+  `;
+}
+
+function renderQcObjListItems() {
+  const objlist = OBJLIST_FIELDS.case;
+  const items = quickCase.links || (quickCase.links = []);
+  renderObjListItemsGeneric(items, objlist.fields, 'qcObjlistItems', saveQuickDraft);
+}
+
+function renderQcValidation() {
+  const wrap = document.getElementById('qcValidation');
+  if (!wrap) return;
+  const issues = validateSlide({type:'case', content: quickCase});
+  wrap.innerHTML = issues.length
+    ? `<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 mb-2 flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4 flex-shrink-0"></i> Falta: ${escHtml(issues.join(', '))}</div>`
+    : `<div class="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800 mb-2 flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 flex-shrink-0"></i> Lámina completa.</div>`;
+  lucide.createIcons();
+}
+
+function wireQuickCase() {
+  document.querySelectorAll('[data-qc-field]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      setPath(quickCase, inp.dataset.qcField, inp.value);
+      saveQuickDraft();
+    });
+  });
+  document.querySelectorAll('[data-qc-chipfield]').forEach(el => {
+    const path = el.dataset.qcChipfield;
+    renderChipsField(quickCase, path, 'qcChipsBox_' + path.replace(/\./g,'_'), saveQuickDraft);
+  });
+  renderQcObjListItems();
+  document.getElementById('qcBtnAddLink').addEventListener('click', () => {
+    (quickCase.links ||= []).push({label:'', url:''});
+    saveQuickDraft(); renderQcObjListItems(); lucide.createIcons();
+  });
+  document.getElementById('qcBtnDescargarJSON').addEventListener('click', downloadQuickCaseJSON);
+  document.getElementById('qcBtnAgregarPractico').addEventListener('click', () => document.getElementById('qcFilePracticoInput').click());
+  document.getElementById('qcFilePracticoInput').addEventListener('change', (e) => {
+    if (e.target.files[0]) addQuickCaseToPractico(e.target.files[0]);
+    e.target.value = '';
+  });
+  document.getElementById('qcBtnPreview').addEventListener('click', showQuickCasePreview);
+  renderQcValidation();
+}
+
+function downloadQuickCaseJSON() {
+  downloadBlob(JSON.stringify(quickCase, null, 2), slugify(quickCase.title || 'lamina') + '.json', 'application/json');
+}
+
+function showQuickCasePreview() {
+  document.getElementById('qcPreviewWrap').classList.remove('hidden');
+  const html = [
+    '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">',
+    '<script src="https://cdn.tailwindcss.com"><\/script>',
+    '<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"><\/script>',
+    '<style>body{font-family:ui-sans-serif,system-ui,sans-serif;margin:0;} .h-full{min-height:100vh;}</style>',
+    '</head><body>',
+    getSlideHTML({type:'case', content: quickCase}),
+    '<script>lucide.createIcons();<\/script>',
+    '</body></html>'
+  ].join('\n');
+  document.getElementById('qcPreviewFrame').srcdoc = html;
+}
+
+function addQuickCaseToPractico(file) {
+  const issues = validateSlide({type:'case', content: quickCase});
+  if (issues.length && !confirm('La lámina tiene campos incompletos (' + issues.join(', ') + '). ¿Agregarla de todas formas?')) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const text = String(reader.result);
+    const found = extractSlidesBlock(text);
+    if (!found) { alert('No se encontró el arreglo de láminas en este archivo. ¿Es un práctico de DigitalDuck?'); return; }
+    const newSlide = {type:'case', content: JSON.parse(JSON.stringify(quickCase))};
+    const updatedSlides = found.slides.concat([newSlide]);
+    const updatedText = text.slice(0, found.arrStart) + JSON.stringify(updatedSlides, null, 4) + text.slice(found.arrEnd + 1);
+    downloadBlob(updatedText, file.name, 'text/html');
+    alert('Lámina agregada al final de "' + file.name + '". Reemplaza el archivo original en el proyecto con esta descarga.');
+  };
+  reader.onerror = () => alert('No se pudo leer el archivo.');
+  reader.readAsText(file);
 }
 
 /* ================= TAB 1: GENERAL ================= */
@@ -1346,6 +1569,9 @@ function renderSlideEditor(i) {
 
   let fieldsHtml = simple.map(([path,label,ftype]) => {
     const val = getPath(slide.content, path);
+    if (ftype === 'chiplist') {
+      return `<div class="mb-3" data-chipfield="${path}"><label class="field-label">${label}</label><div id="chipsBox_${path.replace(/\./g,'_')}"></div></div>`;
+    }
     if (ftype === 'list') {
       return `<div class="mb-3"><label class="field-label">${label}</label><textarea class="field-input" rows="4" data-slide-field="${path}" data-slide-type="list">${escHtml(listToText(val))}</textarea></div>`;
     }
@@ -1394,36 +1620,107 @@ function renderSlideEditor(i) {
   `;
 }
 
-function renderObjListItems(i) {
-  const slide = state.slides[i];
-  const objlist = OBJLIST_FIELDS[slide.type];
-  const wrap = document.getElementById('objlistItems');
-  if (!wrap || !objlist) return;
-  const items = slide.content[objlist.key] || (slide.content[objlist.key] = []);
+function renderObjListItemsGeneric(items, fields, wrapId, persist) {
+  const wrap = document.getElementById(wrapId);
+  if (!wrap) return;
   wrap.innerHTML = items.map((item, idx) => `
     <div class="bg-gray-50 p-3 rounded-lg mb-2 flex gap-2 items-start flex-wrap">
-      ${objlist.fields.map(([key,label]) => `
+      ${fields.map(([key,label]) => `
         <div class="flex-1 min-w-[120px]">
           <label class="text-xs text-gray-500">${label}</label>
-          <input class="field-input" data-obj-field="${idx}.${key}" value="${escAttr(item[key])}">
+          <input class="field-input" data-oli-field="${idx}.${key}" value="${escAttr(item[key])}">
         </div>
       `).join('')}
-      <button class="p-2 text-red-500 hover:text-red-700 self-end" data-obj-remove="${idx}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+      <button class="p-2 text-red-500 hover:text-red-700 self-end" data-oli-remove="${idx}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
     </div>
   `).join('') || '<p class="text-sm text-gray-400 mb-2">Sin elementos aún.</p>';
 
-  wrap.querySelectorAll('[data-obj-field]').forEach(inp => {
+  wrap.querySelectorAll('[data-oli-field]').forEach(inp => {
     inp.addEventListener('input', () => {
-      const [idx,key] = inp.dataset.objField.split('.');
+      const [idx,key] = inp.dataset.oliField.split('.');
       items[+idx][key] = inp.value;
-      saveDraft();
+      persist();
     });
   });
-  wrap.querySelectorAll('[data-obj-remove]').forEach(btn => {
+  wrap.querySelectorAll('[data-oli-remove]').forEach(btn => {
     btn.addEventListener('click', () => {
-      items.splice(+btn.dataset.objRemove, 1);
-      saveDraft(); renderObjListItems(i); lucide.createIcons();
+      items.splice(+btn.dataset.oliRemove, 1);
+      persist();
+      renderObjListItemsGeneric(items, fields, wrapId, persist);
+      lucide.createIcons();
     });
+  });
+  lucide.createIcons();
+}
+
+function renderObjListItems(i) {
+  const slide = state.slides[i];
+  const objlist = OBJLIST_FIELDS[slide.type];
+  if (!objlist) return;
+  const items = slide.content[objlist.key] || (slide.content[objlist.key] = []);
+  renderObjListItemsGeneric(items, objlist.fields, 'objlistItems', saveDraft);
+}
+
+/* Campo de chips reutilizable (preguntas de análisis y, a futuro, otras listas cortas).
+   obj/path apuntan al dato real; boxId es el contenedor; persist guarda el cambio. */
+function renderChipsField(obj, path, boxId, persist) {
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  const selected = getPath(obj, path) || [];
+  const custom = loadCustomQuestions();
+  const bank = PRESET_QUESTIONS.concat(custom.filter(q => !PRESET_QUESTIONS.includes(q)));
+  const available = bank.filter(q => !selected.includes(q));
+  const rerender = () => renderChipsField(obj, path, boxId, persist);
+
+  box.innerHTML = `
+    <div class="flex flex-wrap gap-2 mb-2">
+      ${selected.map((q,qi) => `
+        <span class="bg-purple-100 text-purple-800 text-sm px-3 py-1.5 rounded-full flex items-center gap-2">
+          ${escHtml(q)}
+          <button data-chip-remove="${qi}" class="text-purple-500 hover:text-purple-800 font-bold">&times;</button>
+        </span>
+      `).join('') || '<p class="text-sm text-gray-400">Sin preguntas aún.</p>'}
+    </div>
+    ${available.length ? `<p class="text-xs text-gray-500 mb-1">Frecuentes:</p>
+    <div class="flex flex-wrap gap-2 mb-2">
+      ${available.map(q => `<button data-chip-preset="${escAttr(q)}" class="border border-purple-300 text-purple-700 hover:bg-purple-50 text-xs px-2.5 py-1 rounded-full">+ ${escHtml(q)}</button>`).join('')}
+    </div>` : ''}
+    <div class="flex gap-2 items-center">
+      <input class="field-input" data-chip-custom-input placeholder="Escribe una pregunta propia y presiona +">
+      <button data-chip-custom-add class="bg-purple-700 hover:bg-purple-800 text-white px-3 py-2 rounded-lg text-sm flex-shrink-0">+</button>
+    </div>
+    <label class="flex items-center gap-1 text-xs text-gray-500 mt-1">
+      <input type="checkbox" data-chip-save-custom checked> Guardar en mis preguntas frecuentes (solo este navegador)
+    </label>
+  `;
+
+  box.querySelectorAll('[data-chip-remove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selected.splice(+btn.dataset.chipRemove, 1);
+      setPath(obj, path, selected);
+      persist(); rerender();
+    });
+  });
+  box.querySelectorAll('[data-chip-preset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selected.push(btn.dataset.chipPreset);
+      setPath(obj, path, selected);
+      persist(); rerender();
+    });
+  });
+  const commit = () => {
+    const input = box.querySelector('[data-chip-custom-input]');
+    const saveCk = box.querySelector('[data-chip-save-custom]');
+    const val = input.value.trim();
+    if (!val) return;
+    selected.push(val);
+    setPath(obj, path, selected);
+    if (saveCk.checked) saveCustomQuestion(val);
+    persist(); rerender();
+  };
+  box.querySelector('[data-chip-custom-add]').addEventListener('click', commit);
+  box.querySelector('[data-chip-custom-input]').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); commit(); }
   });
   lucide.createIcons();
 }
@@ -2343,7 +2640,7 @@ function findMatchingBracket(text, startIdx) {
   return -1;
 }
 
-function extractSlidesFromHTML(text) {
+function extractSlidesBlock(text) {
   const marker = 'const slides = ';
   const idx = text.indexOf(marker);
   if (idx === -1) return null;
@@ -2354,11 +2651,16 @@ function extractSlidesFromHTML(text) {
   const literalText = text.slice(arrStart, arrEnd + 1);
   try {
     const slides = new Function('"use strict"; return (' + literalText + ');')();
-    return normalizeSlides(slides);
+    return {slides: normalizeSlides(slides), arrStart, arrEnd};
   } catch(e) {
     console.error('Error al interpretar el arreglo de láminas', e);
     return null;
   }
+}
+
+function extractSlidesFromHTML(text) {
+  const found = extractSlidesBlock(text);
+  return found ? found.slides : null;
 }
 
 /* Prácticos anteriores al generador guardaban los enlaces de "caso" como un objeto
@@ -2543,6 +2845,10 @@ function wireTabEvents() {
           saveDraft();
         });
       });
+      document.querySelectorAll('[data-chipfield]').forEach(el => {
+        const path = el.dataset.chipfield;
+        renderChipsField(state.slides[i].content, path, 'chipsBox_' + path.replace(/\./g,'_'), saveDraft);
+      });
       renderObjListItems(i);
       renderComparisonRows(i);
       const btnAddObj = document.getElementById('btnAddObjItem');
@@ -2604,6 +2910,10 @@ function wireTabEvents() {
   }
 }
 
+document.getElementById('btnCambiarModo').addEventListener('click', () => {
+  if (confirm('¿Volver a la pantalla de elección de modo?')) { genMode = null; render(); }
+});
+
 document.getElementById('btnCargarHTML').addEventListener('click', () => document.getElementById('fileHtmlInput').click());
 document.getElementById('fileHtmlInput').addEventListener('change', (e) => {
   if (e.target.files[0]) importHTML(e.target.files[0]);
@@ -2628,6 +2938,7 @@ document.getElementById('btnNuevo').addEventListener('click', () => {
 /* ================= INIT ================= */
 
 loadDraft();
+loadQuickDraft();
 render();
 </script>
 </body>

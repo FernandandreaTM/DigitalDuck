@@ -60,7 +60,10 @@ lucide.createIcons();
 
 /* ================= SLIDE TYPE DEFINITIONS ================= */
 
+// 'case' es el tipo protagonista: la lámina histológica en sí (el resto son andamiaje
+// pedagógico alrededor de ella). Va primero y se destaca en el selector de "Agregar sección".
 const SLIDE_TYPES = [
+  {id:'case', label:'🔬 Lámina (caso clínico)', icon:'microscope', featured:true},
   {id:'title', label:'Portada', icon:'type'},
   {id:'objectives', label:'Objetivos', icon:'target'},
   {id:'content', label:'Contenido (lista)', icon:'list'},
@@ -68,7 +71,6 @@ const SLIDE_TYPES = [
   {id:'platform', label:'Plataforma externa', icon:'monitor'},
   {id:'tutorial', label:'Tutorial (pasos)', icon:'compass'},
   {id:'activity', label:'Actividad', icon:'pencil'},
-  {id:'case', label:'Caso clínico', icon:'microscope'},
   {id:'comparison', label:'Tabla comparativa', icon:'git-compare'},
   {id:'assessment', label:'Evaluaciones', icon:'clipboard-check'},
   {id:'resources', label:'Recursos / Bibliografía', icon:'library'},
@@ -96,6 +98,828 @@ const OBJLIST_FIELDS = {
   assessment: {key:'items', label:'Evaluaciones', itemLabel:'Evaluación', fields:[['name','Nombre'],['date','Fecha'],['content','Contenido'],['weight','Ponderación']]},
   resources: {key:'platforms', label:'Recursos', itemLabel:'Recurso', fields:[['name','Nombre'],['url','URL'],['purpose','Descripción']]}
 };
+
+/* Biblioteca de láminas ya existentes en los prácticos publicados (data/curriculum.json y
+   data/laminas.json). Permite elegir un caso ya curado en vez de escribirlo desde cero.
+   Si se agregan prácticos nuevos con más láminas, regenerar estos dos bloques. */
+const CURRICULUM_TAXONOMY = {
+  "unidades": [
+    {
+      "numero": "I",
+      "id": "celular",
+      "nombre": "Patología Celular",
+      "temas": [
+        { "id": "introduccion", "nombre": "Introducción a la Patología Digital", "practico": "pra1.html" },
+        { "id": "adaptacion-celular", "nombre": "Adaptación Celular", "practico": "pra2.html" },
+        { "id": "lesion-celular", "nombre": "Lesión Celular", "practico": "pra3.html" },
+        { "id": "muerte-celular", "nombre": "Muerte Celular", "practico": "pra4.html" }
+      ]
+    },
+    {
+      "numero": "II",
+      "id": "inflamacion",
+      "nombre": "Inflamación",
+      "temas": [
+        { "id": "inflamacion-aguda-cronica", "nombre": "Inflamación Aguda y Crónica", "practico": "pra5.html" }
+      ]
+    },
+    {
+      "numero": "III",
+      "id": "neoplasias",
+      "nombre": "Neoplasias",
+      "temas": [
+        { "id": "neoplasias-benignas", "nombre": "Neoplasias Benignas", "practico": "pra6.html" },
+        { "id": "neoplasias-malignas", "nombre": "Neoplasias Malignas", "practico": "pra7.html" }
+      ]
+    },
+    {
+      "numero": "IV",
+      "id": "circulatorios",
+      "nombre": "Trastornos Circulatorios",
+      "temas": [
+        { "id": "trombosis-infarto", "nombre": "Trombosis e Infarto", "practico": "pra8.html" }
+      ]
+    },
+    {
+      "numero": "V",
+      "id": "metabolismo",
+      "nombre": "Metabolismo",
+      "temas": [
+        { "id": "dislipidemias", "nombre": "Dislipidemias", "practico": null },
+        { "id": "ateroesclerosis", "nombre": "Ateroesclerosis", "practico": null },
+        { "id": "diabetes-mellitus", "nombre": "Diabetes Mellitus", "practico": null },
+        { "id": "angiopatia-diabetica", "nombre": "Angiopatía Diabética", "practico": null }
+      ]
+    },
+    {
+      "numero": "VI",
+      "id": "inmunopatologia",
+      "nombre": "Inmunopatología",
+      "temas": [
+        { "id": "hipersensibilidades", "nombre": "Hipersensibilidades", "practico": null }
+      ]
+    },
+    {
+      "numero": "VII",
+      "id": "sistemas",
+      "nombre": "Patología Especial de Sistemas",
+      "temas": [
+        { "id": "respiratoria", "nombre": "Patología Respiratoria", "practico": null },
+        { "id": "renal", "nombre": "Patología Renal", "practico": null },
+        { "id": "digestiva", "nombre": "Patología del Tubo Digestivo", "practico": null },
+        { "id": "hepatica", "nombre": "Patología Hepática", "practico": null },
+        { "id": "vias-biliares-pancreas", "nombre": "Patología de Vías Biliares y Páncreas", "practico": null },
+        { "id": "endocrina", "nombre": "Patología del Sistema Endocrino", "practico": null },
+        { "id": "genital-mamaria", "nombre": "Patología Genital y Mamaria", "practico": null }
+      ]
+    }
+  ]
+};
+const LAMINAS_BANK = {
+  "laminas": [
+    {
+      "id": "pra2-lamina-1",
+      "practico": "pra2.html",
+      "indiceEnPractico": 0,
+      "unidadNumero": "I",
+      "unidadNombre": "Patología Celular",
+      "temaId": "adaptacion-celular",
+      "temaNombre": "Adaptación Celular",
+      "title": "Lámina 1: Metaplasia Intestinal",
+      "concept": "METAPLASIA",
+      "clinical": {
+        "patient": "Varón de 73 años, biopsia de esófago",
+        "symptoms": "Reflujo gastroesofágico persistente",
+        "labs": "Esofagoscopia: cambios en mucosa esofágica"
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a metaplasia reconoce?",
+        "Relacione los hallazgos morfológicos con el contexto clínico",
+        "Investigue cómo podría progresar esta alteración"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEQA%2FGeneral_Histopathology%2FHisto_EQA_CircAK%2F415979.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MHS-234-esophagus/14-slide-1.html"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/gerd.html"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/multimedia/image/barrett-esophagus"
+        }
+      ]
+    },
+    {
+      "id": "pra2-lamina-2",
+      "practico": "pra2.html",
+      "indiceEnPractico": 1,
+      "unidadNumero": "I",
+      "unidadNombre": "Patología Celular",
+      "temaId": "adaptacion-celular",
+      "temaNombre": "Adaptación Celular",
+      "title": "Lámina 2: Atrofia Vellositaria",
+      "concept": "ATROFIA",
+      "clinical": {
+        "patient": "Mujer de 29 años, biopsia de yeyuno",
+        "symptoms": "Fatiga, pérdida de peso, diarrea tras consumo de gluten",
+        "labs": "Anticuerpos anti-transglutaminasa elevados"
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a atrofia reconoce?",
+        "Relacione los hallazgos morfológicos con el contexto clínico",
+        "Investigue cómo podría progresar esta alteración"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FTeaching%2FMFD_GI%2FJejunum%2F7896.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MHS-219-jejunum/14-slide-1.html"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/lab-tests/celiac-disease-screening/"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/gastrointestinal-disorders/malabsorption-syndromes/celiac-disease?query=celiac"
+        }
+      ]
+    },
+    {
+      "id": "pra2-lamina-3",
+      "practico": "pra2.html",
+      "indiceEnPractico": 2,
+      "unidadNumero": "I",
+      "unidadNombre": "Patología Celular",
+      "temaId": "adaptacion-celular",
+      "temaNombre": "Adaptación Celular",
+      "title": "Lámina 3: Hiperplasia Prostática",
+      "concept": "HIPERPLASIA",
+      "clinical": {
+        "patient": "Varón de 70 años, biopsia de próstata",
+        "symptoms": "Dificultad para iniciar micción, chorro débil, nicturia",
+        "labs": "PSA: 8.2 ng/mL (Normal: <4 ng/mL)"
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a hiperplasia reconoce?",
+        "Relacione los hallazgos morfológicos con el contexto clínico",
+        "Investigue cómo podría progresar esta alteración"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FUndergraduate%2F1119.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-183-prostate/19-slide-1.html"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/lab-tests/prostate-specific-antigen-psa-test/"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/genitourinary-disorders/benign-prostate-disease/benign-prostatic-hyperplasia?query=pbh"
+        }
+      ]
+    },
+    {
+      "id": "pra2-lamina-4",
+      "practico": "pra2.html",
+      "indiceEnPractico": 3,
+      "unidadNumero": "I",
+      "unidadNombre": "Patología Celular",
+      "temaId": "adaptacion-celular",
+      "temaNombre": "Adaptación Celular",
+      "title": "Lámina 4: Hipertrofia Muscular",
+      "concept": "HIPERTROFIA",
+      "clinical": {
+        "patient": "Niño de 8 años, biopsia de músculo",
+        "symptoms": "Retraso motor, debilidad proximal, hipertrofia leve de pantorrillas, problemas respiratorios",
+        "labs": "Creatina quinasa (CK) > 8000 U/L (Normal: 39-308 U/L), "
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a hipertrofia reconoce?",
+        "Relacione los hallazgos morfológicos con el contexto clínico",
+        "Investigue cómo podría progresar esta alteración"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FTeaching%2FNeuropathology%2FMuscle_and_Nerve_pathology%2FDystrophy%2F319748.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-055a-skeletal-muscle/04-slide-1.html?b=ax1x1x3x35783x41961x-1"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/lab-tests/creatine-kinase/"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/pediatrics/inherited-muscular-disorders/duchenne-muscular-dystrophy-and-becker-muscular-dystrophy?query=becker#Treatment_v12784711"
+        }
+      ]
+    },
+    {
+      "id": "pra3-lamina-1",
+      "practico": "pra3.html",
+      "indiceEnPractico": 0,
+      "unidadNumero": "I",
+      "unidadNombre": "Patología Celular",
+      "temaId": "lesion-celular",
+      "temaNombre": "Lesión Celular",
+      "title": "Lámina 1: Esteatosis hepática",
+      "concept": "ESTEATOSIS",
+      "clinical": {
+        "patient": "Varón de 61 años, bebedor social, obesidad.",
+        "symptoms": "Dolor en cuadrante superior derecho",
+        "labs": "Alanina transaminasa: 120 U/L (Normal: 7-56 U/L)"
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a esteatosis reconoce?",
+        "Relacione los hallazgos morfológicos con el contexto clínico",
+        "Investigue cómo podría progresar esta alteración"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FSlide_Library%2FLiver%2F36859.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-126b-liver/15-slide-1.html"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/lab-tests/alt-blood-test/"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/hepatic-and-biliary-disorders/approach-to-the-patient-with-liver-disease/metabolic-dysfunction-associated-liver-disease-masld?query=steatosis%20of%20livers"
+        }
+      ]
+    },
+    {
+      "id": "pra3-lamina-2",
+      "practico": "pra3.html",
+      "indiceEnPractico": 1,
+      "unidadNumero": "I",
+      "unidadNombre": "Patología Celular",
+      "temaId": "lesion-celular",
+      "temaNombre": "Lesión Celular",
+      "title": "Lámina 2: Lesión renal aguda",
+      "concept": "EDEMA CELULAR",
+      "clinical": {
+        "patient": "Mujer de 45 años en dialisis, biopsia de corteza renal",
+        "symptoms": "Lesión renal aguda tras TAC con contraste, oliguria",
+        "labs": "Creatinina: 4.2 mg/dL (previo: 1.1 mg/dL)"
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a edema celular reconoce?",
+        "Relacione los hallazgos morfológicos con el contexto clínico",
+        "¿Cree que este daño puede revertirse? Justifique su respuesta"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FPostgraduate%2FSets%2FRenal%2FMaster%2FNatives%2FRN15%2F208624.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://www.histologyguide.com/slideview/MH-143-kidney/16-slide-1.html?x=19618&y=45744&z=6.3"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/lab-tests/creatinine-test/"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/genitourinary-disorders/acute-kidney-injury/acute-kidney-injury-aki?query=acute%20renal%20injury"
+        }
+      ]
+    },
+    {
+      "id": "pra3-lamina-3",
+      "practico": "pra3.html",
+      "indiceEnPractico": 2,
+      "unidadNumero": "I",
+      "unidadNombre": "Patología Celular",
+      "temaId": "lesion-celular",
+      "temaNombre": "Lesión Celular",
+      "title": "Lámina 3: Antracosis Pulmonar",
+      "concept": "PIGMENTOS PATOLÓGICOS",
+      "clinical": {
+        "patient": "Hombre de 67 años, trabajador industrial y minero jubilado",
+        "symptoms": "Disnea de esfuerzo, tos crónica no productiva",
+        "labs": "Radiografía: opacidades pulmonares, función pulmonar alterada"
+      },
+      "questions": [
+        "¿Qué tipo de pigmento observa? Describa sus características morfológicas.",
+        "¿En que tipo celular se acumula? ¿Por qué esta acumulación es irreversible?",
+        "¿Cómo se relaciona con la historia laboral del paciente?"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEQA%2FGeneral_Histopathology%2FHisto_EQA_CircZ_Set6%2F205288.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-138-lung/17-slide-1.html"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/ency/imagepages/1601.htm"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/pulmonary-disorders/environmental-and-occupational-pulmonary-diseases/coal-worker-pneumoconiosis?query=anthracosis"
+        }
+      ]
+    },
+    {
+      "id": "pra4-lamina-1",
+      "practico": "pra4.html",
+      "indiceEnPractico": 0,
+      "unidadNumero": "I",
+      "unidadNombre": "Patología Celular",
+      "temaId": "muerte-celular",
+      "temaNombre": "Muerte Celular",
+      "title": "Lámina 1: Infarto Renal",
+      "concept": "NECROSIS COAGULATIVA",
+      "clinical": {
+        "patient": "Varón de 55 años, hospitalizado por falla renal.",
+        "symptoms": "HTA de 10 años, mal controlada. Falla renal aguda dos semanas posteriores a un infarto al miocardio tratado con trombólisis y stent.",
+        "labs": "Creatinina sérica: 3.5 mg/dL (valor de referencia: 0.6-1.2 mg/dL), Urea sérica: 45 mg/dL (valor de referencia: 7-20 mg/dL)."
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a necrosis coagulativa reconoce?",
+        "Describa el mecanismo fisiopatológico asociado a este caso particular"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FUndergraduate%2F1111.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-141b-kidney/16-slide-1.html?x=23905&y=16102&z=9.30"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/lab-tests/bun-blood-urea-nitrogen/"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/genitourinary-disorders/acute-kidney-injury/acute-kidney-injury-aki"
+        }
+      ]
+    },
+    {
+      "id": "pra4-lamina-2",
+      "practico": "pra4.html",
+      "indiceEnPractico": 1,
+      "unidadNumero": "I",
+      "unidadNombre": "Patología Celular",
+      "temaId": "muerte-celular",
+      "temaNombre": "Muerte Celular",
+      "title": "Lámina 2: Hepatotoxicidad",
+      "concept": "NECROSIS COAGULATIVA",
+      "clinical": {
+        "patient": "Mujer de 35 años, hospitalizada por falla hepática",
+        "symptoms": "Antecedentes de depresión no tratada. Presenta ictericia  y dolor en el cuadrante superior derecho del abdomen tras sobredosis intencional con paracetamol.",
+        "labs": "Aspartato Transaminasa (AST): 1,200 U/L (valor normal: 10-40 U/L), Alanina Transaminasa (ALT): 1,500 U/L (valor normal: 7-56 U/L), Bilirrubina total: 8 mg/dL (valor normal: 0.1-1.2 mg/dL)."
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a necrosis coagulativa reconoce?",
+        "Describa el mecanismo fisiopatológico asociado a este caso particular"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FUndergraduate%2F1061.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-126b-liver/15-slide-1.html?x=30667&y=15752&z=15.90"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/lab-tests/bilirubin-blood-test/"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/injuries-poisoning/poisoning/acetaminophen-poisoning?query=paracetamol"
+        }
+      ]
+    },
+    {
+      "id": "pra4-lamina-3",
+      "practico": "pra4.html",
+      "indiceEnPractico": 2,
+      "unidadNumero": "I",
+      "unidadNombre": "Patología Celular",
+      "temaId": "muerte-celular",
+      "temaNombre": "Muerte Celular",
+      "title": "Lámina 3: Tuberculosis Pulmonar",
+      "concept": "NECROSIS CASEOSA",
+      "clinical": {
+        "patient": "Hombre de 60 años, fumador",
+        "symptoms": "Presenta tos persistente, fiebre, pérdida de peso y sudores nocturnos.",
+        "labs": "Radiografía de tórax muestra múltiples lesiones pequeñas de distribución uniforme, prueba de tuberculina PPD - Positiva, Resultados de cultivo de esputo en espera."
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a necrosis caseosa reconoce?",
+        "Describa el mecanismo fisiopatológico asociado a este caso particular"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FUndergraduate%2F1104.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-138-lung/17-slide-1.html?x=24212&y=14372&z=4.5"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/lab-tests/tuberculosis-screening/"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/infectious-diseases/mycobacteria/tuberculosis-tb?query=tuberculosis"
+        }
+      ]
+    },
+    {
+      "id": "pra5-lamina-1",
+      "practico": "pra5.html",
+      "indiceEnPractico": 0,
+      "unidadNumero": "II",
+      "unidadNombre": "Inflamación",
+      "temaId": "inflamacion-aguda-cronica",
+      "temaNombre": "Inflamación Aguda y Crónica",
+      "title": "Lámina 1: Apendicitis Aguda",
+      "concept": "INFLAMACIÓN AGUDA",
+      "clinical": {
+        "patient": "Varón de 20 años, sin antecedentes médicos de importancia.",
+        "symptoms": "Acude a urgencias por dolor abdominal localizado inicialmente en la región periumbilical, que en las últimas horas se ha desplazado al cuadrante inferior derecho. El dolor se acompaña de náuseas, vómitos y fiebre de 38.5°C.",
+        "labs": "Hemograma: Neutrófilos 14,000/µL (vr: 4,000-11,000/µL). Proteína C reactiva (PCR): 25 mg/L (vr: <5 mg/L). Ecografía abdominal: Apéndice no compresible, con diámetro de 8 mm, acompañado de aumento de la ecogenicidad del tejido graso periapendicular. No se observan fecalitos."
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a inflamación aguda reconoce?",
+        "Describa el mecanismo fisiopatológico asociado a este caso particular"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FTeaching%2FMFD_GI%2FAppendix%2F9143.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-122-appendix/14-slide-1.html"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/ency/article/003356.htm"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/gastrointestinal-disorders/acute-abdomen-and-surgical-gastroenterology/appendicitis?query=appendicitis"
+        }
+      ]
+    },
+    {
+      "id": "pra5-lamina-2",
+      "practico": "pra5.html",
+      "indiceEnPractico": 1,
+      "unidadNumero": "II",
+      "unidadNombre": "Inflamación",
+      "temaId": "inflamacion-aguda-cronica",
+      "temaNombre": "Inflamación Aguda y Crónica",
+      "title": "Lámina 2: Cirrosis hepática",
+      "concept": "INFLAMACIÓN CRÓNICA",
+      "clinical": {
+        "patient": "Mujer de 47 años. Antecedentes de hepatitis B crónica diagnosticada hace 20 años y transplante ortotópico",
+        "symptoms": "Presenta fatiga, ictericia progresiva y molestias abdominales en el cuadrante superior derecho durante los últimos seis meses. Sin antecedentes de consumo problemático de alcohol ni obesidad.",
+        "labs": "Bilirrubina total 3.2 mg/dL (vr: 0.1-1.2 mg/dL), AST 85 U/L (vr: 10-40 U/L), ALT 78 U/L (vr: 7-56 U/L), Albúmina 2.8 g/dL (vr: 3.5-5.0 g/dL)., INR: 1.6 (vr: 0.8-1.2)., Ecografía abdominal: Hígado de contornos irregulares con aumento de la ecogenicidad, signos de hipertensión portal, y esplenomegalia."
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a inflamación crónica reconoce?",
+        "Describa el mecanismo fisiopatológico asociado a este caso particular"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FUndergraduate%2F1061.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-126b-liver/15-slide-1.html?x=30667&y=15752&z=15.90"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/lab-tests/prothrombin-time-test-and-inr-ptinr/"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/hepatic-and-biliary-disorders/hepatitis/hepatitis-b-chronic"
+        }
+      ]
+    },
+    {
+      "id": "pra6-lamina-1",
+      "practico": "pra6.html",
+      "indiceEnPractico": 0,
+      "unidadNumero": "III",
+      "unidadNombre": "Neoplasias",
+      "temaId": "neoplasias-benignas",
+      "temaNombre": "Neoplasias Benignas",
+      "title": "Lámina 1: Fibroadenoma de mama",
+      "concept": "NEOPLASIA BENIGNA FIBROEPITELIAL",
+      "clinical": {
+        "patient": "Mujer de 28 años, madre de lactante de 14 meses.",
+        "symptoms": "Nódulo palpable en cuadrante superoexterno de mama izquierda, móvil, bien delimitado, no doloroso. Aparición hace 8 meses con crecimiento lento progresivo",
+        "labs": "Mamografía: nódulo bien circunscrito. Ecografía: masa hipoecogénica homogénea con márgenes regulares."
+      },
+      "questions": [
+        "Describa las características histológicas de esta muestra ¿Qué componentes tisulares identifica?",
+        "Identifique las características de benignidad presentes en la muestra",
+        "Relacione los hallazgos microscópicos con las características clínicas y de imagen"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEQA%2FGeneral_Histopathology%2FHisto_EQA_CircU%2F125127.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-174a-mammary-gland/18-slide-1.html?x=11961&y=17023&z=2.62"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/ency/article/007216.htm"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/gynecology-and-obstetrics/breast-disorders/breast-masses-breast-lumps?query=fibroadenoma"
+        }
+      ]
+    },
+    {
+      "id": "pra6-lamina-2",
+      "practico": "pra6.html",
+      "indiceEnPractico": 1,
+      "unidadNumero": "III",
+      "unidadNombre": "Neoplasias",
+      "temaId": "neoplasias-benignas",
+      "temaNombre": "Neoplasias Benignas",
+      "title": "Lámina 2: Polipo adenomatoso",
+      "concept": "NEOPLASIA BENIGNA EPITELIAL",
+      "clinical": {
+        "patient": "Mujer de 49 años",
+        "symptoms": "Dolor abdominal intermitente, distensión abdominal, cambios en hábito intestinal con diarrea alternada con estreñimiento. Pérdida de peso de 4 kg en 6 meses. Heces más delgadas de lo normal.",
+        "labs": "Colonoscopía: lesión obstructiva en flexura esplénica del colon + múltiples pólipos distribuidos en todo el colon."
+      },
+      "questions": [
+        "Describa las características histológicas de esta muestra ¿Qué características de benignidad logra observar?",
+        "Relacione los antecedentes clínicos de este paciente con los hallazgos observados en la muestra",
+        "¿Qué estudio genético sería relevante realizar en este caso?",
+        "¿Qué complicaciones podría desarrollar este paciente?"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FTeaching%2FMFD_GI%2FColon%2F6334.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-123-colon/14-slide-1.html?x=32225&y=8989&z=3.30"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/colonicpolyps.html"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/gastrointestinal-disorders/tumors-of-the-gastrointestinal-tract/familial-adenomatous-polyposis?query=poliposis%20adenomatosa%20familiar"
+        }
+      ]
+    },
+    {
+      "id": "pra6-lamina-3",
+      "practico": "pra6.html",
+      "indiceEnPractico": 2,
+      "unidadNumero": "III",
+      "unidadNombre": "Neoplasias",
+      "temaId": "neoplasias-benignas",
+      "temaNombre": "Neoplasias Benignas",
+      "title": "Lámina 3: Leiomioma Cutáneo",
+      "concept": "NEOPLASIA BENIGNA DE MÚSCULO LISO",
+      "clinical": {
+        "patient": "Hombre de 25 años. Antecedentes familiares de leiomioma uterino (madre)",
+        "symptoms": "Biopsia excisional de nódulo cutáneo doloroso en pierna derecha. Nódulo móvil al examen físico. Sin cambios de coloración, sangrado, ulceración o prurito. Antecedentes de nódulos cutáneos desde los 15 años. Paciente niega síntomas sistémicos como fiebre, pérdida de peso o malestar general",
+        "labs": "Resultados de pruebas genéticas en espera"
+      },
+      "questions": [
+        "Describa las características histológicas de esta muestra ¿Qué características de benignidad logra observar?",
+        "Relacione los antecedentes clínicos de este paciente con los hallazgos observados en la muestra",
+        "¿Qué test genético se le ordenó al paciente?",
+        "¿Qué complicaciones podría desarrollar este paciente?"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEQA%2FSkin%2FBSD_self_assessment%2F2014_06_30%2F256160.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-090-thin-skin/11-slide-1.html?x=13296&y=4184&z=29.80"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/genetics/condition/hereditary-leiomyomatosis-and-renal-cell-cancer/#resources"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.cancer.gov/publications/dictionaries/cancer-terms/def/hlrcc"
+        }
+      ]
+    },
+    {
+      "id": "pra7-lamina-1",
+      "practico": "pra7.html",
+      "indiceEnPractico": 0,
+      "unidadNumero": "III",
+      "unidadNombre": "Neoplasias",
+      "temaId": "neoplasias-malignas",
+      "temaNombre": "Neoplasias Malignas",
+      "title": "Lámina 1: Adenocarcinoma de colon",
+      "concept": "NEOPLASIA MALIGNA EPITELIAL",
+      "clinical": {
+        "patient": "Hombre de 60 años",
+        "symptoms": "Presenta dolor abdominal persistente, acompañado de cambios en el hábito intestinal en los últimos meses, con predominio de estreñimiento. Ha experimentado una pérdida de peso de 5 kg en los últimos 4 meses sin modificaciones en su dieta.",
+        "labs": "Colonoscopía: lesión infiltrativa. Análisis genético: Mutación G12D en KRAS"
+      },
+      "questions": [
+        "Describa las características histológicas de esta muestra ¿Qué características de malignidad logra observar?",
+        "Compare con la lámina del pólipo adenomatoso, que diferencias relevantes observa",
+        "Investigue la función de KRAS y explique la importancia de su estudio en el cancer de colon"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FUndergraduate%2F1485.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-123-colon/14-slide-1.html?x=32225&y=8989&z=3.30"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/lab-tests/fecal-occult-blood-test-fobt/"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://bpsbioscience.com/research-areas/ras"
+        }
+      ]
+    },
+    {
+      "id": "pra7-lamina-2",
+      "practico": "pra7.html",
+      "indiceEnPractico": 1,
+      "unidadNumero": "III",
+      "unidadNombre": "Neoplasias",
+      "temaId": "neoplasias-malignas",
+      "temaNombre": "Neoplasias Malignas",
+      "title": "Lámina 2: Leiomiosarcoma cutáneo grado 1",
+      "concept": "NEOPLASIA MALIGNA DE MÚSCULO LISO",
+      "clinical": {
+        "patient": "Hombre de 39 años.",
+        "symptoms": "Biopsia excisional de masa sospechosa, no móvil, localizada en hombro izquierdo",
+        "labs": "Se solicita estudio de inmunohistoquímica (IHQ)"
+      },
+      "questions": [
+        "Describa las características histológicas de esta muestra ¿Qué características de malignidad logra observar?",
+        "Compare con la lámina del leiomioma, que diferencias relevantes observa",
+        "¿Qué significa que este tumor sea de grado histológico 1?",
+        "¿Cuál es el origen histológico de este tumor? Indique un marcador de IHQ que permita demostrarlo"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FSlide_Library%2FSara_Edward%2FSet_6%2F122820.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-090-thin-skin/11-slide-1.html?x=13296&y=4184&z=29.80"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://www.pathologyoutlines.com/topic/softtissuesmoothmuscle.html"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.cancer.gov/about-cancer/diagnosis-staging/diagnosis/tumor-grade"
+        }
+      ]
+    },
+    {
+      "id": "pra8-lamina-1",
+      "practico": "pra8.html",
+      "indiceEnPractico": 0,
+      "unidadNumero": "IV",
+      "unidadNombre": "Trastornos Circulatorios",
+      "temaId": "trombosis-infarto",
+      "temaNombre": "Trombosis e Infarto",
+      "title": "Lámina 1: Cerebro",
+      "concept": "ACV",
+      "clinical": {
+        "patient": "Mujer de 53 años de edad. Presento dolor de cabeza de comienzo suave hasta convertirse en insoportable y punzante, de acuerdo con su relato",
+        "symptoms": "La paciente relata hipertensión arterial y dislipidemia, las que controla pobremenTe con dieta y farmacos. Su marido relata qu e se encuentra tomando haciendo dieta y tomando unas pastillas para bajar de peso, las qué resultan contener fentermina.",
+        "labs": "AngioCT en estudio"
+      },
+      "questions": [
+        "Describa la etiología de la lesión",
+        "Carácterísticas del cuadro clínico",
+        "Características histopatológicas de este infarto, indicando aquellas que más lo distinguen deDetalle las principales diferencias de los tipos de ateromas",
+        "Respecto del proceso de reparación del tejido, describa el mecanismo más relevante y su resultado"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FTeaching%2FNeuropathology%2FVascular_diseases%2F438110.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MHS-283-brain/06-slide-1.html?x=31289&y=7644&z=25.0"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4011567/"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.radiologyinfo.org/es/info/angioct"
+        }
+      ]
+    },
+    {
+      "id": "pra8-lamina-2",
+      "practico": "pra8.html",
+      "indiceEnPractico": 1,
+      "unidadNumero": "IV",
+      "unidadNombre": "Trastornos Circulatorios",
+      "temaId": "trombosis-infarto",
+      "temaNombre": "Trombosis e Infarto",
+      "title": "Lámina 2: Aorta Abdominal",
+      "concept": "ATEROMA",
+      "clinical": {
+        "patient": "Hombre de 61 años de edad. Presenta vértigo acompañado de náuseas y vómitos.",
+        "symptoms": "El dolor inicio aproximadamente 6 horas de forma repentina e intensa que varía entre la zona abdominal y costados.",
+        "labs": "Resonancia magnética: Trombosis por placa ateromatosa de aorta abdominal"
+      },
+      "questions": [
+        "Describa la etiología de la lesión",
+        "Mencione las características histopatológica del cuadro clínico",
+        "Detalle las principales diferencias de los tipos de ateromas",
+        "Mencione cronológicamente los mecanismos de reparación de la lesión"
+      ],
+      "links": [
+        {
+          "label": "Caso Clínico",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FTeaching%2FNeuropathology%2FVascular_diseases%2F438085.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-065-066-aorta-and-vena-cava/09-slide-1.html?x=46073&y=50180&z=10.0"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://www.msdmanuals.com/es/professional/temas-especiales/principios-de-estudios-por-la-imagen-radiol%C3%B3gicas/resonancia-magn%C3%A9tica"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/es/professional/trastornos-cardiovasculares/arteriosclerosis/aterosclerosis"
+        }
+      ]
+    }
+  ]
+}.laminas;
 
 function validateSlide(slide) {
   const c = slide.content || {};
@@ -177,6 +1001,8 @@ let state = {
 
 let activeTab = 'general';
 let editingIndex = null;
+let libraryOpen = false;
+let libraryFilter = '';
 
 function loadDraft() {
   try {
@@ -226,7 +1052,7 @@ function csvToList(txt) { return txt.split(',').map(s=>s.trim()).filter(Boolean)
 const TABS = [
   {id:'general', label:'1. Información General', icon:'settings'},
   {id:'contenidos', label:'2. Contenidos', icon:'book-open'},
-  {id:'laminas', label:'3. Láminas', icon:'layers'},
+  {id:'laminas', label:'3. Secciones', icon:'layers'},
   {id:'generar', label:'4. Generar', icon:'download'}
 ];
 
@@ -238,7 +1064,7 @@ function render() {
     </button>
   `).join('');
   nav.querySelectorAll('[data-tab]').forEach(btn => {
-    btn.addEventListener('click', () => { activeTab = btn.dataset.tab; editingIndex = null; render(); });
+    btn.addEventListener('click', () => { activeTab = btn.dataset.tab; editingIndex = null; libraryOpen = false; render(); });
   });
 
   const content = document.getElementById('tabContent');
@@ -352,15 +1178,28 @@ function renderTabLaminas() {
   if (editingIndex !== null && state.slides[editingIndex]) {
     return renderSlideEditor(editingIndex);
   }
+  if (libraryOpen) {
+    return renderLibraryBrowser();
+  }
+  const featured = SLIDE_TYPES.find(t => t.featured);
+  const rest = SLIDE_TYPES.filter(t => !t.featured);
   return `
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-lg font-bold text-gray-800">Láminas del práctico (${state.slides.length})</h2>
+      <h2 class="text-lg font-bold text-gray-800">Secciones del práctico (${state.slides.length})</h2>
     </div>
     <div id="slideList" class="space-y-2 mb-6"></div>
     <div class="border-t pt-4">
-      <p class="field-label mb-2">Agregar lámina</p>
+      <p class="field-label mb-2">Agregar sección</p>
+      <button class="type-btn rounded-lg p-4 mb-3 w-full flex items-center gap-3 text-left" style="border-width:2px; border-color:#c4b5fd; background:#f5f3ff;" data-add-type="${featured.id}">
+        <i data-lucide="${featured.icon}" class="w-6 h-6 text-purple-700 flex-shrink-0"></i>
+        <div>
+          <span class="block text-sm font-bold text-purple-800">${featured.label}</span>
+          <span class="block text-xs text-purple-600">El corazón del práctico — elige de la biblioteca o crea una nueva</span>
+        </div>
+      </button>
+      <p class="field-label mb-2 mt-4">Otras secciones (contexto y andamiaje)</p>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-2" id="addSlideGrid">
-        ${SLIDE_TYPES.map(t => `
+        ${rest.map(t => `
           <button class="type-btn rounded-lg p-3 text-left flex items-center gap-2" data-add-type="${t.id}">
             <i data-lucide="${t.icon}" class="w-5 h-5 text-purple-600 flex-shrink-0"></i>
             <span class="text-sm text-gray-700">${t.label}</span>
@@ -371,11 +1210,95 @@ function renderTabLaminas() {
   `;
 }
 
+function renderLibraryBrowser() {
+  const filter = (libraryFilter || '').toLowerCase().trim();
+  const matches = (l) => !filter || (l.title + ' ' + (l.concept||'') + ' ' + (l.temaNombre||'')).toLowerCase().includes(filter);
+
+  let html = '';
+  CURRICULUM_TAXONOMY.unidades.forEach(u => {
+    const temasConCasos = u.temas.filter(t => LAMINAS_BANK.some(l => l.temaId === t.id && matches(l)));
+    if (!temasConCasos.length) return;
+    html += `<div class="mb-5"><p class="text-xs font-bold text-purple-700 uppercase tracking-wide mb-2">Unidad ${u.numero}: ${u.nombre}</p>`;
+    temasConCasos.forEach(t => {
+      const laminas = LAMINAS_BANK.filter(l => l.temaId === t.id && matches(l));
+      html += `<p class="text-xs text-gray-500 mb-1 ml-1">${t.nombre}</p><div class="grid md:grid-cols-2 gap-2 mb-3">`;
+      laminas.forEach(l => {
+        html += `
+          <div class="border rounded-lg p-3 bg-gray-50 flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-sm font-semibold text-gray-800 truncate">${escHtml(l.title)}</p>
+              <p class="text-xs text-gray-500 truncate">${escHtml(l.clinical ? l.clinical.patient : '')}</p>
+            </div>
+            <button class="flex-shrink-0 bg-purple-600 hover:bg-purple-700 text-white text-xs px-2 py-1.5 rounded font-medium" data-pick-lamina="${l.id}">+ Agregar</button>
+          </div>`;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  if (!html) html = '<p class="text-sm text-gray-400">Sin resultados para ese filtro.</p>';
+
+  return `
+    <div class="flex items-center gap-2 mb-4">
+      <button id="btnVolverDeLibreria" class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+      <h2 class="text-lg font-bold text-gray-800">Elegir lámina de la biblioteca (${LAMINAS_BANK.length} casos)</h2>
+    </div>
+    <div class="flex gap-2 mb-4">
+      <input class="field-input" id="libraryFilterInput" placeholder="Buscar por tema, concepto o título..." value="${escAttr(libraryFilter||'')}">
+      <button id="btnCrearLaminaBlanco" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">+ Nueva en blanco</button>
+    </div>
+    <div class="max-h-[55vh] overflow-y-auto pr-1">${html}</div>
+  `;
+}
+
+function refreshLibraryBrowser() {
+  const content = document.getElementById('tabContent');
+  content.innerHTML = renderLibraryBrowser();
+  wireLibraryBrowserEvents();
+  lucide.createIcons();
+  const inp = document.getElementById('libraryFilterInput');
+  if (inp) { inp.focus(); const p = inp.value.length; inp.setSelectionRange(p, p); }
+}
+
+function wireLibraryBrowserEvents() {
+  const filterInput = document.getElementById('libraryFilterInput');
+  if (filterInput) {
+    filterInput.addEventListener('input', () => {
+      libraryFilter = filterInput.value;
+      refreshLibraryBrowser();
+    });
+  }
+  document.querySelectorAll('[data-pick-lamina]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const bankItem = LAMINAS_BANK.find(l => l.id === btn.dataset.pickLamina);
+      if (!bankItem) return;
+      const content = JSON.parse(JSON.stringify({
+        title: bankItem.title, concept: bankItem.concept, clinical: bankItem.clinical,
+        questions: bankItem.questions, links: bankItem.links
+      }));
+      state.slides.push({type: 'case', content});
+      libraryOpen = false;
+      saveDraft();
+      render();
+    });
+  });
+  const btnVolver = document.getElementById('btnVolverDeLibreria');
+  if (btnVolver) btnVolver.addEventListener('click', () => { libraryOpen = false; render(); });
+  const btnBlanco = document.getElementById('btnCrearLaminaBlanco');
+  if (btnBlanco) btnBlanco.addEventListener('click', () => {
+    state.slides.push({type: 'case', content: defaultContent('case')});
+    libraryOpen = false;
+    editingIndex = state.slides.length - 1;
+    saveDraft();
+    render();
+  });
+}
+
 function renderSlideList() {
   const wrap = document.getElementById('slideList');
   if (!wrap) return;
   if (state.slides.length === 0) {
-    wrap.innerHTML = '<p class="text-sm text-gray-400">Aún no hay láminas. Agrega una abajo.</p>';
+    wrap.innerHTML = '<p class="text-sm text-gray-400">Aún no hay secciones. Agrega una abajo.</p>';
     return;
   }
   wrap.innerHTML = state.slides.map((s,i) => {
@@ -1639,11 +2562,19 @@ function wireTabEvents() {
       if (btnVolver) btnVolver.addEventListener('click', () => { editingIndex = null; render(); });
       const btnGuardar = document.getElementById('btnGuardarLamina');
       if (btnGuardar) btnGuardar.addEventListener('click', () => { editingIndex = null; saveDraft(); render(); });
+    } else if (libraryOpen) {
+      wireLibraryBrowserEvents();
     } else {
       renderSlideList();
       document.querySelectorAll('[data-add-type]').forEach(btn => {
         btn.addEventListener('click', () => {
           const type = btn.dataset.addType;
+          if (type === 'case' && LAMINAS_BANK.length) {
+            libraryOpen = true;
+            libraryFilter = '';
+            render();
+            return;
+          }
           state.slides.push({type, content: defaultContent(type)});
           editingIndex = state.slides.length - 1;
           saveDraft();
@@ -1654,7 +2585,7 @@ function wireTabEvents() {
   }
   else if (activeTab === 'generar') {
     const frame = document.getElementById('previewFrame');
-    if (frame) frame.srcdoc = state.slides.length ? generateFullHTML() : '<p style="font-family:sans-serif;padding:2rem;color:#666">Agrega al menos una lámina en la pestaña "3. Láminas" para ver la vista previa.</p>';
+    if (frame) frame.srcdoc = state.slides.length ? generateFullHTML() : '<p style="font-family:sans-serif;padding:2rem;color:#666">Agrega al menos una sección en la pestaña "3. Secciones" para ver la vista previa.</p>';
     const btnUpd = document.getElementById('btnActualizarPreview');
     if (btnUpd) btnUpd.addEventListener('click', () => { frame.srcdoc = generateFullHTML(); });
     const btnDl = document.getElementById('btnDescargar');

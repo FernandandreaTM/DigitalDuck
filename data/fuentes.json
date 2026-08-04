@@ -1,0 +1,40 @@
+{
+  "_nota": "Catálogo de fuentes externas usadas en DigitalDuck. DigitalDuck no es autor de este material: solo lo referencia con fines educativos. Robbins y Cotran corresponde a la bibliografía obligatoria del programa ETMP148.",
+  "fuentes": [
+    {
+      "id": "virtual-pathology-leeds",
+      "nombre": "Virtual Pathology Leeds",
+      "url": "https://www.virtualpathology.leeds.ac.uk/",
+      "tipo": "Láminas histológicas virtuales",
+      "descripcion": "Escaneos completos de láminas con contexto clínico, usado como fuente principal de casos."
+    },
+    {
+      "id": "histology-guide",
+      "nombre": "Histology Guide",
+      "url": "https://histologyguide.com/",
+      "tipo": "Histología normal de referencia",
+      "descripcion": "Láminas de histología normal para comparar con los hallazgos patológicos."
+    },
+    {
+      "id": "medlineplus",
+      "nombre": "MedlinePlus",
+      "url": "https://medlineplus.gov/",
+      "tipo": "Información clínica para pacientes",
+      "descripcion": "Contexto clínico accesible sobre las condiciones asociadas a cada caso."
+    },
+    {
+      "id": "msd-manuals",
+      "nombre": "MSD Manuals",
+      "url": "https://www.msdmanuals.com/professional/",
+      "tipo": "Referencia clínica profesional",
+      "descripcion": "Detalle clínico-profesional de las patologías correlacionadas con cada lámina."
+    },
+    {
+      "id": "robbins-cotran",
+      "nombre": "Robbins y Cotran — Patología Estructural y Funcional",
+      "url": "",
+      "tipo": "Bibliografía obligatoria (programa ETMP148)",
+      "descripcion": "Texto base del curso. Sin versión online de acceso abierto enlazada."
+    }
+  ]
+}

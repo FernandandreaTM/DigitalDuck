@@ -6,6 +6,7 @@ const NAV_LINKS = [
     { id: 'caracteristicas', label: 'CARACTERÍSTICAS' },
     { id: 'contenido', label: 'CONTENIDO' },
     { id: 'practicos', label: 'PRÁCTICOS' },
+    { id: 'docentes', label: 'DOCENTES' },
     { id: 'contacto', label: 'CONTACTO' }
 ];
 

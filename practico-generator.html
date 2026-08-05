@@ -948,6 +948,29 @@ function saveCustomQuestion(q) {
   if (!list.includes(q)) { list.push(q); localStorage.setItem(CUSTOM_QUESTIONS_KEY, JSON.stringify(list)); }
 }
 
+/* Fuentes externas recomendadas (data/fuentes.json). Son referenciales: el docente puede
+   usar otras. QUICK_LINKS agrega el home de cada una (en inglés) a los enlaces de una
+   lámina, para que el docente busque ahí el caso específico. FUENTES_ESTANDAR prellena
+   la bibliografía/recursos del práctico (pestaña 2) con las mismas fuentes. */
+const QUICK_LINKS = [
+  {label:'Caso Clínico', url:'https://www.virtualpathology.leeds.ac.uk/slides/library/', hint:'Virtual Pathology Leeds — busca el caso específico en su buscador'},
+  {label:'Histología Referencia', url:'https://histologyguide.com/', hint:'Histology Guide — histología normal de referencia'},
+  {label:'MedlinePlus', url:'https://medlineplus.gov/', hint:'Información clínica orientada al paciente (NLM)'},
+  {label:'MSD Manuals', url:'https://www.msdmanuals.com/professional', hint:'Manual clínico profesional'},
+  {label:'WebPath', url:'https://webpath.med.utah.edu/', hint:'U. of Utah — imágenes macro y micro con texto'},
+  {label:'PathologyOutlines', url:'https://www.pathologyoutlines.com/', hint:'Referencia por diagnóstico'}
+];
+const FUENTES_ESTANDAR = [
+  {name:'Virtual Pathology Leeds', url:'https://www.virtualpathology.leeds.ac.uk/', purpose:'Escaneos completos de láminas con contexto clínico, usado como fuente principal de casos.'},
+  {name:'Histology Guide', url:'https://histologyguide.com/', purpose:'Láminas de histología normal para comparar con los hallazgos patológicos.'},
+  {name:'MedlinePlus', url:'https://medlineplus.gov/', purpose:'Contexto clínico accesible sobre las condiciones asociadas a cada caso.'},
+  {name:'MSD Manuals', url:'https://www.msdmanuals.com/professional/', purpose:'Detalle clínico-profesional de las patologías correlacionadas con cada lámina.'},
+  {name:'WebPath', url:'https://webpath.med.utah.edu/', purpose:'Imágenes macroscópicas y microscópicas explicadas, buen complemento a las láminas de Leeds.'},
+  {name:'PathologyOutlines', url:'https://www.pathologyoutlines.com/', purpose:'Referencia por diagnóstico, con imágenes de apoyo.'},
+  {name:'Robbins y Cotran — Patología Estructural y Funcional', url:'', purpose:'Bibliografía obligatoria del programa ETMP148. Sin versión online de acceso abierto enlazada.'}
+];
+const KNOWN_CONCEPTS = Array.from(new Set(LAMINAS_BANK.map(l => l.concept).filter(Boolean))).sort();
+
 function validateSlide(slide) {
   const c = slide.content || {};
   const issues = [];
@@ -1183,7 +1206,8 @@ function renderQuickCase() {
     if (ftype === 'chiplist') {
       return `<div class="mb-3" data-qc-chipfield="${path}"><label class="field-label">${label}</label><div id="qcChipsBox_${path.replace(/\./g,'_')}"></div></div>`;
     }
-    return `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" data-qc-field="${path}" value="${escAttr(getPath(c, path))}"></div>`;
+    const listAttr = path === 'concept' ? ' list="conceptSuggestions"' : '';
+    return `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" data-qc-field="${path}" value="${escAttr(getPath(c, path))}"${listAttr}></div>`;
   }).join('');
 
   return `
@@ -1196,6 +1220,7 @@ function renderQuickCase() {
       ${fieldsHtml}
       <div class="mb-3 border-t pt-3">
         <label class="field-label mb-2">${objlist.label}</label>
+        <div id="qcQuickLinksBox"></div>
         <div id="qcObjlistItems"></div>
         <button id="qcBtnAddLink" class="mt-2 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1">
           <i data-lucide="plus" class="w-4 h-4"></i> Agregar enlace
@@ -1224,7 +1249,7 @@ function renderQuickCase() {
 function renderQcObjListItems() {
   const objlist = OBJLIST_FIELDS.case;
   const items = quickCase.links || (quickCase.links = []);
-  renderObjListItemsGeneric(items, objlist.fields, 'qcObjlistItems', saveQuickDraft);
+  renderLinksField(items, objlist.fields, 'qcQuickLinksBox', 'qcObjlistItems', saveQuickDraft);
 }
 
 function renderQcValidation() {
@@ -1358,9 +1383,15 @@ function renderTabContenidos() {
     <div class="mb-4">
       <label class="field-label mb-2">Bibliografía / Recursos</label>
       <div id="bibliografiaList" class="space-y-2"></div>
-      <button id="btnAddBib" class="mt-2 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1">
-        <i data-lucide="plus" class="w-4 h-4"></i> Agregar recurso
-      </button>
+      <div class="flex gap-3 mt-2 flex-wrap items-center">
+        <button id="btnAddBib" class="text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1">
+          <i data-lucide="plus" class="w-4 h-4"></i> Agregar recurso
+        </button>
+        <button id="btnUsarFuentesEstandar" class="text-sm text-blue-700 hover:text-blue-900 flex items-center gap-1">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Usar fuentes estándar
+        </button>
+      </div>
+      <p class="text-xs text-gray-500 mt-1">Prellena con las fuentes recomendadas (Leeds, Histology Guide, MedlinePlus, MSD Manuals, WebPath, PathologyOutlines, Robbins). Son referenciales — puedes editarlas o usar otras.</p>
     </div>
     <button id="btnAplicarContenidos" class="mt-3 bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
       <i data-lucide="check" class="w-4 h-4"></i> Aplicar a láminas de Objetivos y Recursos
@@ -1578,13 +1609,16 @@ function renderSlideEditor(i) {
     if (ftype === 'csv') {
       return `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" data-slide-field="${path}" data-slide-type="csv" value="${escAttr((val||[]).join(', '))}"></div>`;
     }
-    return `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" data-slide-field="${path}" data-slide-type="text" value="${escAttr(val)}"></div>`;
+    const listAttr = path === 'concept' ? ' list="conceptSuggestions"' : '';
+    return `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" data-slide-field="${path}" data-slide-type="text" value="${escAttr(val)}"${listAttr}></div>`;
   }).join('');
 
   let objlistHtml = '';
   if (objlist) {
+    const quickLinksBox = slide.type === 'case' ? `<div id="quickLinksBox"></div>` : '';
     objlistHtml = `<div class="mb-3 border-t pt-3">
       <label class="field-label mb-2">${objlist.label}</label>
+      ${quickLinksBox}
       <div id="objlistItems"></div>
       <button id="btnAddObjItem" class="mt-2 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1">
         <i data-lucide="plus" class="w-4 h-4"></i> Agregar ${objlist.itemLabel.toLowerCase()}
@@ -1658,7 +1692,41 @@ function renderObjListItems(i) {
   const objlist = OBJLIST_FIELDS[slide.type];
   if (!objlist) return;
   const items = slide.content[objlist.key] || (slide.content[objlist.key] = []);
-  renderObjListItemsGeneric(items, objlist.fields, 'objlistItems', saveDraft);
+  if (slide.type === 'case') {
+    renderLinksField(items, objlist.fields, 'quickLinksBox', 'objlistItems', saveDraft);
+  } else {
+    renderObjListItemsGeneric(items, objlist.fields, 'objlistItems', saveDraft);
+  }
+}
+
+/* Botones "+ Fuente" que agregan el enlace home de una fuente recomendada (referencial;
+   el docente puede usar otras). Se ocultan una vez agregadas para no duplicar. */
+function renderQuickLinkButtonsHTML(items) {
+  const present = new Set((items||[]).map(l => l.label));
+  const avail = QUICK_LINKS.filter(q => !present.has(q.label));
+  if (!avail.length) return '';
+  return `<div class="mb-2">
+    <p class="text-xs text-gray-500 mb-1">Fuentes rápidas (referenciales — agrega el home, tú buscas y ajustas el enlace al caso; puedes usar otras fuentes):</p>
+    <div class="flex flex-wrap gap-2">
+      ${avail.map(q => `<button data-quicklink="${escAttr(q.label)}" data-quicklink-url="${escAttr(q.url)}" title="${escAttr(q.hint)}" class="border border-blue-300 text-blue-700 hover:bg-blue-50 text-xs px-2.5 py-1 rounded-full">+ ${escHtml(q.label)}</button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderLinksField(items, fields, quickBoxId, objBoxId, persist) {
+  const onChange = () => { persist(); renderLinksField(items, fields, quickBoxId, objBoxId, persist); };
+  const quickBox = document.getElementById(quickBoxId);
+  if (quickBox) {
+    quickBox.innerHTML = renderQuickLinkButtonsHTML(items);
+    quickBox.querySelectorAll('[data-quicklink]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        items.push({label: btn.dataset.quicklink, url: btn.dataset.quicklinkUrl});
+        onChange();
+      });
+    });
+    lucide.createIcons();
+  }
+  renderObjListItemsGeneric(items, fields, objBoxId, onChange);
 }
 
 /* Campo de chips reutilizable (preguntas de análisis y, a futuro, otras listas cortas).
@@ -2823,6 +2891,14 @@ function wireTabEvents() {
     if (objText) objText.addEventListener('input', () => { state.objectives = textToList(objText.value); saveDraft(); });
     const btnAddBib = document.getElementById('btnAddBib');
     if (btnAddBib) btnAddBib.addEventListener('click', () => { state.bibliography.push({name:'',url:'',purpose:''}); renderBibliografiaList(); saveDraft(); });
+    const btnFuentes = document.getElementById('btnUsarFuentesEstandar');
+    if (btnFuentes) btnFuentes.addEventListener('click', () => {
+      const present = new Set(state.bibliography.map(b => b.name));
+      const nuevas = FUENTES_ESTANDAR.filter(f => !present.has(f.name)).map(f => ({...f}));
+      if (!nuevas.length) { alert('Ya están todas las fuentes estándar en la lista.'); return; }
+      state.bibliography.push(...nuevas);
+      renderBibliografiaList(); saveDraft();
+    });
     const btnAplicar = document.getElementById('btnAplicarContenidos');
     if (btnAplicar) btnAplicar.addEventListener('click', () => {
       upsertSlideOfType('objectives', {items: state.objectives.slice()});
@@ -2936,6 +3012,8 @@ document.getElementById('btnNuevo').addEventListener('click', () => {
 });
 
 /* ================= INIT ================= */
+
+document.body.insertAdjacentHTML('beforeend', '<datalist id="conceptSuggestions">' + KNOWN_CONCEPTS.map(c => `<option value="${escAttr(c)}">`).join('') + '</datalist>');
 
 loadDraft();
 loadQuickDraft();

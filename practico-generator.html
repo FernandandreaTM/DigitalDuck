@@ -90,17 +90,10 @@ const SIMPLE_FIELDS = {
   platform: [['title','Título','text'],['url','URL','text'],['features','Características (una por línea)','list']],
   tutorial: [['title','Título','text'],['steps','Pasos (uno por línea)','list']],
   activity: [['title','Título','text'],['instructions','Instrucciones (una por línea)','list']],
+  // Los campos de texto de 'case' (título, concepto, datos clínicos) tienen layout propio
+  // en renderCaseFields (columnas dobles). Aquí solo queda lo que sigue usando el renderer
+  // genérico de SIMPLE_FIELDS.
   case: [
-    ['title','Título (ej. Lámina 1: Metaplasia)','text'],
-    ['concept','Concepto clave (ej. METAPLASIA)','text'],
-    ['clinical.edad','Edad (opcional)','text'],
-    ['clinical.sexo','Sexo (opcional)','text'],
-    ['clinical.tipoBiopsia','Tipo de biopsia (opcional)','text'],
-    ['clinical.sitioBiopsia','Sitio de la biopsia (opcional)','text'],
-    ['clinical.patient','Paciente — texto libre (opcional si ya llenaste edad/sexo/sitio/tipo arriba)','text'],
-    ['clinical.symptoms','Síntomas','text'],
-    ['clinical.labs','Laboratorio','text'],
-    ['clinical.imagenologia','Estudios de imagen (opcional)','text'],
     ['questions','Preguntas de análisis','chiplist']
   ],
   comparison: [['title','Título','text'],['subtitle','Subtítulo','text'],['headers','Encabezados de columna (separados por coma)','csv']],
@@ -1011,6 +1004,19 @@ function composePatientLine(clinical) {
   return [base, bx].filter(Boolean).join(', ');
 }
 
+/* Laboratorio y Estudios de imagen admiten un link opcional (ej. al informe o la
+   imagen). Guardados como {value, url}; se acepta también el string legacy (láminas
+   antiguas) sin url. Mismas funciones duplicadas localmente dentro de getSlideHTML. */
+function labsFieldValue(v) { return (v && typeof v === 'object') ? (v.value || '') : (v || ''); }
+function labsFieldUrl(v) { return (v && typeof v === 'object') ? (v.url || '') : ''; }
+function ensureLabsShape(clinical) {
+  if (!clinical) return;
+  ['labs', 'imagenologia'].forEach(key => {
+    const v = clinical[key];
+    if (!v || typeof v !== 'object') clinical[key] = {value: labsFieldValue(v), url: ''};
+  });
+}
+
 function validateSlide(slide) {
   const c = slide.content || {};
   const issues = [];
@@ -1037,7 +1043,7 @@ function validateSlide(slide) {
         const cl = c.clinical;
         if (!cl.patient && !cl.edad && !cl.sexo && !cl.sitioBiopsia && !cl.tipoBiopsia) issues.push('Información del paciente');
         reqText(cl.symptoms,'Síntomas');
-        if (!cl.labs && !cl.imagenologia) issues.push('Laboratorio o estudios de imagen');
+        if (!labsFieldValue(cl.labs) && !labsFieldValue(cl.imagenologia)) issues.push('Laboratorio o estudios de imagen');
       } else issues.push('Información clínica');
       reqList(c.questions,'Preguntas'); reqList(c.links,'Enlaces');
       break;
@@ -1068,7 +1074,7 @@ function defaultContent(type) {
     case 'platform': return {title:'', url:'', features:[]};
     case 'tutorial': return {title:'', steps:[]};
     case 'activity': return {title:'', instructions:[]};
-    case 'case': return {title:'', concept:'', clinical:{patient:'', edad:'', sexo:'', tipoBiopsia:'', sitioBiopsia:'', symptoms:'', labs:'', imagenologia:''}, questions:[], links:[]};
+    case 'case': return {title:'', concept:'', clinical:{patient:'', edad:'', sexo:'', tipoBiopsia:'', sitioBiopsia:'', symptoms:'', labs:{value:'',url:''}, imagenologia:{value:'',url:''}}, questions:[], links:[]};
     case 'comparison': return {title:'', subtitle:'', headers:['Característica','Opción A','Opción B'], rows:[]};
     case 'assessment': return {title:'Evaluaciones Prácticas', items:[]};
     case 'resources': return {title:'Recursos del Curso', platforms:[]};
@@ -1246,7 +1252,7 @@ function renderQuickCase() {
   const simple = SIMPLE_FIELDS.case;
   const objlist = OBJLIST_FIELDS.case;
 
-  const fieldsHtml = simple.map(([path,label,ftype]) => {
+  const fieldsHtml = renderCaseFields(c, 'data-qc-field') + simple.map(([path,label,ftype]) => {
     if (ftype === 'chiplist') {
       return `<div class="mb-3" data-qc-chipfield="${path}"><label class="field-label">${label}</label><div id="qcChipsBox_${path.replace(/\./g,'_')}"></div></div>`;
     }
@@ -1260,7 +1266,7 @@ function renderQuickCase() {
       <h2 class="text-lg font-bold text-gray-800">Caso clínico rápido</h2>
     </div>
     <p class="text-sm text-gray-500 mb-4">Una sola lámina, lista para descargar, guardar o sumar a un práctico.</p>
-    <div class="max-w-2xl">
+    <div class="max-w-3xl">
       ${fieldsHtml}
       <div class="mb-3 border-t pt-3">
         <label class="field-label mb-2">${objlist.label}</label>
@@ -1271,7 +1277,7 @@ function renderQuickCase() {
         </button>
       </div>
     </div>
-    <div id="qcValidation" class="max-w-2xl"></div>
+    <div id="qcValidation" class="max-w-3xl"></div>
     <div class="flex gap-2 flex-wrap mt-4">
       <button id="qcBtnDescargarJSON" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
         <i data-lucide="file-json" class="w-4 h-4"></i> Descargar JSON de la lámina
@@ -1636,13 +1642,48 @@ function renderSlideList() {
   lucide.createIcons();
 }
 
+/* Layout dedicado del tipo 'case': agrupa edad/sexo y tipo/sitio de biopsia en la misma
+   fila, y laboratorio/imagenología junto a su link opcional, para no alargar tanto el
+   formulario. fieldAttr es 'data-slide-field' (editor completo) o 'data-qc-field' (caso
+   rápido) — ambos wiring loops ya existen y leen ese atributo, no hace falta cablear nada
+   nuevo aquí. */
+function renderCaseFields(content, fieldAttr) {
+  if (!content.clinical) content.clinical = {};
+  ensureLabsShape(content.clinical);
+  const val = (path) => escAttr(getPath(content, path) || '');
+  const dl = (path) => DATALIST_FOR_PATH[path] ? ` list="${DATALIST_FOR_PATH[path]}"` : '';
+  const field = (path, label) => `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" ${fieldAttr}="${path}" data-slide-type="text"${dl(path)} value="${val(path)}"></div>`;
+  return `
+    ${field('title', 'Título (ej. Lámina 1: Metaplasia)')}
+    ${field('concept', 'Concepto clave (ej. METAPLASIA)')}
+    <div class="grid md:grid-cols-2 gap-x-3">
+      ${field('clinical.edad', 'Edad (opcional)')}
+      ${field('clinical.sexo', 'Sexo (opcional)')}
+    </div>
+    <div class="grid md:grid-cols-2 gap-x-3">
+      ${field('clinical.tipoBiopsia', 'Tipo de biopsia (opcional)')}
+      ${field('clinical.sitioBiopsia', 'Sitio de la biopsia (opcional)')}
+    </div>
+    ${field('clinical.patient', 'Paciente — texto libre (opcional si ya llenaste edad/sexo/sitio/tipo arriba)')}
+    ${field('clinical.symptoms', 'Síntomas')}
+    <div class="grid md:grid-cols-3 gap-x-3">
+      <div class="md:col-span-2">${field('clinical.labs.value', 'Laboratorio')}</div>
+      ${field('clinical.labs.url', 'Link (opcional)')}
+    </div>
+    <div class="grid md:grid-cols-3 gap-x-3">
+      <div class="md:col-span-2">${field('clinical.imagenologia.value', 'Estudios de imagen (opcional)')}</div>
+      ${field('clinical.imagenologia.url', 'Link (opcional)')}
+    </div>
+  `;
+}
+
 function renderSlideEditor(i) {
   const slide = state.slides[i];
   const typeInfo = SLIDE_TYPES.find(t => t.id === slide.type);
   const simple = SIMPLE_FIELDS[slide.type] || [];
   const objlist = OBJLIST_FIELDS[slide.type];
 
-  let fieldsHtml = simple.map(([path,label,ftype]) => {
+  let fieldsHtml = (slide.type === 'case' ? renderCaseFields(slide.content, 'data-slide-field') : '') + simple.map(([path,label,ftype]) => {
     const val = getPath(slide.content, path);
     if (ftype === 'chiplist') {
       return `<div class="mb-3" data-chipfield="${path}"><label class="field-label">${label}</label><div id="chipsBox_${path.replace(/\./g,'_')}"></div></div>`;
@@ -1687,7 +1728,7 @@ function renderSlideEditor(i) {
       <i data-lucide="${typeInfo.icon}" class="w-5 h-5 text-purple-600"></i>
       <h2 class="text-lg font-bold text-gray-800">Editando: ${typeInfo.label} (lámina ${i+1})</h2>
     </div>
-    <div class="max-w-2xl">
+    <div class="max-w-3xl">
       ${fieldsHtml}
       ${objlistHtml}
       ${comparisonHtml}
@@ -1935,6 +1976,10 @@ function getSlideHTML(slide) {
         else if (clinical.sitioBiopsia) bx = 'biopsia de ' + clinical.sitioBiopsia;
         return [base, bx].filter(Boolean).join(', ');
     }
+    // Copia local de labsFieldValue/labsFieldUrl (mismo motivo: getSlideHTML se embebe
+    // entera vía toString()). Acepta tanto {value,url} como el string legacy.
+    function fieldVal(v) { return (v && typeof v === 'object') ? (v.value || '') : (v || ''); }
+    function fieldUrl(v) { return (v && typeof v === 'object') ? (v.url || '') : ''; }
     switch(slide.type) {
         case 'title':
             return `
@@ -2200,7 +2245,10 @@ function getSlideHTML(slide) {
                     </div>
                 </div>`;
 
-        case 'case':
+        case 'case': {
+            const cl = slide.content.clinical || {};
+            const labsVal = fieldVal(cl.labs), labsLink = fieldUrl(cl.labs);
+            const imgVal = fieldVal(cl.imagenologia), imgLink = fieldUrl(cl.imagenologia);
             return `
                 <div class="h-full bg-gradient-to-br from-purple-50 to-indigo-50 md:overflow-y-hidden">
                     <div class="mobile-content md:hidden">
@@ -2238,8 +2286,8 @@ function getSlideHTML(slide) {
                                 <div class="space-y-2">
                                     <p class="mobile-small"><strong>Paciente:</strong> ${patientLine(slide.content.clinical)}</p>
                                     <p class="mobile-small"><strong>Síntomas:</strong> ${slide.content.clinical.symptoms}</p>
-                                    <p class="mobile-small"><strong>Laboratorio:</strong> ${slide.content.clinical.labs}</p>
-                                    ${slide.content.clinical.imagenologia ? `<p class="mobile-small"><strong>Estudios de imagen:</strong> ${slide.content.clinical.imagenologia}</p>` : ''}
+                                    ${labsVal || labsLink ? `<p class="mobile-small"><strong>Laboratorio:</strong> ${labsVal}${labsLink ? ` — <a href="${labsLink}" target="_blank" class="underline text-blue-700">ver</a>` : ''}</p>` : ''}
+                                    ${imgVal || imgLink ? `<p class="mobile-small"><strong>Estudios de imagen:</strong> ${imgVal}${imgLink ? ` — <a href="${imgLink}" target="_blank" class="underline text-blue-700">ver</a>` : ''}</p>` : ''}
                                 </div>
                             </div>
                             <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500">
@@ -2292,8 +2340,8 @@ function getSlideHTML(slide) {
                                 <div class="space-y-2">
                                     <p class="text-sm"><strong>Paciente:</strong> ${patientLine(slide.content.clinical)}</p>
                                     <p class="text-sm"><strong>Síntomas:</strong> ${slide.content.clinical.symptoms}</p>
-                                    <p class="text-sm"><strong>Laboratorio:</strong> ${slide.content.clinical.labs}</p>
-                                    ${slide.content.clinical.imagenologia ? `<p class="text-sm"><strong>Estudios de imagen:</strong> ${slide.content.clinical.imagenologia}</p>` : ''}
+                                    ${labsVal || labsLink ? `<p class="text-sm"><strong>Laboratorio:</strong> ${labsVal}${labsLink ? ` — <a href="${labsLink}" target="_blank" class="underline text-blue-700">ver</a>` : ''}</p>` : ''}
+                                    ${imgVal || imgLink ? `<p class="text-sm"><strong>Estudios de imagen:</strong> ${imgVal}${imgLink ? ` — <a href="${imgLink}" target="_blank" class="underline text-blue-700">ver</a>` : ''}</p>` : ''}
                                 </div>
                             </div>
                             <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500">
@@ -2312,6 +2360,7 @@ function getSlideHTML(slide) {
                         </div>
                     </div>
                 </div>`;
+        }
 
         case 'comparison':
             return `
@@ -2798,12 +2847,19 @@ function extractSlidesFromHTML(text) {
 function normalizeSlides(slides) {
   const legacyLabels = {caso:'Caso Clínico', histologia:'Histología Referencia', medline:'MedlinePlus', msd:'MSD Manuals'};
   return (slides||[]).map(s => {
-    if (s.type === 'case' && s.content && s.content.links && !Array.isArray(s.content.links)) {
-      const linksObj = s.content.links;
+    if (s.type !== 'case' || !s.content) return s;
+    let content = s.content;
+    if (content.links && !Array.isArray(content.links)) {
+      const linksObj = content.links;
       const newLinks = Object.keys(linksObj).map(k => ({label: legacyLabels[k] || k, url: linksObj[k]}));
-      return Object.assign({}, s, {content: Object.assign({}, s.content, {links: newLinks})});
+      content = Object.assign({}, content, {links: newLinks});
     }
-    return s;
+    if (content.clinical) {
+      const clinical = Object.assign({}, content.clinical);
+      ensureLabsShape(clinical);
+      content = Object.assign({}, content, {clinical});
+    }
+    return content === s.content ? s : Object.assign({}, s, {content});
   });
 }
 

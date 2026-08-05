@@ -90,7 +90,19 @@ const SIMPLE_FIELDS = {
   platform: [['title','Título','text'],['url','URL','text'],['features','Características (una por línea)','list']],
   tutorial: [['title','Título','text'],['steps','Pasos (uno por línea)','list']],
   activity: [['title','Título','text'],['instructions','Instrucciones (una por línea)','list']],
-  case: [['title','Título (ej. Lámina 1: Metaplasia)','text'],['concept','Concepto clave (ej. METAPLASIA)','text'],['clinical.patient','Paciente','text'],['clinical.symptoms','Síntomas','text'],['clinical.labs','Laboratorio / Exámenes','text'],['questions','Preguntas de análisis','chiplist']],
+  case: [
+    ['title','Título (ej. Lámina 1: Metaplasia)','text'],
+    ['concept','Concepto clave (ej. METAPLASIA)','text'],
+    ['clinical.edad','Edad (opcional)','text'],
+    ['clinical.sexo','Sexo (opcional)','text'],
+    ['clinical.tipoBiopsia','Tipo de biopsia (opcional)','text'],
+    ['clinical.sitioBiopsia','Sitio de la biopsia (opcional)','text'],
+    ['clinical.patient','Paciente — texto libre (opcional si ya llenaste edad/sexo/sitio/tipo arriba)','text'],
+    ['clinical.symptoms','Síntomas','text'],
+    ['clinical.labs','Laboratorio','text'],
+    ['clinical.imagenologia','Estudios de imagen (opcional)','text'],
+    ['questions','Preguntas de análisis','chiplist']
+  ],
   comparison: [['title','Título','text'],['subtitle','Subtítulo','text'],['headers','Encabezados de columna (separados por coma)','csv']],
   assessment: [['title','Título','text']],
   resources: [['title','Título','text']],
@@ -971,6 +983,34 @@ const FUENTES_ESTANDAR = [
 ];
 const KNOWN_CONCEPTS = Array.from(new Set(LAMINAS_BANK.map(l => l.concept).filter(Boolean))).sort();
 
+/* Sugerencias para los campos clínicos estructurados (todos opcionales). */
+const SEXO_SUGGESTIONS = ['Masculino', 'Femenino'];
+const BIOPSY_TYPES = ['Excisional', 'Incisional', 'Punch', 'TRUCUT (core)', 'PAAF (aguja fina)', 'Endoscópica', 'RTU (resección transuretral)', 'Pieza quirúrgica', 'Autopsia', 'Congelación'];
+const DATALIST_FOR_PATH = {
+  'concept': 'conceptSuggestions',
+  'clinical.sexo': 'sexoSuggestions',
+  'clinical.tipoBiopsia': 'biopsyTypeSuggestions'
+};
+
+/* Arma la línea de "Paciente" a partir de los campos clínicos estructurados (todos
+   opcionales); si ninguno está lleno, usa el texto libre (compatibilidad con las
+   láminas existentes, que solo tienen clinical.patient). Esta misma lógica está
+   duplicada, en forma local, dentro de getSlideHTML — ver comentario ahí. */
+function composePatientLine(clinical) {
+  if (!clinical) return '';
+  const structured = clinical.edad || clinical.sexo || clinical.sitioBiopsia || clinical.tipoBiopsia;
+  if (!structured) return clinical.patient || '';
+  let base = '';
+  if (clinical.sexo && clinical.edad) base = clinical.sexo + ' de ' + clinical.edad + ' años';
+  else if (clinical.sexo) base = clinical.sexo;
+  else if (clinical.edad) base = clinical.edad + ' años';
+  let bx = '';
+  if (clinical.tipoBiopsia && clinical.sitioBiopsia) bx = 'biopsia ' + clinical.tipoBiopsia + ' de ' + clinical.sitioBiopsia;
+  else if (clinical.tipoBiopsia) bx = 'biopsia ' + clinical.tipoBiopsia;
+  else if (clinical.sitioBiopsia) bx = 'biopsia de ' + clinical.sitioBiopsia;
+  return [base, bx].filter(Boolean).join(', ');
+}
+
 function validateSlide(slide) {
   const c = slide.content || {};
   const issues = [];
@@ -993,8 +1033,12 @@ function validateSlide(slide) {
       reqText(c.title,'Título'); reqList(c.instructions,'Instrucciones'); break;
     case 'case':
       reqText(c.title,'Título'); reqText(c.concept,'Concepto');
-      if (c.clinical) { reqText(c.clinical.patient,'Paciente'); reqText(c.clinical.symptoms,'Síntomas'); reqText(c.clinical.labs,'Laboratorio'); }
-      else issues.push('Información clínica');
+      if (c.clinical) {
+        const cl = c.clinical;
+        if (!cl.patient && !cl.edad && !cl.sexo && !cl.sitioBiopsia && !cl.tipoBiopsia) issues.push('Información del paciente');
+        reqText(cl.symptoms,'Síntomas');
+        if (!cl.labs && !cl.imagenologia) issues.push('Laboratorio o estudios de imagen');
+      } else issues.push('Información clínica');
       reqList(c.questions,'Preguntas'); reqList(c.links,'Enlaces');
       break;
     case 'comparison':
@@ -1024,7 +1068,7 @@ function defaultContent(type) {
     case 'platform': return {title:'', url:'', features:[]};
     case 'tutorial': return {title:'', steps:[]};
     case 'activity': return {title:'', instructions:[]};
-    case 'case': return {title:'', concept:'', clinical:{patient:'',symptoms:'',labs:''}, questions:[], links:[]};
+    case 'case': return {title:'', concept:'', clinical:{patient:'', edad:'', sexo:'', tipoBiopsia:'', sitioBiopsia:'', symptoms:'', labs:'', imagenologia:''}, questions:[], links:[]};
     case 'comparison': return {title:'', subtitle:'', headers:['Característica','Opción A','Opción B'], rows:[]};
     case 'assessment': return {title:'Evaluaciones Prácticas', items:[]};
     case 'resources': return {title:'Recursos del Curso', platforms:[]};
@@ -1206,7 +1250,7 @@ function renderQuickCase() {
     if (ftype === 'chiplist') {
       return `<div class="mb-3" data-qc-chipfield="${path}"><label class="field-label">${label}</label><div id="qcChipsBox_${path.replace(/\./g,'_')}"></div></div>`;
     }
-    const listAttr = path === 'concept' ? ' list="conceptSuggestions"' : '';
+    const listAttr = DATALIST_FOR_PATH[path] ? ` list="${DATALIST_FOR_PATH[path]}"` : '';
     return `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" data-qc-field="${path}" value="${escAttr(getPath(c, path))}"${listAttr}></div>`;
   }).join('');
 
@@ -1481,7 +1525,7 @@ function renderLibraryBrowser() {
           <div class="border rounded-lg p-3 bg-gray-50 flex items-start justify-between gap-2">
             <div class="min-w-0">
               <p class="text-sm font-semibold text-gray-800 truncate">${escHtml(l.title)}</p>
-              <p class="text-xs text-gray-500 truncate">${escHtml(l.clinical ? l.clinical.patient : '')}</p>
+              <p class="text-xs text-gray-500 truncate">${escHtml(composePatientLine(l.clinical))}</p>
             </div>
             <button class="flex-shrink-0 bg-purple-600 hover:bg-purple-700 text-white text-xs px-2 py-1.5 rounded font-medium" data-pick-lamina="${l.id}">+ Agregar</button>
           </div>`;
@@ -1609,7 +1653,7 @@ function renderSlideEditor(i) {
     if (ftype === 'csv') {
       return `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" data-slide-field="${path}" data-slide-type="csv" value="${escAttr((val||[]).join(', '))}"></div>`;
     }
-    const listAttr = path === 'concept' ? ' list="conceptSuggestions"' : '';
+    const listAttr = DATALIST_FOR_PATH[path] ? ` list="${DATALIST_FOR_PATH[path]}"` : '';
     return `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" data-slide-field="${path}" data-slide-type="text" value="${escAttr(val)}"${listAttr}></div>`;
   }).join('');
 
@@ -1875,6 +1919,22 @@ function getSlideHTML(slide) {
         {icon:'activity', color:'green'}, {icon:'clipboard-plus', color:'green'},
         {icon:'link', color:'blue'}, {icon:'globe', color:'blue'}
     ];
+    // Copia local de composePatientLine: esta función se embebe entera vía .toString()
+    // en el práctico generado, así que no puede depender de funciones externas.
+    function patientLine(clinical) {
+        if (!clinical) return '';
+        const structured = clinical.edad || clinical.sexo || clinical.sitioBiopsia || clinical.tipoBiopsia;
+        if (!structured) return clinical.patient || '';
+        let base = '';
+        if (clinical.sexo && clinical.edad) base = clinical.sexo + ' de ' + clinical.edad + ' años';
+        else if (clinical.sexo) base = clinical.sexo;
+        else if (clinical.edad) base = clinical.edad + ' años';
+        let bx = '';
+        if (clinical.tipoBiopsia && clinical.sitioBiopsia) bx = 'biopsia ' + clinical.tipoBiopsia + ' de ' + clinical.sitioBiopsia;
+        else if (clinical.tipoBiopsia) bx = 'biopsia ' + clinical.tipoBiopsia;
+        else if (clinical.sitioBiopsia) bx = 'biopsia de ' + clinical.sitioBiopsia;
+        return [base, bx].filter(Boolean).join(', ');
+    }
     switch(slide.type) {
         case 'title':
             return `
@@ -2176,9 +2236,10 @@ function getSlideHTML(slide) {
                                     <i data-lucide="user" class="w-5 h-5 mr-2"></i> Información Clínica
                                 </h3>
                                 <div class="space-y-2">
-                                    <p class="mobile-small"><strong>Paciente:</strong> ${slide.content.clinical.patient}</p>
+                                    <p class="mobile-small"><strong>Paciente:</strong> ${patientLine(slide.content.clinical)}</p>
                                     <p class="mobile-small"><strong>Síntomas:</strong> ${slide.content.clinical.symptoms}</p>
                                     <p class="mobile-small"><strong>Laboratorio:</strong> ${slide.content.clinical.labs}</p>
+                                    ${slide.content.clinical.imagenologia ? `<p class="mobile-small"><strong>Estudios de imagen:</strong> ${slide.content.clinical.imagenologia}</p>` : ''}
                                 </div>
                             </div>
                             <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500">
@@ -2229,9 +2290,10 @@ function getSlideHTML(slide) {
                                     <i data-lucide="user" class="w-5 h-5 mr-2"></i> Información Clínica
                                 </h3>
                                 <div class="space-y-2">
-                                    <p class="text-sm"><strong>Paciente:</strong> ${slide.content.clinical.patient}</p>
+                                    <p class="text-sm"><strong>Paciente:</strong> ${patientLine(slide.content.clinical)}</p>
                                     <p class="text-sm"><strong>Síntomas:</strong> ${slide.content.clinical.symptoms}</p>
                                     <p class="text-sm"><strong>Laboratorio:</strong> ${slide.content.clinical.labs}</p>
+                                    ${slide.content.clinical.imagenologia ? `<p class="text-sm"><strong>Estudios de imagen:</strong> ${slide.content.clinical.imagenologia}</p>` : ''}
                                 </div>
                             </div>
                             <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500">
@@ -3014,6 +3076,8 @@ document.getElementById('btnNuevo').addEventListener('click', () => {
 /* ================= INIT ================= */
 
 document.body.insertAdjacentHTML('beforeend', '<datalist id="conceptSuggestions">' + KNOWN_CONCEPTS.map(c => `<option value="${escAttr(c)}">`).join('') + '</datalist>');
+document.body.insertAdjacentHTML('beforeend', '<datalist id="sexoSuggestions">' + SEXO_SUGGESTIONS.map(c => `<option value="${escAttr(c)}">`).join('') + '</datalist>');
+document.body.insertAdjacentHTML('beforeend', '<datalist id="biopsyTypeSuggestions">' + BIOPSY_TYPES.map(c => `<option value="${escAttr(c)}">`).join('') + '</datalist>');
 
 loadDraft();
 loadQuickDraft();

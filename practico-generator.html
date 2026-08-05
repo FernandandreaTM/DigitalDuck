@@ -1112,17 +1112,21 @@ function composePatientLine(clinical) {
   return [base, bx].filter(Boolean).join(', ');
 }
 
-/* Laboratorio y Estudios de imagen admiten un link opcional (ej. al informe o la
-   imagen). Guardados como {value, url}; se acepta también el string legacy (láminas
-   antiguas) sin url. Mismas funciones duplicadas localmente dentro de getSlideHTML. */
-function labsFieldValue(v) { return (v && typeof v === 'object') ? (v.value || '') : (v || ''); }
-function labsFieldUrl(v) { return (v && typeof v === 'object') ? (v.url || '') : ''; }
+/* Laboratorio y Estudios de imagen son listas de resultados independientes, cada uno con
+   su link opcional (ej. al informe o la imagen), agregables uno por uno igual que los
+   enlaces. Se acepta también el string legacy y el objeto único {value,url} de láminas
+   antiguas, migrándolos a una lista de un elemento. Misma función duplicada localmente
+   dentro de getSlideHTML. */
+function labsToList(v) {
+  if (Array.isArray(v)) return v;
+  if (v && typeof v === 'object') return (v.value || v.url) ? [{value: v.value || '', url: v.url || ''}] : [];
+  if (v) return [{value: v, url: ''}];
+  return [];
+}
+function labsHasContent(list) { return (list||[]).some(e => (e.value||'').trim() || (e.url||'').trim()); }
 function ensureLabsShape(clinical) {
   if (!clinical) return;
-  ['labs', 'imagenologia'].forEach(key => {
-    const v = clinical[key];
-    if (!v || typeof v !== 'object') clinical[key] = {value: labsFieldValue(v), url: ''};
-  });
+  ['labs', 'imagenologia'].forEach(key => { clinical[key] = labsToList(clinical[key]); });
 }
 
 function validateSlide(slide) {
@@ -1154,7 +1158,7 @@ function validateSlide(slide) {
         const cl = c.clinical;
         if (!cl.patient && !cl.edad && !cl.sexo && !cl.sitioBiopsia && !cl.tipoBiopsia) issues.push('Información del paciente');
         reqText(cl.symptoms,'Síntomas');
-        if (!labsFieldValue(cl.labs) && !labsFieldValue(cl.imagenologia)) issues.push('Laboratorio o estudios de imagen');
+        if (!labsHasContent(labsToList(cl.labs)) && !labsHasContent(labsToList(cl.imagenologia))) issues.push('Laboratorio o estudios de imagen');
       } else issues.push('Información clínica');
       reqList(c.questions,'Preguntas'); reqList(c.links,'Enlaces');
       break;
@@ -1186,7 +1190,7 @@ function defaultContent(type) {
     case 'platform': return {title:'', url:'', features:[]};
     case 'tutorial': return {title:'', steps:[]};
     case 'activity': return {title:'', instructions:[]};
-    case 'case': return {title:'', concept:'', clinical:{patient:'', edad:'', sexo:'', tipoBiopsia:'', sitioBiopsia:'', symptoms:'', labs:{value:'',url:''}, imagenologia:{value:'',url:''}}, questions:[], links:[]};
+    case 'case': return {title:'', concept:'', clinical:{patient:'', edad:'', sexo:'', tipoBiopsia:'', sitioBiopsia:'', symptoms:'', labs:[], imagenologia:[]}, questions:[], links:[]};
     case 'comparison': return {title:'', subtitle:'', headers:['Característica','Opción A','Opción B'], rows:[]};
     case 'assessment': return {title:'Evaluaciones Prácticas', items:[]};
     case 'resources': return {title:'Recursos del Curso', platforms:[]};
@@ -1201,7 +1205,7 @@ const DRAFT_KEY = 'digitalduck_practico_draft';
 
 function emptyMeta() {
   return {title:'', courseLabel:'Patología Básica - UACh', date:'', instructor:'', email:'', office:'', hours:'',
-    indexIcon:'', indexMenuName:'', indexDescription:'', indexNum:''};
+    indexIcon:'', indexMenuName:'', indexDescription:'', indexNum:'', unidadNumero:'', temaId:''};
 }
 
 function starterSlides() {
@@ -1344,6 +1348,10 @@ function renderModeSelector() {
       <button id="btnDescartarBorrador" class="text-blue-700 underline text-xs whitespace-nowrap flex-shrink-0">Empezar de cero</button>
     </div>` : '';
   return `
+    <div class="max-w-3xl mx-auto mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-500 flex items-start gap-2">
+      <i data-lucide="info" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
+      <span>Este generador funciona en tu navegador: nada se publica en el sitio automáticamente. Los botones "Actualizar índice" y "Actualizar catálogo de láminas" descargan un archivo a tu computador — el cambio solo se ve en el sitio cuando alguien con acceso al repositorio lo sube.</span>
+    </div>
     ${draftNote}
     <div class="max-w-3xl mx-auto py-6">
       <h2 class="text-xl font-bold text-gray-800 text-center mb-2">¿Qué quieres crear?</h2>
@@ -1463,6 +1471,7 @@ function wireQuickCase() {
     renderChipsField(quickCase, path, 'qcChipsBox_' + path.replace(/\./g,'_'), saveQuickDraft, bank.presets, bank.customKey);
   });
   renderQcObjListItems();
+  wireCaseLabsFields(quickCase, 'data-qc-field', saveQuickDraft);
   document.getElementById('qcBtnAddLink').addEventListener('click', () => {
     (quickCase.links ||= []).push({label:'', url:''});
     saveQuickDraft(); renderQcObjListItems(); lucide.createIcons();
@@ -1542,6 +1551,27 @@ function renderTabGeneral() {
         <div><label class="field-label">Ícono (emoji)</label><input class="field-input" data-meta="indexIcon" value="${escAttr(m.indexIcon)}" placeholder="🔬"></div>
         <div><label class="field-label">Nombre corto (menú)</label><input class="field-input" data-meta="indexMenuName" value="${escAttr(m.indexMenuName)}" placeholder="Ej: Inflamación"></div>
         <div class="md:col-span-2"><label class="field-label">Descripción breve (tarjeta)</label><textarea class="field-input" rows="2" data-meta="indexDescription" placeholder="1-2 frases para la tarjeta del índice">${escHtml(m.indexDescription)}</textarea></div>
+      </div>
+    </div>
+
+    <div class="mt-8 pt-5 border-t">
+      <h3 class="text-sm font-bold text-gray-700 mb-1">Unidad temática (opcional, para el catálogo de láminas)</h3>
+      <p class="text-xs text-gray-500 mb-3">Se usa al agregar las láminas de tipo caso de este práctico al catálogo (pestaña 4. Generar). Todas heredan esta clasificación.</p>
+      <div class="grid md:grid-cols-2 gap-4 max-w-3xl">
+        <div>
+          <label class="field-label">Unidad</label>
+          <select class="field-input" data-meta="unidadNumero">
+            <option value="">— Selecciona —</option>
+            ${CURRICULUM_TAXONOMY.unidades.map(u => `<option value="${escAttr(u.numero)}" ${m.unidadNumero===u.numero?'selected':''}>${escHtml(u.numero + ' — ' + u.nombre)}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Tema</label>
+          <select class="field-input" data-meta="temaId" ${!m.unidadNumero ? 'disabled' : ''}>
+            <option value="">— Selecciona —</option>
+            ${((CURRICULUM_TAXONOMY.unidades.find(u => u.numero===m.unidadNumero)||{}).temas||[]).map(t => `<option value="${escAttr(t.id)}" ${m.temaId===t.id?'selected':''}>${escHtml(t.nombre)}</option>`).join('')}
+          </select>
+        </div>
       </div>
     </div>
   `;
@@ -1789,6 +1819,7 @@ function renderSlideList() {
 function renderCaseFields(content, fieldAttr) {
   if (!content.clinical) content.clinical = {};
   ensureLabsShape(content.clinical);
+  const suffix = fieldAttr === 'data-qc-field' ? 'qc' : 'full';
   const val = (path) => escAttr(getPath(content, path) || '');
   const dl = (path) => DATALIST_FOR_PATH[path] ? ` list="${DATALIST_FOR_PATH[path]}"` : '';
   const field = (path, label) => `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" ${fieldAttr}="${path}" data-slide-type="text"${dl(path)} value="${val(path)}"></div>`;
@@ -1805,15 +1836,47 @@ function renderCaseFields(content, fieldAttr) {
     </div>
     ${field('clinical.patient', 'Paciente — texto libre (opcional si ya llenaste edad/sexo/sitio/tipo arriba)')}
     ${field('clinical.symptoms', 'Síntomas')}
-    <div class="grid md:grid-cols-3 gap-x-3">
-      <div class="md:col-span-2">${field('clinical.labs.value', 'Laboratorio')}</div>
-      ${field('clinical.labs.url', 'Link (opcional)')}
+    <div class="mb-3">
+      <label class="field-label mb-2">Laboratorio (opcional, agrega los resultados que necesites)</label>
+      <div id="caseLabsBox_${suffix}"></div>
+      <button data-case-add-labs class="mt-1 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1"><i data-lucide="plus" class="w-4 h-4"></i> Agregar resultado</button>
     </div>
-    <div class="grid md:grid-cols-3 gap-x-3">
-      <div class="md:col-span-2">${field('clinical.imagenologia.value', 'Estudios de imagen (opcional)')}</div>
-      ${field('clinical.imagenologia.url', 'Link (opcional)')}
+    <div class="mb-3">
+      <label class="field-label mb-2">Estudios de imagen (opcional, agrega los que necesites)</label>
+      <div id="caseImgBox_${suffix}"></div>
+      <button data-case-add-img class="mt-1 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1"><i data-lucide="plus" class="w-4 h-4"></i> Agregar estudio</button>
     </div>
   `;
+}
+
+/* Solo redibuja las dos listas (llamable muchas veces sin duplicar listeners, mismo
+   patrón que renderObjListItemsGeneric: innerHTML se reemplaza completo cada vez). */
+function renderCaseLabsLists(content, fieldAttr, persist) {
+  const suffix = fieldAttr === 'data-qc-field' ? 'qc' : 'full';
+  const labsFields = [['value','Resultado'],['url','Link (opcional)']];
+  renderObjListItemsGeneric(content.clinical.labs, labsFields, 'caseLabsBox_' + suffix, persist);
+  renderObjListItemsGeneric(content.clinical.imagenologia, labsFields, 'caseImgBox_' + suffix, persist);
+}
+
+/* Wiring de las listas de laboratorio/imagenología de una lámina de caso; se llama UNA vez
+   después de insertar el HTML de renderCaseFields (editor completo o caso rápido) — los
+   botones "+ agregar" viven fuera de las listas regeneradas, así que se cablean acá y no
+   dentro de renderCaseLabsLists (que sí se puede llamar repetidas veces). */
+function wireCaseLabsFields(content, fieldAttr, persist) {
+  if (!content.clinical) return;
+  ensureLabsShape(content.clinical);
+  renderCaseLabsLists(content, fieldAttr, persist);
+  const btnAddLabs = document.querySelector(`[data-case-add-labs]`);
+  if (btnAddLabs) btnAddLabs.addEventListener('click', () => {
+    content.clinical.labs.push({value:'', url:''});
+    persist(); renderCaseLabsLists(content, fieldAttr, persist); lucide.createIcons();
+  });
+  const btnAddImg = document.querySelector(`[data-case-add-img]`);
+  if (btnAddImg) btnAddImg.addEventListener('click', () => {
+    content.clinical.imagenologia.push({value:'', url:''});
+    persist(); renderCaseLabsLists(content, fieldAttr, persist); lucide.createIcons();
+  });
+  lucide.createIcons();
 }
 
 function renderSlideEditor(i) {
@@ -1895,6 +1958,7 @@ function renderSlideEditor(i) {
 function renderObjListItemsGeneric(items, fields, wrapId, persist) {
   const wrap = document.getElementById(wrapId);
   if (!wrap) return;
+  const rerender = () => { renderObjListItemsGeneric(items, fields, wrapId, persist); lucide.createIcons(); };
   wrap.innerHTML = items.map((item, idx) => `
     <div class="bg-gray-50 p-3 rounded-lg mb-2 flex gap-2 items-start flex-wrap">
       ${fields.map(([key,label]) => `
@@ -1903,7 +1967,11 @@ function renderObjListItemsGeneric(items, fields, wrapId, persist) {
           <input class="field-input" data-oli-field="${idx}.${key}" value="${escAttr(item[key])}">
         </div>
       `).join('')}
-      <button class="p-2 text-red-500 hover:text-red-700 self-end" data-oli-remove="${idx}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+      <div class="flex gap-1 self-end">
+        <button class="p-2 text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed" data-oli-up="${idx}" ${idx===0?'disabled':''} title="Subir"><i data-lucide="chevron-up" class="w-4 h-4"></i></button>
+        <button class="p-2 text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed" data-oli-down="${idx}" ${idx===items.length-1?'disabled':''} title="Bajar"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
+        <button class="p-2 text-red-500 hover:text-red-700" data-oli-remove="${idx}" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+      </div>
     </div>
   `).join('') || '<p class="text-sm text-gray-400 mb-2">Sin elementos aún.</p>';
 
@@ -1914,12 +1982,26 @@ function renderObjListItemsGeneric(items, fields, wrapId, persist) {
       persist();
     });
   });
+  wrap.querySelectorAll('[data-oli-up]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = +btn.dataset.oliUp;
+      if (idx <= 0) return;
+      [items[idx-1], items[idx]] = [items[idx], items[idx-1]];
+      persist(); rerender();
+    });
+  });
+  wrap.querySelectorAll('[data-oli-down]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = +btn.dataset.oliDown;
+      if (idx >= items.length-1) return;
+      [items[idx+1], items[idx]] = [items[idx], items[idx+1]];
+      persist(); rerender();
+    });
+  });
   wrap.querySelectorAll('[data-oli-remove]').forEach(btn => {
     btn.addEventListener('click', () => {
       items.splice(+btn.dataset.oliRemove, 1);
-      persist();
-      renderObjListItemsGeneric(items, fields, wrapId, persist);
-      lucide.createIcons();
+      persist(); rerender();
     });
   });
   lucide.createIcons();
@@ -2233,7 +2315,16 @@ function renderTabGenerar() {
         <i data-lucide="list-plus" class="w-4 h-4"></i> Actualizar índice (practicos.html)
       </button>
       <input type="file" id="fileIndexInput" accept=".html,.htm" class="hidden">
+      <button id="btnActualizarLaminas" class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="library" class="w-4 h-4"></i> Actualizar catálogo de láminas (laminas.json)
+      </button>
+      <input type="file" id="fileLaminasInput" accept=".json" class="hidden">
     </div>
+    <p class="text-xs text-gray-500 mb-4 max-w-3xl">
+      Ambos botones funcionan igual: subes tu archivo local, el generador lo actualiza en tu navegador y te
+      descarga la versión nueva. Nada se publica automáticamente — reemplaza el archivo en tu carpeta del
+      proyecto y súbelo con git cuando quieras que el cambio sea visible en el sitio.
+    </p>
     <div class="border rounded-xl overflow-hidden" style="height:70vh;">
       <iframe id="previewFrame" class="w-full h-full" title="Vista previa"></iframe>
     </div>
@@ -2264,10 +2355,14 @@ function getSlideHTML(slide) {
         else if (clinical.sitioBiopsia) bx = 'biopsia de ' + clinical.sitioBiopsia;
         return [base, bx].filter(Boolean).join(', ');
     }
-    // Copia local de labsFieldValue/labsFieldUrl (mismo motivo: getSlideHTML se embebe
-    // entera vía toString()). Acepta tanto {value,url} como el string legacy.
-    function fieldVal(v) { return (v && typeof v === 'object') ? (v.value || '') : (v || ''); }
-    function fieldUrl(v) { return (v && typeof v === 'object') ? (v.url || '') : ''; }
+    // Copia local de labsToList (mismo motivo: getSlideHTML se embebe entera vía
+    // toString()). Acepta lista, objeto único {value,url} o string legacy.
+    function fieldList(v) {
+        if (Array.isArray(v)) return v.filter(function(e){ return (e.value||'').trim() || (e.url||'').trim(); });
+        if (v && typeof v === 'object') return (v.value || v.url) ? [{value: v.value || '', url: v.url || ''}] : [];
+        if (v) return [{value: v, url: ''}];
+        return [];
+    }
     switch(slide.type) {
         case 'flex': {
             const segs = slide.content.segments || [];
@@ -2588,8 +2683,13 @@ function getSlideHTML(slide) {
 
         case 'case': {
             const cl = slide.content.clinical || {};
-            const labsVal = fieldVal(cl.labs), labsLink = fieldUrl(cl.labs);
-            const imgVal = fieldVal(cl.imagenologia), imgLink = fieldUrl(cl.imagenologia);
+            const labsList = fieldList(cl.labs);
+            const imgList = fieldList(cl.imagenologia);
+            function labsListHTML(list) {
+                return list.map(function(e){
+                    return e.url ? (e.value + ' — <a href="' + e.url + '" target="_blank" class="underline text-blue-700">ver</a>') : e.value;
+                }).map(function(line){ return '<li>' + line + '</li>'; }).join('');
+            }
             return `
                 <div class="h-full bg-gradient-to-br from-purple-50 to-indigo-50 md:overflow-y-hidden">
                     <div class="mobile-content md:hidden">
@@ -2627,8 +2727,8 @@ function getSlideHTML(slide) {
                                 <div class="space-y-2">
                                     <p class="mobile-small"><strong>Paciente:</strong> ${patientLine(slide.content.clinical)}</p>
                                     <p class="mobile-small"><strong>Síntomas:</strong> ${slide.content.clinical.symptoms}</p>
-                                    ${labsVal || labsLink ? `<p class="mobile-small"><strong>Laboratorio:</strong> ${labsVal}${labsLink ? ` — <a href="${labsLink}" target="_blank" class="underline text-blue-700">ver</a>` : ''}</p>` : ''}
-                                    ${imgVal || imgLink ? `<p class="mobile-small"><strong>Estudios de imagen:</strong> ${imgVal}${imgLink ? ` — <a href="${imgLink}" target="_blank" class="underline text-blue-700">ver</a>` : ''}</p>` : ''}
+                                    ${labsList.length ? `<div class="mobile-small"><strong>Laboratorio:</strong><ul class="list-disc list-inside">${labsListHTML(labsList)}</ul></div>` : ''}
+                                    ${imgList.length ? `<div class="mobile-small"><strong>Estudios de imagen:</strong><ul class="list-disc list-inside">${labsListHTML(imgList)}</ul></div>` : ''}
                                 </div>
                             </div>
                             <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500">
@@ -2681,8 +2781,8 @@ function getSlideHTML(slide) {
                                 <div class="space-y-2">
                                     <p class="text-sm"><strong>Paciente:</strong> ${patientLine(slide.content.clinical)}</p>
                                     <p class="text-sm"><strong>Síntomas:</strong> ${slide.content.clinical.symptoms}</p>
-                                    ${labsVal || labsLink ? `<p class="text-sm"><strong>Laboratorio:</strong> ${labsVal}${labsLink ? ` — <a href="${labsLink}" target="_blank" class="underline text-blue-700">ver</a>` : ''}</p>` : ''}
-                                    ${imgVal || imgLink ? `<p class="text-sm"><strong>Estudios de imagen:</strong> ${imgVal}${imgLink ? ` — <a href="${imgLink}" target="_blank" class="underline text-blue-700">ver</a>` : ''}</p>` : ''}
+                                    ${labsList.length ? `<div class="text-sm"><strong>Laboratorio:</strong><ul class="list-disc list-inside">${labsListHTML(labsList)}</ul></div>` : ''}
+                                    ${imgList.length ? `<div class="text-sm"><strong>Estudios de imagen:</strong><ul class="list-disc list-inside">${labsListHTML(imgList)}</ul></div>` : ''}
                                 </div>
                             </div>
                             <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500">
@@ -3307,6 +3407,62 @@ function updateIndex(file) {
   reader.readAsText(file);
 }
 
+/* Convierte las láminas de tipo 'case' del práctico actual al formato de data/laminas.json.
+   Todas heredan la unidad/tema elegidos en "1. Información General". */
+function buildLaminaEntries() {
+  const practicoFile = slugify(state.meta.title) + '.html';
+  const unidad = CURRICULUM_TAXONOMY.unidades.find(u => u.numero === state.meta.unidadNumero);
+  const tema = unidad ? (unidad.temas || []).find(t => t.id === state.meta.temaId) : null;
+  return state.slides
+    .map((s, idx) => ({s, idx}))
+    .filter(({s}) => s.type === 'case')
+    .map(({s, idx}) => ({
+      id: practicoFile.replace('.html','') + '-lamina-' + (idx + 1),
+      practico: practicoFile,
+      indiceEnPractico: idx,
+      unidadNumero: state.meta.unidadNumero || '',
+      unidadNombre: unidad ? unidad.nombre : '',
+      temaId: state.meta.temaId || '',
+      temaNombre: tema ? tema.nombre : '',
+      title: s.content.title || '',
+      concept: s.content.concept || '',
+      clinical: s.content.clinical || {},
+      questions: s.content.questions || [],
+      links: s.content.links || []
+    }));
+}
+
+/* Mismo patrón seguro que updateIndex: se sube un data/laminas.json local, se actualiza
+   en el navegador y se descarga la versión nueva. Nada se escribe en vivo. */
+function updateLaminas(file) {
+  if (!state.meta.title) {
+    alert('Completa el título del práctico en la pestaña "1. Información General" primero.');
+    return;
+  }
+  const entries = buildLaminaEntries();
+  if (!entries.length) {
+    alert('Este práctico no tiene láminas de tipo "caso" para agregar al catálogo.');
+    return;
+  }
+  const practicoFile = slugify(state.meta.title) + '.html';
+  const reader = new FileReader();
+  reader.onload = () => {
+    let parsed;
+    try { parsed = JSON.parse(String(reader.result)); }
+    catch(e) { alert('El archivo no es un JSON válido. ¿Es el data/laminas.json correcto?'); return; }
+    if (!parsed || !Array.isArray(parsed.laminas)) {
+      alert('No se encontró el arreglo "laminas" en el archivo subido. ¿Es el data/laminas.json correcto?');
+      return;
+    }
+    const otras = parsed.laminas.filter(l => l.practico !== practicoFile);
+    parsed.laminas = otras.concat(entries);
+    downloadBlob(JSON.stringify(parsed, null, 2) + '\n', 'laminas.json', 'application/json');
+    alert('laminas.json actualizado y descargado (' + entries.length + ' lámina(s) de este práctico). Reemplaza data/laminas.json, corre "node scripts/sync-embedded-data.js" y revisa el diff antes de subir.');
+  };
+  reader.onerror = () => alert('No se pudo leer el archivo.');
+  reader.readAsText(file);
+}
+
 function importJSON(file) {
   const reader = new FileReader();
   reader.onload = () => {
@@ -3334,7 +3490,13 @@ function importJSON(file) {
 function wireTabEvents() {
   if (activeTab === 'general') {
     document.querySelectorAll('[data-meta]').forEach(inp => {
-      inp.addEventListener('input', () => { state.meta[inp.dataset.meta] = inp.value; saveDraft(); });
+      const evt = inp.tagName === 'SELECT' ? 'change' : 'input';
+      inp.addEventListener(evt, () => {
+        state.meta[inp.dataset.meta] = inp.value;
+        if (inp.dataset.meta === 'unidadNumero') state.meta.temaId = '';
+        saveDraft();
+        if (inp.tagName === 'SELECT') render();
+      });
     });
     const btn = document.getElementById('btnAplicarGeneral');
     if (btn) btn.addEventListener('click', () => {
@@ -3387,6 +3549,7 @@ function wireTabEvents() {
         renderChipsField(state.slides[i].content, path, 'chipsBox_' + path.replace(/\./g,'_'), saveDraft, bank.presets, bank.customKey);
       });
       renderObjListItems(i);
+      if (state.slides[i].type === 'case') wireCaseLabsFields(state.slides[i].content, 'data-slide-field', saveDraft);
       renderComparisonTable(i);
       renderFlexSegments(i);
       document.querySelectorAll('[data-flex-add]').forEach(btn => {
@@ -3444,6 +3607,15 @@ function wireTabEvents() {
       btnIdx.addEventListener('click', () => fileIdx.click());
       fileIdx.addEventListener('change', (e) => {
         if (e.target.files[0]) updateIndex(e.target.files[0]);
+        e.target.value = '';
+      });
+    }
+    const btnLam = document.getElementById('btnActualizarLaminas');
+    const fileLam = document.getElementById('fileLaminasInput');
+    if (btnLam && fileLam) {
+      btnLam.addEventListener('click', () => fileLam.click());
+      fileLam.addEventListener('change', (e) => {
+        if (e.target.files[0]) updateLaminas(e.target.files[0]);
         e.target.value = '';
       });
     }

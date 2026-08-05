@@ -90,7 +90,7 @@ const SLIDE_TYPES = [
 const SIMPLE_FIELDS = {
   flex: [['title','Título','text'],['subtitle','Subtítulo (opcional)','text']],
   title: [['title','Título','text'],['subtitle','Subtítulo','text'],['instructor','Instructor/a','text'],['email','Email','text']],
-  objectives: [['title','Título','text'],['items','Objetivos (uno por línea)','list']],
+  objectives: [['title','Título','text'],['items','Objetivos de aprendizaje','chiplist']],
   content: [['title','Título','text'],['subtitle','Subtítulo (opcional)','text'],['items','Puntos (uno por línea, admite <strong>negrita</strong>)','list']],
   process: [['title','Título','text'],['subtitle','Subtítulo','text'],['image','URL de imagen (opcional)','text']],
   platform: [['title','Título','text'],['url','URL','text'],['features','Características (una por línea)','list']],
@@ -102,7 +102,7 @@ const SIMPLE_FIELDS = {
   case: [
     ['questions','Preguntas de análisis','chiplist']
   ],
-  comparison: [['title','Título','text'],['subtitle','Subtítulo','text'],['headers','Encabezados de columna (separados por coma)','csv']],
+  comparison: [['title','Título','text'],['subtitle','Subtítulo','text']],
   assessment: [['title','Título','text']],
   resources: [['title','Título','text']],
   qa: [['title','Título','text'],['subtitle','Subtítulo','text'],['contact.email','Email','text'],['contact.office','Oficina','text'],['contact.hours','Horario','text']]
@@ -1030,13 +1030,35 @@ const PRESET_QUESTIONS = [
   'Describa la etiología de la lesión'
 ];
 const CUSTOM_QUESTIONS_KEY = 'digitalduck_preguntas_frecuentes';
-function loadCustomQuestions() {
-  try { return JSON.parse(localStorage.getItem(CUSTOM_QUESTIONS_KEY)) || []; }
+
+/* Objetivos de aprendizaje reutilizables. A diferencia de las preguntas, no encontramos
+   objetivos repetidos entre los 8 prácticos reales (casi ninguno usa la lámina de
+   Objetivos todavía) — este banco es un punto de partida razonable, no algo minado de
+   datos reales, y crece con lo que el docente vaya agregando. */
+const PRESET_OBJECTIVES = [
+  'Reconocer las características morfológicas asociadas al proceso patológico',
+  'Relacionar los hallazgos histológicos con el contexto clínico del paciente',
+  'Diferenciar los hallazgos patológicos del tejido normal',
+  'Comprender el mecanismo fisiopatológico involucrado'
+];
+const CUSTOM_OBJECTIVES_KEY = 'digitalduck_objetivos_frecuentes';
+
+// Bancos de chips por campo (path del contenido de la lámina, o 'objectives' para la
+// pestaña 2). Igual que DATALIST_FOR_PATH, es lo que le dice a renderChipsField qué
+// presets y qué llave de localStorage usar según el campo que se está editando.
+const CHIP_BANKS = {
+  questions: {presets: PRESET_QUESTIONS, customKey: CUSTOM_QUESTIONS_KEY},
+  items: {presets: PRESET_OBJECTIVES, customKey: CUSTOM_OBJECTIVES_KEY},
+  objectives: {presets: PRESET_OBJECTIVES, customKey: CUSTOM_OBJECTIVES_KEY}
+};
+
+function loadCustomChips(key) {
+  try { return JSON.parse(localStorage.getItem(key)) || []; }
   catch(e) { return []; }
 }
-function saveCustomQuestion(q) {
-  const list = loadCustomQuestions();
-  if (!list.includes(q)) { list.push(q); localStorage.setItem(CUSTOM_QUESTIONS_KEY, JSON.stringify(list)); }
+function saveCustomChip(key, q) {
+  const list = loadCustomChips(key);
+  if (!list.includes(q)) { list.push(q); localStorage.setItem(key, JSON.stringify(list)); }
 }
 
 /* Fuentes externas recomendadas (data/fuentes.json). Son referenciales: el docente puede
@@ -1182,12 +1204,22 @@ function emptyMeta() {
     indexIcon:'', indexMenuName:'', indexDescription:'', indexNum:''};
 }
 
+function starterSlides() {
+  return [
+    {type:'title', content: defaultContent('title')},
+    {type:'objectives', content: defaultContent('objectives')},
+    {type:'case', content: defaultContent('case')}
+  ];
+}
+
 let state = {
   meta: emptyMeta(),
   objectives: [],
   bibliography: [],
   slides: []
 };
+state.slides = starterSlides();
+let draftWasRestored = false;
 
 let activeTab = 'general';
 let editingIndex = null;
@@ -1214,9 +1246,10 @@ function loadDraft() {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && parsed.meta) state = parsed;
+      if (parsed && parsed.meta) { state = parsed; return true; }
     }
   } catch(e) { console.warn('No se pudo cargar borrador', e); }
+  return false;
 }
 
 function saveDraft() {
@@ -1305,7 +1338,13 @@ function render() {
 /* ================= PANTALLA DE ELECCIÓN DE MODO ================= */
 
 function renderModeSelector() {
+  const draftNote = (draftWasRestored && state.slides.length) ? `
+    <div class="max-w-3xl mx-auto mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800 flex items-center justify-between gap-3 flex-wrap">
+      <span>Tienes un práctico guardado de una sesión anterior (${state.slides.length} sección(es)). Se retoma automáticamente si eliges "Práctico completo".</span>
+      <button id="btnDescartarBorrador" class="text-blue-700 underline text-xs whitespace-nowrap flex-shrink-0">Empezar de cero</button>
+    </div>` : '';
   return `
+    ${draftNote}
     <div class="max-w-3xl mx-auto py-6">
       <h2 class="text-xl font-bold text-gray-800 text-center mb-2">¿Qué quieres crear?</h2>
       <p class="text-sm text-gray-500 text-center mb-8">Puedes cambiar de modo cuando quieras.</p>
@@ -1332,6 +1371,15 @@ function wireModeSelector() {
       if (genMode === 'full') activeTab = 'general';
       render();
     });
+  });
+  const btnDescartar = document.getElementById('btnDescartarBorrador');
+  if (btnDescartar) btnDescartar.addEventListener('click', () => {
+    if (confirm('¿Descartar el práctico guardado y empezar de cero?')) {
+      state = {meta: emptyMeta(), objectives:[], bibliography:[], slides: starterSlides()};
+      draftWasRestored = false;
+      saveDraft();
+      render();
+    }
   });
 }
 
@@ -1411,7 +1459,8 @@ function wireQuickCase() {
   });
   document.querySelectorAll('[data-qc-chipfield]').forEach(el => {
     const path = el.dataset.qcChipfield;
-    renderChipsField(quickCase, path, 'qcChipsBox_' + path.replace(/\./g,'_'), saveQuickDraft);
+    const bank = CHIP_BANKS[path] || {presets: [], customKey: 'digitalduck_chips_' + path};
+    renderChipsField(quickCase, path, 'qcChipsBox_' + path.replace(/\./g,'_'), saveQuickDraft, bank.presets, bank.customKey);
   });
   renderQcObjListItems();
   document.getElementById('qcBtnAddLink').addEventListener('click', () => {
@@ -1517,8 +1566,8 @@ function renderTabContenidos() {
     <h2 class="text-lg font-bold text-gray-800 mb-1">Contenidos</h2>
     <p class="text-sm text-gray-500 mb-4">Objetivos de aprendizaje y bibliografía. Se aplican a las láminas de Objetivos y Recursos.</p>
     <div class="mb-6">
-      <label class="field-label">Objetivos de aprendizaje (uno por línea)</label>
-      <textarea id="objetivosText" class="field-input" rows="5">${escHtml(listToText(state.objectives))}</textarea>
+      <label class="field-label">Objetivos de aprendizaje</label>
+      <div id="objetivosChipsBox"></div>
     </div>
     <div class="mb-4">
       <label class="field-label mb-2">Bibliografía / Recursos</label>
@@ -1804,11 +1853,8 @@ function renderSlideEditor(i) {
   let comparisonHtml = '';
   if (slide.type === 'comparison') {
     comparisonHtml = `<div class="mb-3 border-t pt-3">
-      <label class="field-label mb-2">Filas (una celda por columna)</label>
-      <div id="comparisonRows"></div>
-      <button id="btnAddRow" class="mt-2 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1">
-        <i data-lucide="plus" class="w-4 h-4"></i> Agregar fila
-      </button>
+      <label class="field-label mb-2">Tabla comparativa</label>
+      <div id="comparisonTableWrap"></div>
     </div>`;
   }
 
@@ -1823,6 +1869,7 @@ function renderSlideEditor(i) {
         <button data-flex-add="list" class="text-sm border border-purple-300 text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-lg">+ Lista</button>
         <button data-flex-add="links" class="text-sm border border-purple-300 text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-lg">+ Enlaces</button>
         <button data-flex-add="resource" class="text-sm border border-purple-300 text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-lg">+ Tarjeta de recurso</button>
+        <button data-flex-add="steps" class="text-sm border border-purple-300 text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-lg">+ Pasos</button>
       </div>
     </div>`;
   }
@@ -1922,14 +1969,14 @@ function renderLinksField(items, fields, quickBoxId, objBoxId, persist) {
 
 /* Campo de chips reutilizable (preguntas de análisis y, a futuro, otras listas cortas).
    obj/path apuntan al dato real; boxId es el contenedor; persist guarda el cambio. */
-function renderChipsField(obj, path, boxId, persist) {
+function renderChipsField(obj, path, boxId, persist, presets, customKey) {
   const box = document.getElementById(boxId);
   if (!box) return;
   const selected = getPath(obj, path) || [];
-  const custom = loadCustomQuestions();
-  const bank = PRESET_QUESTIONS.concat(custom.filter(q => !PRESET_QUESTIONS.includes(q)));
+  const custom = loadCustomChips(customKey);
+  const bank = presets.concat(custom.filter(q => !presets.includes(q)));
   const available = bank.filter(q => !selected.includes(q));
-  const rerender = () => renderChipsField(obj, path, boxId, persist);
+  const rerender = () => renderChipsField(obj, path, boxId, persist, presets, customKey);
 
   box.innerHTML = `
     <div class="flex flex-wrap gap-2 mb-2">
@@ -1938,18 +1985,18 @@ function renderChipsField(obj, path, boxId, persist) {
           ${escHtml(q)}
           <button data-chip-remove="${qi}" class="text-purple-500 hover:text-purple-800 font-bold">&times;</button>
         </span>
-      `).join('') || '<p class="text-sm text-gray-400">Sin preguntas aún.</p>'}
+      `).join('') || '<p class="text-sm text-gray-400">Sin elementos aún.</p>'}
     </div>
     ${available.length ? `<p class="text-xs text-gray-500 mb-1">Frecuentes:</p>
     <div class="flex flex-wrap gap-2 mb-2">
       ${available.map(q => `<button data-chip-preset="${escAttr(q)}" class="border border-purple-300 text-purple-700 hover:bg-purple-50 text-xs px-2.5 py-1 rounded-full">+ ${escHtml(q)}</button>`).join('')}
     </div>` : ''}
     <div class="flex gap-2 items-center">
-      <input class="field-input" data-chip-custom-input placeholder="Escribe una pregunta propia y presiona +">
+      <input class="field-input" data-chip-custom-input placeholder="Escribe uno propio y presiona +">
       <button data-chip-custom-add class="bg-purple-700 hover:bg-purple-800 text-white px-3 py-2 rounded-lg text-sm flex-shrink-0">+</button>
     </div>
     <label class="flex items-center gap-1 text-xs text-gray-500 mt-1">
-      <input type="checkbox" data-chip-save-custom checked> Guardar en mis preguntas frecuentes (solo este navegador)
+      <input type="checkbox" data-chip-save-custom checked> Guardar en mis frecuentes (solo este navegador)
     </label>
   `;
 
@@ -1974,7 +2021,7 @@ function renderChipsField(obj, path, boxId, persist) {
     if (!val) return;
     selected.push(val);
     setPath(obj, path, selected);
-    if (saveCk.checked) saveCustomQuestion(val);
+    if (saveCk.checked) saveCustomChip(customKey, val);
     persist(); rerender();
   };
   box.querySelector('[data-chip-custom-add]').addEventListener('click', commit);
@@ -1984,33 +2031,92 @@ function renderChipsField(obj, path, boxId, persist) {
   lucide.createIcons();
 }
 
-function renderComparisonRows(i) {
+/* Tabla comparativa editada como grilla real: columnas y filas se agregan/quitan desde
+   la propia tabla, en vez de un campo de encabezados separado en texto plano. Cada fila
+   se mantiene sincronizada con el número de columnas actual. */
+function renderComparisonTable(i) {
   const slide = state.slides[i];
-  const wrap = document.getElementById('comparisonRows');
+  const wrap = document.getElementById('comparisonTableWrap');
   if (!wrap) return;
-  const headers = slide.content.headers || [];
+  const headers = slide.content.headers || (slide.content.headers = ['Característica','Opción A']);
   const rows = slide.content.rows || (slide.content.rows = []);
-  wrap.innerHTML = rows.map((row, ridx) => `
-    <div class="bg-gray-50 p-2 rounded-lg mb-2 flex gap-2 items-center flex-wrap">
-      ${headers.map((h, cidx) => `
-        <input class="field-input" placeholder="${escAttr(h)}" data-row-cell="${ridx}.${cidx}" value="${escAttr(row[cidx])}">
-      `).join('')}
-      <button class="p-2 text-red-500 hover:text-red-700" data-row-remove="${ridx}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-    </div>
-  `).join('') || '<p class="text-sm text-gray-400 mb-2">Sin filas aún.</p>';
+  rows.forEach(row => {
+    while (row.length < headers.length) row.push('');
+    while (row.length > headers.length) row.pop();
+  });
 
-  wrap.querySelectorAll('[data-row-cell]').forEach(inp => {
+  wrap.innerHTML = `
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse text-sm">
+        <thead>
+          <tr>
+            ${headers.map((h,ci) => `
+              <th class="p-1 border bg-purple-50 align-top">
+                <div class="flex items-center gap-1">
+                  <input class="field-input text-xs font-semibold" data-col-header="${ci}" value="${escAttr(h)}" placeholder="Encabezado">
+                  ${headers.length > 2 ? `<button data-col-remove="${ci}" class="text-red-400 hover:text-red-600 flex-shrink-0" title="Quitar columna"><i data-lucide="x" class="w-3 h-3"></i></button>` : ''}
+                </div>
+              </th>
+            `).join('')}
+            <th class="p-1 border bg-purple-50 w-10"></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((row,ridx) => `
+            <tr>
+              ${row.map((cell,ci) => `
+                <td class="p-1 border">
+                  <input class="field-input text-xs" data-cell="${ridx}.${ci}" value="${escAttr(cell)}">
+                </td>
+              `).join('')}
+              <td class="p-1 border text-center">
+                <button data-row-remove="${ridx}" class="text-red-500 hover:text-red-700" title="Quitar fila"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              </td>
+            </tr>
+          `).join('') || `<tr><td colspan="${headers.length+1}" class="p-2 text-center text-gray-400 text-xs">Sin filas aún.</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+    <div class="flex gap-3 mt-2">
+      <button id="btnAddRow" class="text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1"><i data-lucide="plus" class="w-4 h-4"></i> Agregar fila</button>
+      <button id="btnAddCol" class="text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1"><i data-lucide="plus" class="w-4 h-4"></i> Agregar columna</button>
+    </div>
+  `;
+
+  wrap.querySelectorAll('[data-col-header]').forEach(inp => {
+    inp.addEventListener('input', () => { headers[+inp.dataset.colHeader] = inp.value; saveDraft(); });
+  });
+  wrap.querySelectorAll('[data-col-remove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ci = +btn.dataset.colRemove;
+      headers.splice(ci,1);
+      rows.forEach(row => row.splice(ci,1));
+      saveDraft(); renderComparisonTable(i); lucide.createIcons();
+    });
+  });
+  wrap.querySelectorAll('[data-cell]').forEach(inp => {
     inp.addEventListener('input', () => {
-      const [ridx,cidx] = inp.dataset.rowCell.split('.');
-      rows[+ridx][+cidx] = inp.value;
+      const [ridx,ci] = inp.dataset.cell.split('.');
+      rows[+ridx][+ci] = inp.value;
       saveDraft();
     });
   });
   wrap.querySelectorAll('[data-row-remove]').forEach(btn => {
     btn.addEventListener('click', () => {
       rows.splice(+btn.dataset.rowRemove, 1);
-      saveDraft(); renderComparisonRows(i); lucide.createIcons();
+      saveDraft(); renderComparisonTable(i); lucide.createIcons();
     });
+  });
+  const btnAddRow = wrap.querySelector('#btnAddRow');
+  if (btnAddRow) btnAddRow.addEventListener('click', () => {
+    rows.push(headers.map(()=>''));
+    saveDraft(); renderComparisonTable(i); lucide.createIcons();
+  });
+  const btnAddCol = wrap.querySelector('#btnAddCol');
+  if (btnAddCol) btnAddCol.addEventListener('click', () => {
+    headers.push('Columna ' + (headers.length+1));
+    rows.forEach(row => row.push(''));
+    saveDraft(); renderComparisonTable(i); lucide.createIcons();
   });
   lucide.createIcons();
 }
@@ -2022,7 +2128,7 @@ function renderFlexSegments(i) {
   const wrap = document.getElementById('flexSegments');
   if (!wrap) return;
   const segments = state.slides[i].content.segments || (state.slides[i].content.segments = []);
-  const kindLabel = {text:'Texto', list:'Lista', links:'Enlaces', resource:'Tarjeta de recurso'};
+  const kindLabel = {text:'Texto', list:'Lista', links:'Enlaces', resource:'Tarjeta de recurso', steps:'Pasos'};
 
   wrap.innerHTML = segments.map((seg, si) => {
     let fields = '';
@@ -2037,6 +2143,8 @@ function renderFlexSegments(i) {
         <input class="field-input mb-2" placeholder="Nombre" data-flex-res="${si}.name" value="${escAttr(seg.name)}">
         <input class="field-input mb-2" placeholder="URL (opcional)" data-flex-res="${si}.url" value="${escAttr(seg.url)}">
         <input class="field-input" placeholder="Descripción (opcional)" data-flex-res="${si}.description" value="${escAttr(seg.description)}">`;
+    } else if (seg.kind === 'steps') {
+      fields = `<div id="flexSteps_${si}"></div><button data-flex-step-add="${si}" class="mt-1 text-xs text-purple-700 hover:text-purple-900">+ agregar paso</button>`;
     }
     return `<div class="border rounded-lg p-3 mb-2 bg-gray-50">
       <div class="flex items-center justify-between mb-2">
@@ -2048,14 +2156,23 @@ function renderFlexSegments(i) {
   }).join('') || '<p class="text-sm text-gray-400 mb-2">Sin segmentos aún — agrega uno abajo.</p>';
 
   segments.forEach((seg, si) => {
-    if (seg.kind !== 'links') return;
-    const items = seg.items || (seg.items = []);
-    renderObjListItemsGeneric(items, [['label','Etiqueta'],['url','URL']], 'flexLinks_' + si, saveDraft);
-    const addBtn = wrap.querySelector(`[data-flex-link-add="${si}"]`);
-    if (addBtn) addBtn.addEventListener('click', () => {
-      items.push({label:'', url:''});
-      saveDraft(); renderFlexSegments(i); lucide.createIcons();
-    });
+    if (seg.kind === 'links') {
+      const items = seg.items || (seg.items = []);
+      renderObjListItemsGeneric(items, [['label','Etiqueta'],['url','URL']], 'flexLinks_' + si, saveDraft);
+      const addBtn = wrap.querySelector(`[data-flex-link-add="${si}"]`);
+      if (addBtn) addBtn.addEventListener('click', () => {
+        items.push({label:'', url:''});
+        saveDraft(); renderFlexSegments(i); lucide.createIcons();
+      });
+    } else if (seg.kind === 'steps') {
+      const items = seg.items || (seg.items = []);
+      renderObjListItemsGeneric(items, [['title','Título'],['description','Descripción']], 'flexSteps_' + si, saveDraft);
+      const addBtn = wrap.querySelector(`[data-flex-step-add="${si}"]`);
+      if (addBtn) addBtn.addEventListener('click', () => {
+        items.push({title:'', description:''});
+        saveDraft(); renderFlexSegments(i); lucide.createIcons();
+      });
+    }
   });
 
   wrap.querySelectorAll('[data-flex-text]').forEach(ta => {
@@ -2170,6 +2287,17 @@ function getSlideHTML(slide) {
                         ${seg.description ? `<p class="${cls.small} text-gray-600 mt-1">${seg.description}</p>` : ''}
                         ${seg.url ? `<a href="${seg.url}" target="_blank" class="${cls.small} text-blue-600 underline break-all">${seg.url}</a>` : ''}
                     </div>`;
+                }
+                if (seg.kind === 'steps') {
+                    return `<div class="space-y-2">${(seg.items||[]).map((st,sti) => `
+                        <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-purple-500 flex items-start space-x-3">
+                            <span class="bg-purple-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold text-sm flex-shrink-0">${sti+1}</span>
+                            <div>
+                                <h3 class="${cls.text} font-semibold text-gray-800">${st.title||''}</h3>
+                                ${st.description ? `<p class="${cls.small} text-gray-600">${st.description}</p>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}</div>`;
                 }
                 return '';
             }
@@ -3218,8 +3346,9 @@ function wireTabEvents() {
   }
   else if (activeTab === 'contenidos') {
     renderBibliografiaList();
-    const objText = document.getElementById('objetivosText');
-    if (objText) objText.addEventListener('input', () => { state.objectives = textToList(objText.value); saveDraft(); });
+    if (document.getElementById('objetivosChipsBox')) {
+      renderChipsField(state, 'objectives', 'objetivosChipsBox', saveDraft, PRESET_OBJECTIVES, CUSTOM_OBJECTIVES_KEY);
+    }
     const btnAddBib = document.getElementById('btnAddBib');
     if (btnAddBib) btnAddBib.addEventListener('click', () => { state.bibliography.push({name:'',url:'',purpose:''}); renderBibliografiaList(); saveDraft(); });
     const btnFuentes = document.getElementById('btnUsarFuentesEstandar');
@@ -3254,15 +3383,16 @@ function wireTabEvents() {
       });
       document.querySelectorAll('[data-chipfield]').forEach(el => {
         const path = el.dataset.chipfield;
-        renderChipsField(state.slides[i].content, path, 'chipsBox_' + path.replace(/\./g,'_'), saveDraft);
+        const bank = CHIP_BANKS[path] || {presets: [], customKey: 'digitalduck_chips_' + path};
+        renderChipsField(state.slides[i].content, path, 'chipsBox_' + path.replace(/\./g,'_'), saveDraft, bank.presets, bank.customKey);
       });
       renderObjListItems(i);
-      renderComparisonRows(i);
+      renderComparisonTable(i);
       renderFlexSegments(i);
       document.querySelectorAll('[data-flex-add]').forEach(btn => {
         btn.addEventListener('click', () => {
           const kind = btn.dataset.flexAdd;
-          const empty = {text:{kind:'text', text:''}, list:{kind:'list', items:[]}, links:{kind:'links', items:[]}, resource:{kind:'resource', name:'', url:'', description:''}}[kind];
+          const empty = {text:{kind:'text', text:''}, list:{kind:'list', items:[]}, links:{kind:'links', items:[]}, resource:{kind:'resource', name:'', url:'', description:''}, steps:{kind:'steps', items:[]}}[kind];
           (state.slides[i].content.segments ||= []).push(empty);
           saveDraft(); renderFlexSegments(i); lucide.createIcons();
         });
@@ -3273,12 +3403,6 @@ function wireTabEvents() {
         const empty = {}; objlist.fields.forEach(([k]) => empty[k]='');
         (state.slides[i].content[objlist.key] ||= []).push(empty);
         saveDraft(); renderObjListItems(i); lucide.createIcons();
-      });
-      const btnAddRow = document.getElementById('btnAddRow');
-      if (btnAddRow) btnAddRow.addEventListener('click', () => {
-        const headers = state.slides[i].content.headers || [];
-        (state.slides[i].content.rows ||= []).push(headers.map(()=>''));
-        saveDraft(); renderComparisonRows(i); lucide.createIcons();
       });
       const btnVolver = document.getElementById('btnVolverLista');
       if (btnVolver) btnVolver.addEventListener('click', () => { editingIndex = null; render(); });
@@ -3343,7 +3467,8 @@ document.getElementById('fileJsonInput').addEventListener('change', (e) => {
 
 document.getElementById('btnNuevo').addEventListener('click', () => {
   if (confirm('¿Empezar un práctico nuevo? Se perderá el borrador actual (a menos que lo hayas descargado).')) {
-    state = {meta: emptyMeta(), objectives:[], bibliography:[], slides:[]};
+    state = {meta: emptyMeta(), objectives:[], bibliography:[], slides: starterSlides()};
+    draftWasRestored = false;
     editingIndex = null;
     activeTab = 'general';
     saveDraft();
@@ -3357,7 +3482,7 @@ document.body.insertAdjacentHTML('beforeend', '<datalist id="conceptSuggestions"
 document.body.insertAdjacentHTML('beforeend', '<datalist id="sexoSuggestions">' + SEXO_SUGGESTIONS.map(c => `<option value="${escAttr(c)}">`).join('') + '</datalist>');
 document.body.insertAdjacentHTML('beforeend', '<datalist id="biopsyTypeSuggestions">' + BIOPSY_TYPES.map(c => `<option value="${escAttr(c)}">`).join('') + '</datalist>');
 
-loadDraft();
+draftWasRestored = loadDraft();
 loadQuickDraft();
 render();
 </script>

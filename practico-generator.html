@@ -69,20 +69,26 @@ lucide.createIcons();
 // pedagógico alrededor de ella). Va primero y se destaca en el selector de "Agregar sección".
 const SLIDE_TYPES = [
   {id:'case', label:'🔬 Lámina (caso clínico)', icon:'microscope', featured:true},
+  {id:'flex', label:'🧩 Contenido flexible', icon:'layout-grid'},
   {id:'title', label:'Portada', icon:'type'},
   {id:'objectives', label:'Objetivos', icon:'target'},
-  {id:'content', label:'Contenido (lista)', icon:'list'},
+  {id:'content', label:'Contenido (lista) — heredado', icon:'list'},
   {id:'process', label:'Proceso (pasos)', icon:'flask-conical'},
-  {id:'platform', label:'Plataforma externa', icon:'monitor'},
+  {id:'platform', label:'Plataforma externa — heredado', icon:'monitor'},
   {id:'tutorial', label:'Tutorial (pasos)', icon:'compass'},
   {id:'activity', label:'Actividad', icon:'pencil'},
   {id:'comparison', label:'Tabla comparativa', icon:'git-compare'},
   {id:'assessment', label:'Evaluaciones', icon:'clipboard-check'},
-  {id:'resources', label:'Recursos / Bibliografía', icon:'library'},
+  {id:'resources', label:'Recursos / Bibliografía — heredado', icon:'library'},
   {id:'qa', label:'Contacto / Preguntas', icon:'message-circle'}
 ];
+// 'content', 'platform' y 'resources' quedan como tipos heredados: el contenido real de
+// pra1-pra8 los sigue usando y no se toca. Para láminas nuevas, 'flex' los reemplaza a
+// los tres con un modelo de segmentos componibles (texto, lista, enlaces, tarjeta de
+// recurso) en vez de un formulario fijo por tipo.
 
 const SIMPLE_FIELDS = {
+  flex: [['title','Título','text'],['subtitle','Subtítulo (opcional)','text']],
   title: [['title','Título','text'],['subtitle','Subtítulo','text'],['instructor','Instructor/a','text'],['email','Email','text']],
   objectives: [['title','Título','text'],['items','Objetivos (uno por línea)','list']],
   content: [['title','Título','text'],['subtitle','Subtítulo (opcional)','text'],['items','Puntos (uno por línea, admite <strong>negrita</strong>)','list']],
@@ -1103,6 +1109,9 @@ function validateSlide(slide) {
   const reqText = (val, label) => { if (!val || !String(val).trim()) issues.push(label); };
   const reqList = (arr, label) => { if (!arr || !arr.length) issues.push(label); };
   switch (slide.type) {
+    case 'flex':
+      reqText(c.title,'Título'); reqList(c.segments,'Al menos un segmento');
+      break;
     case 'title':
       reqText(c.title,'Título'); reqText(c.instructor,'Instructor/a'); reqText(c.email,'Email'); break;
     case 'objectives':
@@ -1147,6 +1156,7 @@ function validateSlide(slide) {
 
 function defaultContent(type) {
   switch(type) {
+    case 'flex': return {title:'', subtitle:'', segments:[]};
     case 'title': return {title:'', subtitle:'', instructor: state.meta.instructor||'', email: state.meta.email||''};
     case 'objectives': return {title:'Objetivos del Práctico', items:[]};
     case 'content': return {title:'', subtitle:'', items:[]};
@@ -1802,6 +1812,21 @@ function renderSlideEditor(i) {
     </div>`;
   }
 
+  let flexHtml = '';
+  if (slide.type === 'flex') {
+    flexHtml = `<div class="mb-3 border-t pt-3">
+      <label class="field-label mb-2">Segmentos</label>
+      <div id="flexSegments"></div>
+      <p class="text-xs text-gray-500 mb-2 mt-2">Agregar segmento:</p>
+      <div class="flex gap-2 flex-wrap">
+        <button data-flex-add="text" class="text-sm border border-purple-300 text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-lg">+ Texto</button>
+        <button data-flex-add="list" class="text-sm border border-purple-300 text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-lg">+ Lista</button>
+        <button data-flex-add="links" class="text-sm border border-purple-300 text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-lg">+ Enlaces</button>
+        <button data-flex-add="resource" class="text-sm border border-purple-300 text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-lg">+ Tarjeta de recurso</button>
+      </div>
+    </div>`;
+  }
+
   return `
     <div class="flex items-center gap-2 mb-4">
       <button id="btnVolverLista" class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
@@ -1812,6 +1837,7 @@ function renderSlideEditor(i) {
       ${fieldsHtml}
       ${objlistHtml}
       ${comparisonHtml}
+      ${flexHtml}
     </div>
     <button id="btnGuardarLamina" class="mt-4 bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
       <i data-lucide="check" class="w-4 h-4"></i> Guardar y volver
@@ -1989,6 +2015,71 @@ function renderComparisonRows(i) {
   lucide.createIcons();
 }
 
+/* Editor de segmentos del tipo 'flex'. Cada segmento es texto / lista / enlaces / tarjeta
+   de recurso; 'enlaces' reutiliza renderObjListItemsGeneric (mismo patrón que los enlaces
+   de una lámina de caso). */
+function renderFlexSegments(i) {
+  const wrap = document.getElementById('flexSegments');
+  if (!wrap) return;
+  const segments = state.slides[i].content.segments || (state.slides[i].content.segments = []);
+  const kindLabel = {text:'Texto', list:'Lista', links:'Enlaces', resource:'Tarjeta de recurso'};
+
+  wrap.innerHTML = segments.map((seg, si) => {
+    let fields = '';
+    if (seg.kind === 'text') {
+      fields = `<textarea class="field-input" rows="2" placeholder="Texto" data-flex-text="${si}">${escHtml(seg.text||'')}</textarea>`;
+    } else if (seg.kind === 'list') {
+      fields = `<textarea class="field-input" rows="3" placeholder="Uno por línea" data-flex-list="${si}">${escHtml((seg.items||[]).join('\n'))}</textarea>`;
+    } else if (seg.kind === 'links') {
+      fields = `<div id="flexLinks_${si}"></div><button data-flex-link-add="${si}" class="mt-1 text-xs text-purple-700 hover:text-purple-900">+ agregar enlace</button>`;
+    } else if (seg.kind === 'resource') {
+      fields = `
+        <input class="field-input mb-2" placeholder="Nombre" data-flex-res="${si}.name" value="${escAttr(seg.name)}">
+        <input class="field-input mb-2" placeholder="URL (opcional)" data-flex-res="${si}.url" value="${escAttr(seg.url)}">
+        <input class="field-input" placeholder="Descripción (opcional)" data-flex-res="${si}.description" value="${escAttr(seg.description)}">`;
+    }
+    return `<div class="border rounded-lg p-3 mb-2 bg-gray-50">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold text-purple-700 uppercase tracking-wide">${kindLabel[seg.kind]||seg.kind}</span>
+        <button data-flex-remove="${si}" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+      </div>
+      ${fields}
+    </div>`;
+  }).join('') || '<p class="text-sm text-gray-400 mb-2">Sin segmentos aún — agrega uno abajo.</p>';
+
+  segments.forEach((seg, si) => {
+    if (seg.kind !== 'links') return;
+    const items = seg.items || (seg.items = []);
+    renderObjListItemsGeneric(items, [['label','Etiqueta'],['url','URL']], 'flexLinks_' + si, saveDraft);
+    const addBtn = wrap.querySelector(`[data-flex-link-add="${si}"]`);
+    if (addBtn) addBtn.addEventListener('click', () => {
+      items.push({label:'', url:''});
+      saveDraft(); renderFlexSegments(i); lucide.createIcons();
+    });
+  });
+
+  wrap.querySelectorAll('[data-flex-text]').forEach(ta => {
+    ta.addEventListener('input', () => { segments[+ta.dataset.flexText].text = ta.value; saveDraft(); });
+  });
+  wrap.querySelectorAll('[data-flex-list]').forEach(ta => {
+    ta.addEventListener('input', () => { segments[+ta.dataset.flexList].items = textToList(ta.value); saveDraft(); });
+  });
+  wrap.querySelectorAll('[data-flex-res]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const [si,key] = inp.dataset.flexRes.split('.');
+      segments[+si][key] = inp.value;
+      saveDraft();
+    });
+  });
+  wrap.querySelectorAll('[data-flex-remove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      segments.splice(+btn.dataset.flexRemove, 1);
+      saveDraft(); renderFlexSegments(i); lucide.createIcons();
+    });
+  });
+  lucide.createIcons();
+}
+
 /* ================= TAB 4: GENERAR ================= */
 
 function renderValidationSummary() {
@@ -2061,6 +2152,48 @@ function getSlideHTML(slide) {
     function fieldVal(v) { return (v && typeof v === 'object') ? (v.value || '') : (v || ''); }
     function fieldUrl(v) { return (v && typeof v === 'object') ? (v.url || '') : ''; }
     switch(slide.type) {
+        case 'flex': {
+            const segs = slide.content.segments || [];
+            function renderFlexSegment(seg, cls) {
+                if (seg.kind === 'text') {
+                    return `<div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500"><p class="${cls.text} text-gray-700">${seg.text||''}</p></div>`;
+                }
+                if (seg.kind === 'list') {
+                    return `<div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500"><ul class="list-disc list-inside space-y-1">${(seg.items||[]).map(it => `<li class="${cls.text} text-gray-700">${it}</li>`).join('')}</ul></div>`;
+                }
+                if (seg.kind === 'links') {
+                    return `<div class="grid grid-cols-1 gap-2">${(seg.items||[]).map(l => `<a href="${l.url}" target="_blank" class="link-card bg-white p-3 rounded-lg border block"><span class="${cls.text} font-medium text-blue-600 flex items-center"><i data-lucide="link" class="w-4 h-4 mr-2 flex-shrink-0"></i>${l.label}</span></a>`).join('')}</div>`;
+                }
+                if (seg.kind === 'resource') {
+                    return `<div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+                        <p class="${cls.text} font-bold text-gray-800">${seg.name||''}</p>
+                        ${seg.description ? `<p class="${cls.small} text-gray-600 mt-1">${seg.description}</p>` : ''}
+                        ${seg.url ? `<a href="${seg.url}" target="_blank" class="${cls.small} text-blue-600 underline break-all">${seg.url}</a>` : ''}
+                    </div>`;
+                }
+                return '';
+            }
+            const mobileCls = {text:'mobile-text', small:'mobile-small'};
+            const desktopCls = {text:'text-base', small:'text-sm'};
+            return `
+                <div class="h-full bg-gradient-to-br from-purple-50 to-indigo-50 md:overflow-y-hidden">
+                    <div class="mobile-content md:hidden">
+                        <div class="text-center mb-4">
+                            <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                            ${slide.content.subtitle ? `<h2 class="mobile-subtitle text-purple-600 mt-1">${slide.content.subtitle}</h2>` : ''}
+                        </div>
+                        <div class="space-y-3">${segs.map(s => renderFlexSegment(s, mobileCls)).join('')}</div>
+                    </div>
+                    <div class="hidden md:block desktop-fit desktop-compact">
+                        <div class="text-center mb-4">
+                            <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                            ${slide.content.subtitle ? `<h2 class="text-xl text-purple-600 mt-1">${slide.content.subtitle}</h2>` : ''}
+                        </div>
+                        <div class="max-w-4xl mx-auto space-y-3">${segs.map(s => renderFlexSegment(s, desktopCls)).join('')}</div>
+                    </div>
+                </div>`;
+        }
+
         case 'title':
             return `
                 <div class="h-full bg-gradient-to-br from-purple-50 to-indigo-50 flex items-center justify-center p-6 md:p-8">
@@ -3125,6 +3258,15 @@ function wireTabEvents() {
       });
       renderObjListItems(i);
       renderComparisonRows(i);
+      renderFlexSegments(i);
+      document.querySelectorAll('[data-flex-add]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const kind = btn.dataset.flexAdd;
+          const empty = {text:{kind:'text', text:''}, list:{kind:'list', items:[]}, links:{kind:'links', items:[]}, resource:{kind:'resource', name:'', url:'', description:''}}[kind];
+          (state.slides[i].content.segments ||= []).push(empty);
+          saveDraft(); renderFlexSegments(i); lucide.createIcons();
+        });
+      });
       const btnAddObj = document.getElementById('btnAddObjItem');
       if (btnAddObj) btnAddObj.addEventListener('click', () => {
         const objlist = OBJLIST_FIELDS[state.slides[i].type];

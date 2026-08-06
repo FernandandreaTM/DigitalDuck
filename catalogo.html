@@ -18,10 +18,10 @@
             </div>
             <div class="nav-right">
                 <ul class="nav-links" id="navLinks"></ul>
-                <a href="catalogo.html" class="nav-pill"><span class="pill-label">CATÁLOGO</span></a>
+                <a href="catalogo.html" class="nav-pill"><span class="nav-pill-icon">🔬</span><span class="pill-label">CATÁLOGO</span></a>
                 <div class="nav-pill-wrap">
                     <button class="nav-pill" id="practicosPillToggle" aria-haspopup="true" aria-expanded="false">
-                        <span class="pill-label">PRÁCTICOS</span> <span class="pill-caret">▾</span>
+                        <span class="nav-pill-icon">📋</span><span class="pill-label">PRÁCTICOS</span> <span class="pill-caret">▾</span>
                     </button>
                     <div class="practicos-pill-dropdown" id="practicosPillDropdown">
                         <div class="practicos-pill-dropdown-content" id="practicosPillDropdownContent"></div>
@@ -43,28 +43,32 @@
     </div>
 
     <div class="practicos-container">
-        <div class="catalogo-intro">
-            <p>
+        <div class="catalogo-header-block">
+            <p class="catalogo-intro">
                 Cada práctico completo (con objetivos, tutoriales y actividades) está en
-                <a href="practicos.html" style="color: var(--color-secondary); font-weight: 600;">Prácticos</a>.
-                Esta vista es un atajo: solo las láminas, agrupadas por tema, para repasar antes de una evaluación
-                o buscar un caso puntual.
+                <a href="practicos.html">Prácticos</a>. Esta vista es un atajo: solo las láminas,
+                agrupadas por tema, para repasar antes de una evaluación o buscar un caso puntual.
             </p>
-        </div>
 
-        <div class="catalogo-disclaimer">
-            <strong>Sobre las fuentes:</strong> las láminas y referencias clínicas de este catálogo provienen de
-            plataformas externas (Virtual Pathology Leeds, Histology Guide, MedlinePlus, MSD Manuals) y de la
-            bibliografía del curso. DigitalDuck no es autor de ese material — lo cura y enlaza con fines educativos.
-            Ver el detalle en <a href="#fuentes" style="color: var(--color-secondary); font-weight: 600;">Fuentes y bibliografía</a>.
-            <br><br>
-            <strong>Sobre los casos clínicos:</strong> la lámina histológica es real, pero el caso clínico que la
-            acompaña (nombre, edad, síntomas, exámenes) es ficticio — se reconstruye a partir de los pocos datos
-            clínicos disponibles junto a cada lámina, cuando existen, para representar una presentación típica de
-            la entidad. No corresponde a un paciente real ni debe usarse con fines diagnósticos o clínicos.
-        </div>
+            <div class="catalogo-disclaimer">
+                <div class="catalogo-disclaimer-item">
+                    <span class="catalogo-disclaimer-icon">🔗</span>
+                    <p><strong>Sobre las fuentes:</strong> las láminas y referencias clínicas de este catálogo provienen de
+                    plataformas externas (Virtual Pathology Leeds, Histology Guide, MedlinePlus, MSD Manuals) y de la
+                    bibliografía del curso. DigitalDuck no es autor de ese material — lo cura y enlaza con fines educativos.
+                    Ver el detalle en <a href="#fuentes">Fuentes y bibliografía</a>.</p>
+                </div>
+                <div class="catalogo-disclaimer-item">
+                    <span class="catalogo-disclaimer-icon">⚠️</span>
+                    <p><strong>Sobre los casos clínicos:</strong> la lámina histológica es real, pero el caso clínico que la
+                    acompaña (nombre, edad, síntomas, exámenes) es ficticio — se reconstruye a partir de los pocos datos
+                    clínicos disponibles junto a cada lámina, cuando existen, para representar una presentación típica de
+                    la entidad. No corresponde a un paciente real ni debe usarse con fines diagnósticos o clínicos.</p>
+                </div>
+            </div>
 
-        <div class="unidad-jump-nav" id="unidadJumpNav"></div>
+            <div class="unidad-jump-nav" id="unidadJumpNav"></div>
+        </div>
 
         <div id="catalogoContent"></div>
 

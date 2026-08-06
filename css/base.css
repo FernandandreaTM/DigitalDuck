@@ -94,21 +94,32 @@ nav {
 }
 
 .nav-pill {
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    justify-content: center;
+    gap: 0.4rem;
+    height: 2.2rem;
     background: var(--gradient-primary);
     color: var(--color-dark);
+    font-family: inherit;
     font-weight: 600;
     font-size: 0.8rem;
+    line-height: 1;
     text-decoration: none;
-    padding: 0.45rem 1rem;
+    padding: 0 1.1rem;
+    margin: 0;
     border: none;
     border-radius: 20px;
     cursor: pointer;
     white-space: nowrap;
     box-shadow: 0 2px 8px rgba(245, 200, 66, 0.3);
     transition: all 0.25s ease;
+}
+
+.nav-pill-icon {
+    font-size: 0.95rem;
+    line-height: 1;
 }
 
 .nav-pill:hover {

@@ -96,10 +96,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: '.$_SERVER['PHP_SELF'].'?msg='.urlencode('Lámina eliminada.'));
         exit;
     }
+
+    if ($action === 'upload_json') {
+        if (!isset($_FILES['json_file']) || $_FILES['json_file']['error'] !== UPLOAD_ERR_OK) {
+            header('Location: '.$_SERVER['PHP_SELF'].'?error='.urlencode('No se pudo leer el archivo subido.'));
+            exit;
+        }
+        $data = json_decode(file_get_contents($_FILES['json_file']['tmp_name']), true);
+        if (!is_array($data) || empty($data['title'])) {
+            header('Location: '.$_SERVER['PHP_SELF'].'?error='.urlencode('El JSON no tiene el formato esperado (falta "title"). ¿Es el archivo descargado desde Caso rápido?'));
+            exit;
+        }
+
+        $title    = trim($data['title']);
+        $slug     = slugify($title) . '-suelta';
+        $clinical = is_array($data['clinical'] ?? null) ? $data['clinical'] : [];
+
+        $unidad_numero = trim($data['unidadNumero'] ?? '');
+        $tema_id       = trim($data['temaId'] ?? '');
+        $unidad_nombre = ''; $tema_nombre = '';
+        foreach ($curriculum as $u) {
+            if ($u['numero'] === $unidad_numero) {
+                $unidad_nombre = $u['nombre'];
+                foreach ($u['temas'] as $t) {
+                    if ($t['id'] === $tema_id) { $tema_nombre = $t['nombre']; }
+                }
+            }
+        }
+
+        $labs_json      = json_encode(is_array($clinical['labs'] ?? null) ? $clinical['labs'] : [], JSON_UNESCAPED_UNICODE);
+        $imagen_json    = json_encode(is_array($clinical['imagenologia'] ?? null) ? $clinical['imagenologia'] : [], JSON_UNESCAPED_UNICODE);
+        $questions_json = json_encode(is_array($data['questions'] ?? null) ? $data['questions'] : [], JSON_UNESCAPED_UNICODE);
+        $links_json     = json_encode(is_array($data['links'] ?? null) ? $data['links'] : [], JSON_UNESCAPED_UNICODE);
+
+        $params = [
+            $slug, null, null, $unidad_numero ?: null, $unidad_nombre ?: null,
+            $tema_id ?: null, $tema_nombre ?: null, $title, trim($data['concept'] ?? '') ?: null,
+            trim($clinical['edad'] ?? '') ?: null, trim($clinical['sexo'] ?? '') ?: null,
+            trim($clinical['tipoBiopsia'] ?? '') ?: null, trim($clinical['sitioBiopsia'] ?? '') ?: null,
+            trim($clinical['patient'] ?? '') ?: null, trim($clinical['symptoms'] ?? '') ?: null,
+            $labs_json, $imagen_json, $questions_json, $links_json,
+        ];
+
+        // Si ya existe una lámina suelta con este slug (mismo título), la actualiza en vez de duplicar.
+        $existing = $pdo->prepare("SELECT id FROM laminas WHERE slug=?");
+        $existing->execute([$slug]);
+        $existing_id = $existing->fetchColumn();
+
+        if ($existing_id) {
+            $pdo->prepare("UPDATE laminas SET slug=?,practico=?,indice_en_practico=?,unidad_numero=?,unidad_nombre=?,
+                tema_id=?,tema_nombre=?,title=?,concept=?,clinical_edad=?,clinical_sexo=?,clinical_tipo_biopsia=?,
+                clinical_sitio_biopsia=?,clinical_patient=?,clinical_symptoms=?,labs_json=?,imagenologia_json=?,
+                questions_json=?,links_json=?,updated_at=datetime('now') WHERE id=?")
+                ->execute([...$params, $existing_id]);
+            $id  = $existing_id;
+            $msg = 'Lámina actualizada desde el JSON (ya existía una con este título).';
+        } else {
+            $orden = (int)($pdo->query('SELECT COALESCE(MAX(orden),0) FROM laminas')->fetchColumn()) + 1;
+            $pdo->prepare("INSERT INTO laminas (slug,practico,indice_en_practico,unidad_numero,unidad_nombre,
+                tema_id,tema_nombre,title,concept,clinical_edad,clinical_sexo,clinical_tipo_biopsia,
+                clinical_sitio_biopsia,clinical_patient,clinical_symptoms,labs_json,imagenologia_json,
+                questions_json,links_json,orden) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+                ->execute([...$params, $orden]);
+            $id  = (int)$pdo->lastInsertId();
+            $msg = 'Lámina creada desde el JSON.';
+        }
+        header('Location: '.$_SERVER['PHP_SELF'].'?lamina_id='.$id.'&msg='.urlencode($msg));
+        exit;
+    }
 }
 
 $lamina_id = (int)($_GET['lamina_id'] ?? 0);
 $msg       = $_GET['msg'] ?? '';
+$error     = $_GET['error'] ?? '';
 $practicos = $pdo->query("SELECT file,name FROM practicos ORDER BY orden,id")->fetchAll();
 $laminas   = $pdo->query("SELECT id,slug,title,practico,unidad_numero FROM laminas ORDER BY orden,id")->fetchAll();
 $edit      = null;
@@ -144,6 +213,7 @@ header h1{font-size:1.1rem;color:var(--yellow)}
 .btn-new{display:block;width:100%;text-align:center;background:var(--green);color:#0f2e1d;border:none;padding:.6rem;border-radius:var(--radius);cursor:pointer;font-size:.875rem;margin-bottom:1rem}
 .main{padding:1.5rem 2rem;max-width:900px}
 .msg{background:rgba(74,222,128,.15);border:1px solid var(--green);color:var(--green);padding:.6rem 1rem;border-radius:var(--radius);margin-bottom:1rem;font-size:.875rem}
+.err{background:rgba(248,113,113,.15);border:1px solid var(--red);color:var(--red);padding:.6rem 1rem;border-radius:var(--radius);margin-bottom:1rem;font-size:.875rem}
 .card{background:var(--purple-mid);border:1px solid var(--gray-700);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.25rem}
 .card h3{font-size:.9rem;color:var(--yellow);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.05em}
 .card .sub-h{font-size:.75rem;color:var(--gray-500);margin:1rem 0 .5rem}
@@ -187,6 +257,19 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--yellow)}
 </aside>
 <main class="main">
   <?php if ($msg): ?><div class="msg"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
+  <?php if ($error): ?><div class="err"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+
+  <div class="card">
+    <h3>Subir JSON de Caso rápido</h3>
+    <p class="sub" style="margin-bottom:.75rem">Sube el archivo que descargas con "Descargar JSON" en el generador público. Si ya existe una lámina con el mismo título, se actualiza; si no, se crea nueva.</p>
+    <form method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="action" value="upload_json">
+      <div class="field">
+        <input type="file" name="json_file" accept=".json" required>
+      </div>
+      <button type="submit" class="btn btn-yellow">Subir y guardar lámina</button>
+    </form>
+  </div>
 
   <?php if (isset($_GET['new']) || ($lamina_id === 0 && !$edit)): $edit = null; ?>
   <div class="card">

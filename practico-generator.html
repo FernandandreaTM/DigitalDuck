@@ -1289,6 +1289,18 @@ function listToText(arr) { return (arr||[]).join('\n'); }
 function textToList(txt) { return txt.split('\n').map(s=>s.trim()).filter(Boolean); }
 function csvToList(txt) { return txt.split(',').map(s=>s.trim()).filter(Boolean); }
 
+/* Tarjeta visual reutilizable para agrupar secciones de un formulario (ej. "Paciente",
+   "Preguntas de análisis") en vez de un formulario plano largo. subtitle es opcional. */
+function cardWrap(icon, title, innerHtml, subtitle) {
+  return `<div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-4">
+    <h3 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+      <i data-lucide="${icon}" class="w-4 h-4 text-purple-600 flex-shrink-0"></i> ${title}
+    </h3>
+    ${subtitle ? `<p class="text-xs text-gray-500 -mt-2 mb-3">${subtitle}</p>` : ''}
+    ${innerHtml}
+  </div>`;
+}
+
 /* ================= RENDER: APP SHELL ================= */
 
 const TABS = [
@@ -1395,16 +1407,32 @@ function wireModeSelector() {
 
 function renderQuickCase() {
   const c = quickCase;
-  const simple = SIMPLE_FIELDS.case;
   const objlist = OBJLIST_FIELDS.case;
 
-  const fieldsHtml = renderCaseFields(c, 'data-qc-field') + simple.map(([path,label,ftype]) => {
-    if (ftype === 'chiplist') {
-      return `<div class="mb-3" data-qc-chipfield="${path}"><label class="field-label">${label}</label><div id="qcChipsBox_${path.replace(/\./g,'_')}"></div></div>`;
-    }
-    const listAttr = DATALIST_FOR_PATH[path] ? ` list="${DATALIST_FOR_PATH[path]}"` : '';
-    return `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" data-qc-field="${path}" value="${escAttr(getPath(c, path))}"${listAttr}></div>`;
-  }).join('');
+  const preguntasCard = cardWrap('help-circle', 'Preguntas de análisis', `
+    <div data-qc-chipfield="questions"><div id="qcChipsBox_questions"></div></div>
+  `);
+
+  const enlacesCard = cardWrap('link', objlist.label, `
+    <div id="qcQuickLinksBox"></div>
+    <div id="qcObjlistItems"></div>
+    <button id="qcBtnAddLink" class="mt-2 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1">
+      <i data-lucide="plus" class="w-4 h-4"></i> Agregar enlace
+    </button>
+  `);
+
+  const clasificacionCard = cardWrap('bookmark', 'Clasificación (opcional)', `
+    <div class="grid md:grid-cols-2 gap-x-3">
+      <select class="field-input" data-qc-meta="unidadNumero">
+        <option value="">— Selecciona unidad —</option>
+        ${CURRICULUM_TAXONOMY.unidades.map(u => `<option value="${escAttr(u.numero)}" ${quickCase.unidadNumero===u.numero?'selected':''}>${escHtml(u.numero + ' — ' + u.nombre)}</option>`).join('')}
+      </select>
+      <select class="field-input" data-qc-meta="temaId" ${!quickCase.unidadNumero ? 'disabled' : ''}>
+        <option value="">— Selecciona tema —</option>
+        ${((CURRICULUM_TAXONOMY.unidades.find(u => u.numero===quickCase.unidadNumero)||{}).temas||[]).map(t => `<option value="${escAttr(t.id)}" ${quickCase.temaId===t.id?'selected':''}>${escHtml(t.nombre)}</option>`).join('')}
+      </select>
+    </div>
+  `, 'Se usa solo si vas a agregar esta lámina al catálogo.');
 
   return `
     <div class="flex items-center gap-2 mb-1">
@@ -1413,47 +1441,35 @@ function renderQuickCase() {
     </div>
     <p class="text-sm text-gray-500 mb-4">Una sola lámina, lista para descargar, guardar o sumar a un práctico.</p>
     <div class="max-w-3xl">
-      ${fieldsHtml}
-      <div class="mb-3 border-t pt-3">
-        <label class="field-label mb-2">${objlist.label}</label>
-        <div id="qcQuickLinksBox"></div>
-        <div id="qcObjlistItems"></div>
-        <button id="qcBtnAddLink" class="mt-2 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1">
-          <i data-lucide="plus" class="w-4 h-4"></i> Agregar enlace
-        </button>
-      </div>
-      <div class="mb-3 border-t pt-3">
-        <label class="field-label mb-1">Unidad temática (opcional, para sumarla al catálogo de láminas)</label>
-        <div class="grid md:grid-cols-2 gap-x-3">
-          <select class="field-input" data-qc-meta="unidadNumero">
-            <option value="">— Selecciona unidad —</option>
-            ${CURRICULUM_TAXONOMY.unidades.map(u => `<option value="${escAttr(u.numero)}" ${quickCase.unidadNumero===u.numero?'selected':''}>${escHtml(u.numero + ' — ' + u.nombre)}</option>`).join('')}
-          </select>
-          <select class="field-input" data-qc-meta="temaId" ${!quickCase.unidadNumero ? 'disabled' : ''}>
-            <option value="">— Selecciona tema —</option>
-            ${((CURRICULUM_TAXONOMY.unidades.find(u => u.numero===quickCase.unidadNumero)||{}).temas||[]).map(t => `<option value="${escAttr(t.id)}" ${quickCase.temaId===t.id?'selected':''}>${escHtml(t.nombre)}</option>`).join('')}
-          </select>
+      ${renderCaseFields(c, 'data-qc-field')}
+      ${preguntasCard}
+      ${enlacesCard}
+      ${clasificacionCard}
+      <div id="qcValidation"></div>
+      <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Exportar</p>
+        <div class="flex gap-2 flex-wrap mb-3">
+          <button id="qcBtnDescargarJSON" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+            <i data-lucide="file-json" class="w-4 h-4"></i> Descargar JSON
+          </button>
+          <button id="qcBtnPreview" class="border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+            <i data-lucide="eye" class="w-4 h-4"></i> Vista previa
+          </button>
         </div>
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Publicar</p>
+        <div class="flex gap-2 flex-wrap">
+          <button id="qcBtnAgregarPractico" class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+            <i data-lucide="list-plus" class="w-4 h-4"></i> Agregar a un práctico existente
+          </button>
+          <button id="qcBtnAgregarCatalogo" class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+            <i data-lucide="library" class="w-4 h-4"></i> Agregar al catálogo de láminas
+          </button>
+        </div>
+        <input type="file" id="qcFilePracticoInput" accept=".html,.htm" class="hidden">
+        <input type="file" id="qcFileLaminasInput" accept=".json" class="hidden">
       </div>
     </div>
-    <div id="qcValidation" class="max-w-3xl"></div>
-    <div class="flex gap-2 flex-wrap mt-4">
-      <button id="qcBtnDescargarJSON" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-        <i data-lucide="file-json" class="w-4 h-4"></i> Descargar JSON de la lámina
-      </button>
-      <button id="qcBtnAgregarPractico" class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-        <i data-lucide="list-plus" class="w-4 h-4"></i> Agregar a un práctico existente
-      </button>
-      <button id="qcBtnAgregarCatalogo" class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-        <i data-lucide="library" class="w-4 h-4"></i> Agregar al catálogo de láminas
-      </button>
-      <button id="qcBtnPreview" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-        <i data-lucide="eye" class="w-4 h-4"></i> Vista previa
-      </button>
-      <input type="file" id="qcFilePracticoInput" accept=".html,.htm" class="hidden">
-      <input type="file" id="qcFileLaminasInput" accept=".json" class="hidden">
-    </div>
-    <div id="qcPreviewWrap" class="border rounded-xl overflow-hidden mt-4 hidden" style="height:60vh;">
+    <div id="qcPreviewWrap" class="border rounded-xl overflow-hidden mt-4 hidden max-w-3xl" style="height:60vh;">
       <iframe id="qcPreviewFrame" class="w-full h-full" title="Vista previa"></iframe>
     </div>
   `;
@@ -1900,9 +1916,13 @@ function renderCaseFields(content, fieldAttr) {
   const val = (path) => escAttr(getPath(content, path) || '');
   const dl = (path) => DATALIST_FOR_PATH[path] ? ` list="${DATALIST_FOR_PATH[path]}"` : '';
   const field = (path, label) => `<div class="mb-3"><label class="field-label">${label}</label><input class="field-input" ${fieldAttr}="${path}" data-slide-type="text"${dl(path)} value="${val(path)}"></div>`;
-  return `
+
+  const laminaCard = cardWrap('layers', 'Lámina', `
     ${field('title', 'Título (ej. Metaplasia Intestinal — sin número, el orden lo da la posición en el práctico)')}
     ${field('concept', 'Concepto clave (ej. METAPLASIA)')}
+  `);
+
+  const pacienteCard = cardWrap('user', 'Paciente', `
     <div class="grid md:grid-cols-2 gap-x-3">
       ${field('clinical.edad', 'Edad (opcional)')}
       ${field('clinical.sexo', 'Sexo (opcional)')}
@@ -1912,18 +1932,23 @@ function renderCaseFields(content, fieldAttr) {
       ${field('clinical.sitioBiopsia', 'Sitio de la biopsia (opcional)')}
     </div>
     ${field('clinical.patient', 'Paciente — texto libre (opcional si ya llenaste edad/sexo/sitio/tipo arriba)')}
+  `, 'El caso es ficticio — recrea una presentación típica, no un paciente real.');
+
+  const hallazgosCard = cardWrap('stethoscope', 'Hallazgos', `
     ${field('clinical.symptoms', 'Síntomas')}
     <div class="mb-3">
       <label class="field-label mb-2">Laboratorio (opcional, agrega los resultados que necesites)</label>
       <div id="caseLabsBox_${suffix}"></div>
       <button data-case-add-labs class="mt-1 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1"><i data-lucide="plus" class="w-4 h-4"></i> Agregar resultado</button>
     </div>
-    <div class="mb-3">
+    <div>
       <label class="field-label mb-2">Estudios de imagen (opcional, agrega los que necesites)</label>
       <div id="caseImgBox_${suffix}"></div>
       <button data-case-add-img class="mt-1 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1"><i data-lucide="plus" class="w-4 h-4"></i> Agregar estudio</button>
     </div>
-  `;
+  `);
+
+  return laminaCard + pacienteCard + hallazgosCard;
 }
 
 /* Solo redibuja las dos listas (llamable muchas veces sin duplicar listeners, mismo
@@ -1965,7 +1990,8 @@ function renderSlideEditor(i) {
   let fieldsHtml = (slide.type === 'case' ? renderCaseFields(slide.content, 'data-slide-field') : '') + simple.map(([path,label,ftype]) => {
     const val = getPath(slide.content, path);
     if (ftype === 'chiplist') {
-      return `<div class="mb-3" data-chipfield="${path}"><label class="field-label">${label}</label><div id="chipsBox_${path.replace(/\./g,'_')}"></div></div>`;
+      const inner = `<div data-chipfield="${path}"><div id="chipsBox_${path.replace(/\./g,'_')}"></div></div>`;
+      return slide.type === 'case' ? cardWrap('help-circle', label, inner) : `<div class="mb-3"><label class="field-label">${label}</label>${inner}</div>`;
     }
     if (ftype === 'list') {
       return `<div class="mb-3"><label class="field-label">${label}</label><textarea class="field-input" rows="4" data-slide-field="${path}" data-slide-type="list">${escHtml(listToText(val))}</textarea></div>`;
@@ -1980,28 +2006,23 @@ function renderSlideEditor(i) {
   let objlistHtml = '';
   if (objlist) {
     const quickLinksBox = slide.type === 'case' ? `<div id="quickLinksBox"></div>` : '';
-    objlistHtml = `<div class="mb-3 border-t pt-3">
-      <label class="field-label mb-2">${objlist.label}</label>
+    objlistHtml = cardWrap('link', objlist.label, `
       ${quickLinksBox}
       <div id="objlistItems"></div>
       <button id="btnAddObjItem" class="mt-2 text-sm text-purple-700 hover:text-purple-900 flex items-center gap-1">
         <i data-lucide="plus" class="w-4 h-4"></i> Agregar ${objlist.itemLabel.toLowerCase()}
       </button>
-    </div>`;
+    `);
   }
 
   let comparisonHtml = '';
   if (slide.type === 'comparison') {
-    comparisonHtml = `<div class="mb-3 border-t pt-3">
-      <label class="field-label mb-2">Tabla comparativa</label>
-      <div id="comparisonTableWrap"></div>
-    </div>`;
+    comparisonHtml = cardWrap('table', 'Tabla comparativa', `<div id="comparisonTableWrap"></div>`);
   }
 
   let flexHtml = '';
   if (slide.type === 'flex') {
-    flexHtml = `<div class="mb-3 border-t pt-3">
-      <label class="field-label mb-2">Segmentos</label>
+    flexHtml = cardWrap('layout-grid', 'Segmentos', `
       <div id="flexSegments"></div>
       <p class="text-xs text-gray-500 mb-2 mt-2">Agregar segmento:</p>
       <div class="flex gap-2 flex-wrap">
@@ -2011,7 +2032,7 @@ function renderSlideEditor(i) {
         <button data-flex-add="resource" class="text-sm border border-purple-300 text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-lg">+ Tarjeta de recurso</button>
         <button data-flex-add="steps" class="text-sm border border-purple-300 text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-lg">+ Pasos</button>
       </div>
-    </div>`;
+    `);
   }
 
   return `
@@ -2025,10 +2046,10 @@ function renderSlideEditor(i) {
       ${objlistHtml}
       ${comparisonHtml}
       ${flexHtml}
+      <button id="btnGuardarLamina" class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="check" class="w-4 h-4"></i> Guardar y volver
+      </button>
     </div>
-    <button id="btnGuardarLamina" class="mt-4 bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-      <i data-lucide="check" class="w-4 h-4"></i> Guardar y volver
-    </button>
   `;
 }
 
@@ -2103,10 +2124,10 @@ function renderQuickLinkButtonsHTML(items) {
   const avail = QUICK_LINKS.filter(q => !present.has(q.label));
   if (!avail.length) return '';
   return `<div class="mb-2">
-    <p class="text-xs text-gray-500 mb-1">Fuentes rápidas (referenciales — agrega el home, tú buscas y ajustas el enlace al caso; puedes usar otras fuentes):</p>
-    <div class="flex flex-wrap gap-2">
-      ${avail.map(q => `<button data-quicklink="${escAttr(q.label)}" data-quicklink-url="${escAttr(q.url)}" title="${escAttr(q.hint)}" class="border border-blue-300 text-blue-700 hover:bg-blue-50 text-xs px-2.5 py-1 rounded-full">+ ${escHtml(q.label)}</button>`).join('')}
-    </div>
+    <select class="field-input text-sm" data-quicklink-select>
+      <option value="">+ Agregar fuente rápida (home; tú ajustas el enlace al caso)…</option>
+      ${avail.map((q,qi) => `<option value="${qi}" title="${escAttr(q.hint)}">${escHtml(q.label)}</option>`).join('')}
+    </select>
   </div>`;
 }
 
@@ -2114,12 +2135,14 @@ function renderLinksField(items, fields, quickBoxId, objBoxId, persist) {
   const onChange = () => { persist(); renderLinksField(items, fields, quickBoxId, objBoxId, persist); };
   const quickBox = document.getElementById(quickBoxId);
   if (quickBox) {
+    const present = new Set((items||[]).map(l => l.label));
+    const avail = QUICK_LINKS.filter(q => !present.has(q.label));
     quickBox.innerHTML = renderQuickLinkButtonsHTML(items);
-    quickBox.querySelectorAll('[data-quicklink]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        items.push({label: btn.dataset.quicklink, url: btn.dataset.quicklinkUrl});
-        onChange();
-      });
+    const sel = quickBox.querySelector('[data-quicklink-select]');
+    if (sel) sel.addEventListener('change', () => {
+      if (sel.value === '') return;
+      const q = avail[+sel.value];
+      if (q) { items.push({label: q.label, url: q.url}); onChange(); }
     });
     lucide.createIcons();
   }
@@ -2138,7 +2161,7 @@ function renderChipsField(obj, path, boxId, persist, presets, customKey) {
   const rerender = () => renderChipsField(obj, path, boxId, persist, presets, customKey);
 
   box.innerHTML = `
-    <div class="flex flex-wrap gap-2 mb-2">
+    <div class="flex flex-wrap gap-2 ${selected.length ? 'mb-2' : ''}">
       ${selected.map((q,qi) => `
         <span class="bg-purple-100 text-purple-800 text-sm px-3 py-1.5 rounded-full flex items-center gap-2">
           ${escHtml(q)}
@@ -2146,10 +2169,11 @@ function renderChipsField(obj, path, boxId, persist, presets, customKey) {
         </span>
       `).join('') || '<p class="text-sm text-gray-400">Sin elementos aún.</p>'}
     </div>
-    ${available.length ? `<p class="text-xs text-gray-500 mb-1">Frecuentes:</p>
-    <div class="flex flex-wrap gap-2 mb-2">
-      ${available.map(q => `<button data-chip-preset="${escAttr(q)}" class="border border-purple-300 text-purple-700 hover:bg-purple-50 text-xs px-2.5 py-1 rounded-full">+ ${escHtml(q)}</button>`).join('')}
-    </div>` : ''}
+    ${available.length ? `
+    <select class="field-input text-sm mb-2" data-chip-select>
+      <option value="">+ Agregar de frecuentes…</option>
+      ${available.map(q => `<option value="${escAttr(q)}">${escHtml(q)}</option>`).join('')}
+    </select>` : ''}
     <div class="flex gap-2 items-center">
       <input class="field-input" data-chip-custom-input placeholder="Escribe uno propio y presiona +">
       <button data-chip-custom-add class="bg-purple-700 hover:bg-purple-800 text-white px-3 py-2 rounded-lg text-sm flex-shrink-0">+</button>
@@ -2166,12 +2190,12 @@ function renderChipsField(obj, path, boxId, persist, presets, customKey) {
       persist(); rerender();
     });
   });
-  box.querySelectorAll('[data-chip-preset]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      selected.push(btn.dataset.chipPreset);
-      setPath(obj, path, selected);
-      persist(); rerender();
-    });
+  const chipSelect = box.querySelector('[data-chip-select]');
+  if (chipSelect) chipSelect.addEventListener('change', () => {
+    if (!chipSelect.value) return;
+    selected.push(chipSelect.value);
+    setPath(obj, path, selected);
+    persist(); rerender();
   });
   const commit = () => {
     const input = box.querySelector('[data-chip-custom-input]');

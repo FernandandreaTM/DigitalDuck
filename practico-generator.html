@@ -1422,6 +1422,19 @@ function renderQuickCase() {
           <i data-lucide="plus" class="w-4 h-4"></i> Agregar enlace
         </button>
       </div>
+      <div class="mb-3 border-t pt-3">
+        <label class="field-label mb-1">Unidad temática (opcional, para sumarla al catálogo de láminas)</label>
+        <div class="grid md:grid-cols-2 gap-x-3">
+          <select class="field-input" data-qc-meta="unidadNumero">
+            <option value="">— Selecciona unidad —</option>
+            ${CURRICULUM_TAXONOMY.unidades.map(u => `<option value="${escAttr(u.numero)}" ${quickCase.unidadNumero===u.numero?'selected':''}>${escHtml(u.numero + ' — ' + u.nombre)}</option>`).join('')}
+          </select>
+          <select class="field-input" data-qc-meta="temaId" ${!quickCase.unidadNumero ? 'disabled' : ''}>
+            <option value="">— Selecciona tema —</option>
+            ${((CURRICULUM_TAXONOMY.unidades.find(u => u.numero===quickCase.unidadNumero)||{}).temas||[]).map(t => `<option value="${escAttr(t.id)}" ${quickCase.temaId===t.id?'selected':''}>${escHtml(t.nombre)}</option>`).join('')}
+          </select>
+        </div>
+      </div>
     </div>
     <div id="qcValidation" class="max-w-3xl"></div>
     <div class="flex gap-2 flex-wrap mt-4">
@@ -1431,10 +1444,14 @@ function renderQuickCase() {
       <button id="qcBtnAgregarPractico" class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
         <i data-lucide="list-plus" class="w-4 h-4"></i> Agregar a un práctico existente
       </button>
+      <button id="qcBtnAgregarCatalogo" class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="library" class="w-4 h-4"></i> Agregar al catálogo de láminas
+      </button>
       <button id="qcBtnPreview" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
         <i data-lucide="eye" class="w-4 h-4"></i> Vista previa
       </button>
       <input type="file" id="qcFilePracticoInput" accept=".html,.htm" class="hidden">
+      <input type="file" id="qcFileLaminasInput" accept=".json" class="hidden">
     </div>
     <div id="qcPreviewWrap" class="border rounded-xl overflow-hidden mt-4 hidden" style="height:60vh;">
       <iframe id="qcPreviewFrame" class="w-full h-full" title="Vista previa"></iframe>
@@ -1472,6 +1489,14 @@ function wireQuickCase() {
   });
   renderQcObjListItems();
   wireCaseLabsFields(quickCase, 'data-qc-field', saveQuickDraft);
+  document.querySelectorAll('[data-qc-meta]').forEach(sel => {
+    sel.addEventListener('change', () => {
+      quickCase[sel.dataset.qcMeta] = sel.value;
+      if (sel.dataset.qcMeta === 'unidadNumero') quickCase.temaId = '';
+      saveQuickDraft();
+      render();
+    });
+  });
   document.getElementById('qcBtnAddLink').addEventListener('click', () => {
     (quickCase.links ||= []).push({label:'', url:''});
     saveQuickDraft(); renderQcObjListItems(); lucide.createIcons();
@@ -1482,12 +1507,64 @@ function wireQuickCase() {
     if (e.target.files[0]) addQuickCaseToPractico(e.target.files[0]);
     e.target.value = '';
   });
+  document.getElementById('qcBtnAgregarCatalogo').addEventListener('click', () => document.getElementById('qcFileLaminasInput').click());
+  document.getElementById('qcFileLaminasInput').addEventListener('change', (e) => {
+    if (e.target.files[0]) updateLaminasFromQuickCase(e.target.files[0]);
+    e.target.value = '';
+  });
   document.getElementById('qcBtnPreview').addEventListener('click', showQuickCasePreview);
   renderQcValidation();
 }
 
 function downloadQuickCaseJSON() {
   downloadBlob(JSON.stringify(quickCase, null, 2), slugify(quickCase.title || 'lamina') + '.json', 'application/json');
+}
+
+/* Convierte el caso rápido actual a una entrada de data/laminas.json. A diferencia de
+   buildLaminaEntries() (que reparte varias láminas de un práctico), acá siempre es una
+   sola lámina y practico queda en null porque el caso rápido no está atado a ningún
+   archivo — catalogo.html no muestra el link "ver práctico completo" cuando es null. */
+function buildQuickLaminaEntry() {
+  const unidad = CURRICULUM_TAXONOMY.unidades.find(u => u.numero === quickCase.unidadNumero);
+  const tema = unidad ? (unidad.temas || []).find(t => t.id === quickCase.temaId) : null;
+  return {
+    id: slugify(quickCase.title || 'lamina') + '-suelta',
+    practico: null,
+    indiceEnPractico: null,
+    unidadNumero: quickCase.unidadNumero || '',
+    unidadNombre: unidad ? unidad.nombre : '',
+    temaId: quickCase.temaId || '',
+    temaNombre: tema ? tema.nombre : '',
+    title: quickCase.title || '',
+    concept: quickCase.concept || '',
+    clinical: quickCase.clinical || {},
+    questions: quickCase.questions || [],
+    links: quickCase.links || []
+  };
+}
+
+function updateLaminasFromQuickCase(file) {
+  if (!quickCase.title) {
+    alert('Completa el título de la lámina primero.');
+    return;
+  }
+  const entry = buildQuickLaminaEntry();
+  const reader = new FileReader();
+  reader.onload = () => {
+    let parsed;
+    try { parsed = JSON.parse(String(reader.result)); }
+    catch(e) { alert('El archivo no es un JSON válido. ¿Es el data/laminas.json correcto?'); return; }
+    if (!parsed || !Array.isArray(parsed.laminas)) {
+      alert('No se encontró el arreglo "laminas" en el archivo subido. ¿Es el data/laminas.json correcto?');
+      return;
+    }
+    const otras = parsed.laminas.filter(l => l.id !== entry.id);
+    parsed.laminas = otras.concat([entry]);
+    downloadBlob(JSON.stringify(parsed, null, 2) + '\n', 'laminas.json', 'application/json');
+    alert('laminas.json actualizado y descargado con esta lámina. Reemplaza data/laminas.json, corre "node scripts/sync-embedded-data.js" y revisa el diff antes de subir.');
+  };
+  reader.onerror = () => alert('No se pudo leer el archivo.');
+  reader.readAsText(file);
 }
 
 function showQuickCasePreview() {

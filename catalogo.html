@@ -1054,10 +1054,43 @@
             return LAMINAS.filter(l => l.temaId === temaId);
         }
 
+        /* Copia local de composePatientLine (practico-generator.html): compone la línea de
+           paciente a partir de edad/sexo/tipo/sitio de biopsia si existen, o cae al string
+           legado clinical.patient. */
+        function patientLine(clinical) {
+            if (!clinical) return '';
+            const structured = clinical.edad || clinical.sexo || clinical.sitioBiopsia || clinical.tipoBiopsia;
+            if (!structured) return clinical.patient || '';
+            let base = '';
+            if (clinical.sexo && clinical.edad) base = clinical.sexo + ' de ' + clinical.edad + ' años';
+            else if (clinical.sexo) base = clinical.sexo;
+            else if (clinical.edad) base = clinical.edad + ' años';
+            let bx = '';
+            if (clinical.tipoBiopsia && clinical.sitioBiopsia) bx = 'biopsia ' + clinical.tipoBiopsia + ' de ' + clinical.sitioBiopsia;
+            else if (clinical.tipoBiopsia) bx = 'biopsia ' + clinical.tipoBiopsia;
+            else if (clinical.sitioBiopsia) bx = 'biopsia de ' + clinical.sitioBiopsia;
+            return [base, bx].filter(Boolean).join(', ');
+        }
+        /* Copia local de labsToList/fieldList: acepta lista nueva, objeto único {value,url}
+           o string legado, siempre devuelve una lista. */
+        function fieldList(v) {
+            if (Array.isArray(v)) return v.filter(e => (e.value||'').trim() || (e.url||'').trim());
+            if (v && typeof v === 'object') return (v.value || v.url) ? [{value: v.value || '', url: v.url || ''}] : [];
+            if (v) return [{value: v, url: ''}];
+            return [];
+        }
+        function fieldListHTML(list) {
+            return list.map(e => e.url ? (e.value + ' — <a href="' + e.url + '" target="_blank">ver</a>') : e.value)
+                       .map(line => '<li>' + line + '</li>').join('');
+        }
+
         function renderLaminaCard(l) {
             const linksHtml = (l.links || []).map(lnk =>
                 `<a href="${lnk.url}" target="_blank">${lnk.label}</a>`
             ).join('');
+            const cl = l.clinical || {};
+            const labsList = fieldList(cl.labs);
+            const imgList = fieldList(cl.imagenologia);
             return `
                 <div class="lamina-card">
                     <div class="lamina-card-header">
@@ -1065,10 +1098,12 @@
                         <h4>${l.title}</h4>
                     </div>
                     <div class="lamina-card-body">
-                        <p><strong>Paciente:</strong> ${l.clinical ? l.clinical.patient : ''}</p>
-                        <p><strong>Síntomas:</strong> ${l.clinical ? l.clinical.symptoms : ''}</p>
+                        <p><strong>Paciente:</strong> ${patientLine(cl)}</p>
+                        ${cl.symptoms ? `<p><strong>Síntomas:</strong> ${cl.symptoms}</p>` : ''}
+                        ${labsList.length ? `<div class="lamina-list-block"><strong>Laboratorio:</strong><ul>${fieldListHTML(labsList)}</ul></div>` : ''}
+                        ${imgList.length ? `<div class="lamina-list-block"><strong>Estudios de imagen:</strong><ul>${fieldListHTML(imgList)}</ul></div>` : ''}
                         <div class="lamina-links">${linksHtml}</div>
-                        <a href="${l.practico}" class="lamina-context-link">Ver en el práctico completo →</a>
+                        ${l.practico ? `<a href="${l.practico}" class="lamina-context-link">Ver en el práctico completo →</a>` : ''}
                     </div>
                 </div>
             `;

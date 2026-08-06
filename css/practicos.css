@@ -1,109 +1,11 @@
 /* ===== PRACTICOS.HTML - Estilos específicos ===== */
-
-/* ===== Botones de navegación ===== */
-.nav-buttons {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-/* Botón de prácticos (hamburguesa secundaria) */
-.practicos-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--gradient-primary);
-    border: none;
-    border-radius: 25px;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 10px rgba(245, 200, 66, 0.3);
-}
-
-.practicos-toggle:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(245, 200, 66, 0.4);
-}
-
-.practicos-toggle.active {
-    background: var(--color-primary);
-}
-
-.practicos-icon {
-    font-size: 1.2rem;
-}
-
-.practicos-text {
-    font-weight: 600;
-    color: var(--color-dark);
-    font-size: 0.85rem;
-}
-
-/* Menú desplegable de prácticos */
-.practicos-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 1.5rem;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 10px 40px rgba(61, 38, 69, 0.25);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    z-index: 999;
-    overflow: hidden;
-    min-width: 280px;
-}
-
-.practicos-dropdown.active {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.practicos-dropdown-content {
-    padding: 0.5rem;
-    max-height: 70vh;
-    overflow-y: auto;
-}
-
-.practico-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.8rem 1rem;
-    text-decoration: none;
-    color: var(--color-dark);
-    border-radius: 10px;
-    transition: all 0.2s ease;
-}
-
-.practico-item:hover {
-    background: var(--gradient-primary);
-}
-
-.practico-num {
-    background: var(--gradient-secondary);
-    color: white;
-    font-weight: bold;
-    font-size: 0.8rem;
-    padding: 0.3rem 0.6rem;
-    border-radius: 8px;
-    min-width: 35px;
-    text-align: center;
-}
-
-.practico-name {
-    font-weight: 500;
-    font-size: 0.95rem;
-}
+/* El pill/dropdown de navegación de Prácticos vive en base.css (compartido con
+   index.html y catalogo.html). Acá solo quedan estilos propios de esta página. */
 
 /* ===== Page Header ===== */
 .page-header {
     background: var(--gradient-primary);
-    padding: 4rem 2rem;
+    padding: 2.5rem 2rem;
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -121,16 +23,16 @@
 }
 
 .page-header h1 {
-    font-size: 3.5rem;
+    font-size: 2.25rem;
     color: var(--color-dark);
-    margin-bottom: 1rem;
+    margin-bottom: 0.6rem;
     position: relative;
     z-index: 1;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
 
 .page-header p {
-    font-size: 1.3rem;
+    font-size: 1.05rem;
     color: var(--color-dark);
     position: relative;
     z-index: 1;
@@ -142,58 +44,58 @@
 .practicos-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 5rem 2rem;
+    padding: 2.5rem 2rem;
 }
 
 .practicos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 2.5rem;
-    margin-top: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
 }
 
 /* ===== Práctico Card ===== */
 .practico-card {
     background: white;
-    border-radius: 20px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(61, 38, 69, 0.15);
-    transition: all 0.4s ease;
+    box-shadow: 0 6px 20px rgba(61, 38, 69, 0.12);
+    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
-    border: 3px solid transparent;
+    border: 2px solid transparent;
 }
 
 .practico-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(61, 38, 69, 0.25);
+    transform: translateY(-6px);
+    box-shadow: 0 14px 28px rgba(61, 38, 69, 0.2);
     border-color: var(--color-primary);
 }
 
 .practico-header {
     background: var(--gradient-secondary);
-    padding: 2rem;
+    padding: 1.25rem;
     text-align: center;
     position: relative;
 }
 
 .practico-number {
-    font-size: 3rem;
+    font-size: 2rem;
     font-weight: bold;
     color: var(--color-primary);
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
 }
 
 .practico-title {
-    font-size: 1.5rem;
+    font-size: 1.15rem;
     color: var(--color-light);
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
 }
 
 .practico-body {
-    padding: 2rem;
+    padding: 1.25rem;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -201,88 +103,71 @@
 
 .practico-description {
     color: var(--color-dark);
-    line-height: 1.8;
-    margin-bottom: 2rem;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+    font-size: 0.92rem;
     flex-grow: 1;
 }
 
 .practico-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+    font-size: 1.75rem;
+    margin-bottom: 0.6rem;
     text-align: center;
 }
 
 .practico-link {
     display: inline-block;
-    padding: 1rem 2rem;
+    padding: 0.65rem 1.4rem;
     background: var(--gradient-primary);
     color: var(--color-dark);
     text-decoration: none;
     border-radius: 50px;
     font-weight: 600;
+    font-size: 0.9rem;
     text-align: center;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(245, 200, 66, 0.3);
+    box-shadow: 0 3px 10px rgba(245, 200, 66, 0.3);
 }
 
 .practico-link:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(245, 200, 66, 0.4);
+    box-shadow: 0 6px 16px rgba(245, 200, 66, 0.4);
 }
 
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
     .page-header h1 {
-        font-size: 2.5rem;
+        font-size: 1.85rem;
     }
 
     .page-header p {
-        font-size: 1.1rem;
+        font-size: 0.95rem;
     }
 
     .practicos-grid {
         grid-template-columns: 1fr;
-        gap: 2rem;
+        gap: 1.25rem;
     }
 
     .practico-number {
-        font-size: 2.5rem;
+        font-size: 1.85rem;
     }
 
     .practico-title {
-        font-size: 1.3rem;
-    }
-
-    /* Ajuste del menú desplegable en móvil */
-    .practicos-dropdown {
-        right: 1rem;
-        left: 1rem;
-        min-width: auto;
-    }
-
-    .practicos-text {
-        display: none;
-    }
-
-    .practicos-toggle {
-        padding: 0.5rem 0.8rem;
+        font-size: 1.05rem;
     }
 }
 
 @media (max-width: 480px) {
     .page-header h1 {
-        font-size: 2rem;
+        font-size: 1.6rem;
     }
 
     .practico-header {
-        padding: 1.5rem;
+        padding: 1rem;
     }
 
     .practico-body {
-        padding: 1.5rem;
-    }
-
-    .nav-buttons {
-        gap: 0.5rem;
+        padding: 1rem;
     }
 }

@@ -16,7 +16,19 @@
                 <img src="images/logo2.png" alt="DigitalDuck Logo" class="logo-dd">
                 <img src="images/logouach.png" alt="UACH Logo" class="logo-uach">
             </div>
-            <ul class="nav-links" id="navLinks"></ul>
+            <div class="nav-right">
+                <ul class="nav-links" id="navLinks"></ul>
+                <a href="catalogo.html" class="nav-pill"><span class="pill-label">CATÁLOGO</span></a>
+                <div class="nav-pill-wrap">
+                    <button class="nav-pill" id="practicosPillToggle" aria-haspopup="true" aria-expanded="false">
+                        <span class="pill-label">PRÁCTICOS</span> <span class="pill-caret">▾</span>
+                    </button>
+                    <div class="practicos-pill-dropdown" id="practicosPillDropdown">
+                        <div class="practicos-pill-dropdown-content" id="practicosPillDropdownContent"></div>
+                    </div>
+                </div>
+                <a href="admin/login.php" class="admin-link" title="Panel de administración" aria-label="Panel de administración">🔒</a>
+            </div>
             <button class="menu-toggle" id="menuToggle">
                 <span></span>
                 <span></span>
@@ -75,6 +87,7 @@
     <script src="js/nav.js"></script>
     <script>
         renderNav('index.html');
+        initPracticosNav();
 
         const menuToggle = document.getElementById('menuToggle');
         const navLinks = document.getElementById('navLinks');

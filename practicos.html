@@ -16,28 +16,25 @@
                 <img src="images/logouach.png" alt="UACH Logo" class="logo-uach">
             </div> 
             <!-- Menú principal: markup generado por js/nav.js (misma fuente que index.html) -->
-            <ul class="nav-links" id="navLinks"></ul>
-
-            <div class="nav-buttons">
-                <!-- Botón hamburguesa para prácticos -->
-                <button class="practicos-toggle" id="practicosToggle" aria-label="Menú de prácticos">
-                    <span class="practicos-icon">📋</span>
-                    <span class="practicos-text">Prácticos</span>
-                </button>
-
-                <!-- Botón hamburguesa para menú principal (móvil) -->
-                <button class="menu-toggle" id="menuToggle">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
+            <div class="nav-right">
+                <ul class="nav-links" id="navLinks"></ul>
+                <a href="catalogo.html" class="nav-pill"><span class="pill-label">CATÁLOGO</span></a>
+                <div class="nav-pill-wrap">
+                    <button class="nav-pill" id="practicosPillToggle" aria-haspopup="true" aria-expanded="false">
+                        <span class="pill-label">PRÁCTICOS</span> <span class="pill-caret">▾</span>
+                    </button>
+                    <div class="practicos-pill-dropdown" id="practicosPillDropdown">
+                        <div class="practicos-pill-dropdown-content" id="practicosPillDropdownContent"></div>
+                    </div>
+                </div>
+                <a href="admin/login.php" class="admin-link" title="Panel de administración" aria-label="Panel de administración">🔒</a>
             </div>
+            <button class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </nav>
-
-        <!-- Menú desplegable de prácticos (generado desde PRACTICOS, ver script al final del archivo) -->
-        <div class="practicos-dropdown" id="practicosDropdown">
-            <div class="practicos-dropdown-content" id="practicosDropdownContent"></div>
-        </div>
     </header>
 
     <div class="page-header">
@@ -67,16 +64,9 @@
         renderNav('index.html');
 
         // Lista de prácticos: se carga desde el backend (admin/practicos.php la gestiona).
+        // initPracticosNav() (js/nav.js) ya arma el pill del menú; acá solo reusamos los
+        // mismos datos para la grilla de tarjetas de esta página.
         let PRACTICOS = [];
-
-        function renderPracticosDropdown() {
-            document.getElementById('practicosDropdownContent').innerHTML = PRACTICOS.map(p => `
-                <a href="${p.file}" class="practico-item">
-                    <span class="practico-num">${p.num}</span>
-                    <span class="practico-name">${p.name}</span>
-                </a>
-            `).join('');
-        }
 
         function renderPracticosGrid() {
             document.getElementById('practicosGrid').innerHTML = PRACTICOS.map(p => `
@@ -94,44 +84,18 @@
             `).join('');
         }
 
-        fetch('api/practicos.php')
-            .then(r => r.json())
-            .then(data => { PRACTICOS = data; })
-            .catch(() => { console.warn('No se pudo cargar el índice de prácticos desde el servidor.'); })
-            .finally(() => {
-                renderPracticosDropdown();
-                renderPracticosGrid();
-            });
+        initPracticosNav().then(data => {
+            PRACTICOS = data;
+            renderPracticosGrid();
+        });
 
         const menuToggle = document.getElementById('menuToggle');
         const navLinks = document.getElementById('navLinks');
-        const practicosToggle = document.getElementById('practicosToggle');
-        const practicosDropdown = document.getElementById('practicosDropdown');
 
         // Toggle menú principal (móvil)
         menuToggle.addEventListener('click', function() {
             this.classList.toggle('active');
             navLinks.classList.toggle('active');
-            // Cerrar menú de prácticos si está abierto
-            practicosDropdown.classList.remove('active');
-            practicosToggle.classList.remove('active');
-        });
-
-        // Toggle menú de prácticos
-        practicosToggle.addEventListener('click', function() {
-            this.classList.toggle('active');
-            practicosDropdown.classList.toggle('active');
-            // Cerrar menú principal si está abierto
-            navLinks.classList.remove('active');
-            menuToggle.classList.remove('active');
-        });
-
-        // Cerrar menús al hacer click fuera
-        document.addEventListener('click', function(e) {
-            if (!practicosToggle.contains(e.target) && !practicosDropdown.contains(e.target)) {
-                practicosDropdown.classList.remove('active');
-                practicosToggle.classList.remove('active');
-            }
         });
 
         // Cerrar menú móvil al hacer click en un link

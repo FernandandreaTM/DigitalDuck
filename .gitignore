@@ -1,0 +1,18 @@
+# Base de datos
+data/digitalduck.db
+data/digitalduck.db-wal
+data/digitalduck.db-shm
+
+# PHP
+*.log
+*.cache
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,31 @@
+{
+  "title": "Pielonefritis Crónica",
+  "concept": "INFLAMACIÓN CRÓNICA",
+  "clinical": {
+    "patient": "",
+    "edad": "20",
+    "sexo": "Mujer",
+    "tipoBiopsia": "quirúrgica",
+    "sitioBiopsia": "riñón",
+    "symptoms": "Fiebre, vómitos y dolor en flanco, en el contexto de infecciones urinarias recurrentes de larga data.",
+    "labs": [
+      { "value": "Urocultivos previos positivos a repetición; función renal en el límite normal", "url": null }
+    ],
+    "imagenologia": [
+      { "value": "Ecografía renal: riñón de contorno irregular con adelgazamiento cortical focal", "url": null }
+    ]
+  },
+  "questions": [
+    "¿Qué características morfológicas asociadas a inflamación crónica reconoce en la lámina?",
+    "¿En qué se diferencian los hallazgos de este caso de los de una pielonefritis aguda?",
+    "¿Qué factores predisponen a la cronicidad de esta infección?"
+  ],
+  "links": [
+    { "label": "Caso Clínico", "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FUndergraduate%2F1101.svs" },
+    { "label": "Histología Referencia", "url": "https://www.histologyguide.com/slideview/MH-143-kidney/16-slide-1.html" },
+    { "label": "MedlinePlus", "url": "https://medlineplus.gov/ency/article/003579.htm" },
+    { "label": "MSD Manuals", "url": "https://www.msdmanuals.com/professional/infectious-diseases/urinary-tract-infections-utis/chronic-pyelonephritis" }
+  ],
+  "unidadNumero": "II",
+  "temaId": "inflamacion-cronica"
+}

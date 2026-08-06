@@ -63,10 +63,29 @@ nav {
     width: auto;
 }
 
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
 .nav-links {
     display: flex;
     gap: 1.5rem;
     list-style: none;
+}
+
+.admin-link {
+    color: var(--color-light);
+    opacity: 0.4;
+    text-decoration: none;
+    font-size: 0.95rem;
+    line-height: 1;
+    transition: opacity 0.3s;
+}
+
+.admin-link:hover {
+    opacity: 1;
 }
 
 .nav-links a {

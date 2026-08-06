@@ -393,8 +393,8 @@
       "indiceEnPractico": 0,
       "unidadNumero": "II",
       "unidadNombre": "Inflamación",
-      "temaId": "inflamacion-aguda-cronica",
-      "temaNombre": "Inflamación Aguda y Crónica",
+      "temaId": "inflamacion-aguda",
+      "temaNombre": "Inflamación Aguda",
       "title": "Apendicitis Aguda",
       "concept": "INFLAMACIÓN AGUDA",
       "clinical": {
@@ -431,8 +431,8 @@
       "indiceEnPractico": 1,
       "unidadNumero": "II",
       "unidadNombre": "Inflamación",
-      "temaId": "inflamacion-aguda-cronica",
-      "temaNombre": "Inflamación Aguda y Crónica",
+      "temaId": "inflamacion-cronica",
+      "temaNombre": "Inflamación Crónica",
       "title": "Cirrosis hepática",
       "concept": "INFLAMACIÓN CRÓNICA",
       "clinical": {

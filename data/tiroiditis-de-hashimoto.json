@@ -1,0 +1,52 @@
+{
+  "title": "Tiroiditis de Hashimoto",
+  "concept": "TIROIDITIS AUTOINMUNE",
+  "clinical": {
+    "patient": "",
+    "edad": "34",
+    "sexo": "Femenino",
+    "tipoBiopsia": "Pieza quirúrgica",
+    "sitioBiopsia": "Tiroides",
+    "symptoms": "atiga progresiva, aumento de peso, intolerancia al frío, piel seca, bocio indoloro de crecimiento gradual en los últimos 8 meses.",
+    "labs": [
+      {
+        "value": "TSH: 12.4 mIU/L (vr: 0.4–4.0 mIU/L)",
+        "url": ""
+      },
+      {
+        "value": "T4 libre: 0.6 ng/dL (vr: 0.8–1.8 ng/dL)",
+        "url": ""
+      },
+      {
+        "value": "Anticuerpos anti-TPO: 620 UI/mL (vr: <35 UI/mL)",
+        "url": ""
+      }
+    ],
+    "imagenologia": []
+  },
+  "questions": [
+    "¿Qué características morfológicas asociadas a tiroiditis de Hashimoto reconoce en la lámina?",
+    "Relacione los hallazgos morfológicos con las alteraciones hormonales del caso.",
+    "¿Por qué esta entidad se considera un trastorno autoinmune? Mencione el mecanismo involucrado."
+  ],
+  "links": [
+    {
+      "label": "Caso Clínico",
+      "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FUndergraduate%2F1058.svs"
+    },
+    {
+      "label": "Histología Referencia",
+      "url": "https://histologyguide.com/slideview/MH-151-thyroid/13-slide-1.html"
+    },
+    {
+      "label": "MedlinePlus",
+      "url": "https://medlineplus.gov/ency/article/003684.htm"
+    },
+    {
+      "label": "MSD Manuals",
+      "url": "https://www.msdmanuals.com/professional/endocrine-and-metabolic-disorders/thyroid-disorders/hashimoto-thyroiditis"
+    }
+  ],
+  "unidadNumero": "VII",
+  "temaId": "endocrina"
+}

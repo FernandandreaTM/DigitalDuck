@@ -1,0 +1,32 @@
+{
+  "title": "Salpingitis Aguda Purulenta",
+  "concept": "INFLAMACIÓN AGUDA SUPURATIVA",
+  "clinical": {
+    "patient": "",
+    "edad": "38",
+    "sexo": "Mujer",
+    "tipoBiopsia": "quirúrgica",
+    "sitioBiopsia": "trompa uterina (anexo derecho)",
+    "symptoms": "Dolor pélvico agudo en fosa ilíaca derecha, fiebre y flujo vaginal purulento; hallazgo intraoperatorio de masa tubo-ovárica derecha.",
+    "labs": [
+      { "value": "Leucocitosis con neutrofilia; PCR elevada", "url": null },
+      { "value": "Cultivo cervical positivo para Neisseria gonorrhoeae / Chlamydia trachomatis", "url": null }
+    ],
+    "imagenologia": [
+      { "value": "Ecografía transvaginal: masa anexial derecha compleja compatible con absceso tubo-ovárico", "url": null }
+    ]
+  },
+  "questions": [
+    "¿Qué características morfológicas asociadas a inflamación aguda supurativa reconoce en la lámina?",
+    "¿Cuáles son los agentes causales más frecuentes de esta entidad?",
+    "¿Qué complicaciones a largo plazo se asocian a este cuadro si no se trata a tiempo?"
+  ],
+  "links": [
+    { "label": "Caso Clínico", "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FPostgraduate%2FMaleki_FRCPath_collection%2FSet_011%2F334740.svs" },
+    { "label": "Histología Referencia", "url": "https://histologyguide.com/slideview/MH-171-oviduct/18-slide-1.html" },
+    { "label": "MedlinePlus", "url": "https://medlineplus.gov/pelvicinflammatorydisease.html" },
+    { "label": "MSD Manuals", "url": "https://www.msdmanuals.com/professional/gynecology-and-obstetrics/vaginitis-cervicitis-and-pelvic-inflammatory-disease/pelvic-inflammatory-disease-pid" }
+  ],
+  "unidadNumero": "II",
+  "temaId": "inflamacion-aguda"
+}

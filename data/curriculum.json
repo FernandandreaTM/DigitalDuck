@@ -16,7 +16,8 @@
       "id": "inflamacion",
       "nombre": "Inflamación",
       "temas": [
-        { "id": "inflamacion-aguda-cronica", "nombre": "Inflamación Aguda y Crónica", "practico": "pra5.html" }
+        { "id": "inflamacion-aguda", "nombre": "Inflamación Aguda", "practico": "pra5.html" },
+        { "id": "inflamacion-cronica", "nombre": "Inflamación Crónica", "practico": "pra5.html" }
       ]
     },
     {

@@ -766,21 +766,18 @@
                                         <i data-lucide="microscope" class="w-5 h-5 text-red-600 mr-2"></i>
                                         <span class="text-purple-800 font-bold mobile-small">${slide.content.concept}</span>
                                     </div>
-                                    <h1 class="mobile-title font-bold text-gray-800 mb-2">${slide.content.title}</h1>
+                                    <h1 class="mobile-title font-bold text-gray-800 mb-4">${slide.content.title}</h1>
+                                <a href="${slide.content.links.caso}" target="_blank" class="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-300 text-purple-900 font-bold px-5 py-2.5 rounded-full shadow-md mobile-text mt-1">
+                                    <i data-lucide="microscope" class="w-5 h-5"></i> Ver Lámina
+                                </a>
                                 </div>
                                 <div class="mb-6">
                                     <div class="bg-yellow-50 p-4 rounded-xl border-l-4 border-yellow-500">
                                         <h3 class="mobile-text font-bold text-yellow-800 mb-4 flex items-center">
                                             <i data-lucide="link" class="w-5 h-5 mr-2"></i>
-                                            Enlaces de Estudio
+                                            Enlaces de apoyo
                                         </h3>
                                         <div class="grid grid-cols-1 gap-3">
-                                            <a href="${slide.content.links.caso}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="microscope" class="w-5 h-5 text-purple-600 mr-3 flex-shrink-0"></i>
-                                                    <span class="mobile-text font-medium text-purple-600">Caso Clínico</span>
-                                                </div>
-                                            </a>
                                             <a href="${slide.content.links.histologia}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
                                                 <div class="flex items-center">
                                                     <i data-lucide="book-open" class="w-5 h-5 text-purple-600 mr-3 flex-shrink-0"></i>
@@ -833,24 +830,23 @@
                             <div class="hidden md:block desktop-fit desktop-compact">
                                 <div class="flex flex-wrap items-center justify-between mb-4">
                                     <h1 class="font-bold text-gray-800 text-xl md:text-2xl lg:text-3xl mb-2 md:mb-0">${slide.content.title}</h1>
-                                    <div class="flex items-center bg-purple-100 px-3 py-1 rounded-full">
-                                        <i data-lucide="microscope" class="w-5 h-5 text-red-600 mr-2"></i>
-                                        <span class="text-purple-800 font-bold text-sm md:text-base">${slide.content.concept}</span>
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex items-center bg-purple-100 px-3 py-1 rounded-full">
+                                            <i data-lucide="microscope" class="w-5 h-5 text-red-600 mr-2"></i>
+                                            <span class="text-purple-800 font-bold text-sm md:text-base">${slide.content.concept}</span>
+                                        </div>
+                                        <a href="${slide.content.links.caso}" target="_blank" class="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-300 text-purple-900 font-bold text-sm md:text-base px-4 py-1.5 rounded-full shadow-md hover:shadow-lg transition-shadow">
+                                            <i data-lucide="microscope" class="w-4 h-4"></i>  Ver Lámina
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="mb-4">
                                     <div class="bg-yellow-50 p-4 rounded-xl border-l-4 border-yellow-500">
                                         <h3 class="font-bold text-yellow-800 mb-3 flex items-center">
                                             <i data-lucide="link" class="w-5 h-5 mr-2"></i>
-                                            Enlaces de Estudio
+                                            Enlaces de apoyo
                                         </h3>
                                         <div class="grid grid-cols-2 gap-3">
-                                            <a href="${slide.content.links.caso}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="search" class="w-4 h-4 text-purple-600 mr-2 flex-shrink-0"></i>
-                                                    <span class="text-sm font-medium text-purple-600">Caso Clínico</span>
-                                                </div>
-                                            </a>
                                             <a href="${slide.content.links.histologia}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
                                                 <div class="flex items-center">
                                                     <i data-lucide="microscope" class="w-4 h-4 text-purple-600 mr-2 flex-shrink-0"></i>

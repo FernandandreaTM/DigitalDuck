@@ -363,7 +363,10 @@
         }
 
         function renderLaminaCard(l) {
-            const linksHtml = (l.links || []).map(lnk =>
+            const allLinks = l.links || [];
+            const primary = allLinks[0];
+            const secondary = allLinks.slice(1);
+            const secondaryHtml = secondary.map(lnk =>
                 `<a href="${lnk.url}" target="_blank">${lnk.label}</a>`
             ).join('');
             const cl = l.clinical || {};
@@ -372,15 +375,18 @@
             return `
                 <div class="lamina-card">
                     <div class="lamina-card-header">
-                        <span class="lamina-concept-badge">${l.concept || ''}</span>
-                        <h4>${l.title}</h4>
+                        <div class="lamina-card-header-main">
+                            <span class="lamina-concept-badge">${l.concept || ''}</span>
+                            <h4>${l.title}</h4>
+                        </div>
+                        ${primary ? `<a href="${primary.url}" target="_blank" class="lamina-view-btn">🔬 ${primary.label}</a>` : ''}
                     </div>
                     <div class="lamina-card-body">
                         <p><strong>Paciente:</strong> ${patientLine(cl)}</p>
                         ${cl.symptoms ? `<p><strong>Síntomas:</strong> ${cl.symptoms}</p>` : ''}
                         ${labsList.length ? `<div class="lamina-list-block"><strong>Laboratorio:</strong><ul>${fieldListHTML(labsList)}</ul></div>` : ''}
                         ${imgList.length ? `<div class="lamina-list-block"><strong>Estudios de imagen:</strong><ul>${fieldListHTML(imgList)}</ul></div>` : ''}
-                        <div class="lamina-links">${linksHtml}</div>
+                        ${secondary.length ? `<p class="lamina-links-label"><strong>Enlaces de apoyo:</strong></p><div class="lamina-links">${secondaryHtml}</div>` : ''}
                         ${l.practico ? `<a href="${l.practico}" class="lamina-context-link">Ver en el práctico completo →</a>` : ''}
                     </div>
                 </div>

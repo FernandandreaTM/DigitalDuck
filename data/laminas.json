@@ -11,9 +11,19 @@
       "title": "Metaplasia Intestinal",
       "concept": "METAPLASIA",
       "clinical": {
-        "patient": "Varón de 73 años, biopsia de esófago",
+        "patient": "",
+        "edad": "73",
+        "sexo": "Varón",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "esófago",
         "symptoms": "Reflujo gastroesofágico persistente",
-        "labs": "Esofagoscopia: cambios en mucosa esofágica"
+        "labs": [],
+        "imagenologia": [
+          {
+            "value": "Esofagoscopia: cambios en mucosa esofágica",
+            "url": null
+          }
+        ]
       },
       "questions": [
         "¿Qué características morfológicas asociadas a metaplasia reconoce?",
@@ -50,9 +60,19 @@
       "title": "Atrofia Vellositaria",
       "concept": "ATROFIA",
       "clinical": {
-        "patient": "Mujer de 29 años, biopsia de yeyuno",
+        "patient": "",
+        "edad": "29",
+        "sexo": "Mujer",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "yeyuno",
         "symptoms": "Fatiga, pérdida de peso, diarrea tras consumo de gluten",
-        "labs": "Anticuerpos anti-transglutaminasa elevados"
+        "labs": [
+          {
+            "value": "Anticuerpos anti-transglutaminasa elevados",
+            "url": null
+          }
+        ],
+        "imagenologia": []
       },
       "questions": [
         "¿Qué características morfológicas asociadas a atrofia reconoce?",
@@ -89,9 +109,19 @@
       "title": "Hiperplasia Prostática",
       "concept": "HIPERPLASIA",
       "clinical": {
-        "patient": "Varón de 70 años, biopsia de próstata",
+        "patient": "",
+        "edad": "70",
+        "sexo": "Varón",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "próstata",
         "symptoms": "Dificultad para iniciar micción, chorro débil, nicturia",
-        "labs": "PSA: 8.2 ng/mL (Normal: <4 ng/mL)"
+        "labs": [
+          {
+            "value": "PSA: 8.2 ng/mL (Normal: <4 ng/mL)",
+            "url": null
+          }
+        ],
+        "imagenologia": []
       },
       "questions": [
         "¿Qué características morfológicas asociadas a hiperplasia reconoce?",
@@ -128,9 +158,19 @@
       "title": "Hipertrofia Muscular",
       "concept": "HIPERTROFIA",
       "clinical": {
-        "patient": "Niño de 8 años, biopsia de músculo",
+        "patient": "",
+        "edad": "8",
+        "sexo": "Niño",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "músculo",
         "symptoms": "Retraso motor, debilidad proximal, hipertrofia leve de pantorrillas, problemas respiratorios",
-        "labs": "Creatina quinasa (CK) > 8000 U/L (Normal: 39-308 U/L), "
+        "labs": [
+          {
+            "value": "Creatina quinasa (CK) > 8000 U/L (Normal: 39-308 U/L), ",
+            "url": null
+          }
+        ],
+        "imagenologia": []
       },
       "questions": [
         "¿Qué características morfológicas asociadas a hipertrofia reconoce?",
@@ -167,9 +207,19 @@
       "title": "Esteatosis hepática",
       "concept": "ESTEATOSIS",
       "clinical": {
-        "patient": "Varón de 61 años, bebedor social, obesidad.",
-        "symptoms": "Dolor en cuadrante superior derecho",
-        "labs": "Alanina transaminasa: 120 U/L (Normal: 7-56 U/L)"
+        "patient": "",
+        "edad": "61",
+        "sexo": "Varón",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
+        "symptoms": "Bebedor social, obesidad. Dolor en cuadrante superior derecho",
+        "labs": [
+          {
+            "value": "Alanina transaminasa: 120 U/L (Normal: 7-56 U/L)",
+            "url": null
+          }
+        ],
+        "imagenologia": []
       },
       "questions": [
         "¿Qué características morfológicas asociadas a esteatosis reconoce?",
@@ -206,9 +256,19 @@
       "title": "Lesión renal aguda",
       "concept": "EDEMA CELULAR",
       "clinical": {
-        "patient": "Mujer de 45 años en dialisis, biopsia de corteza renal",
-        "symptoms": "Lesión renal aguda tras TAC con contraste, oliguria",
-        "labs": "Creatinina: 4.2 mg/dL (previo: 1.1 mg/dL)"
+        "patient": "",
+        "edad": "45",
+        "sexo": "Mujer",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "corteza renal",
+        "symptoms": "En diálisis. Lesión renal aguda tras TAC con contraste, oliguria",
+        "labs": [
+          {
+            "value": "Creatinina: 4.2 mg/dL (previo: 1.1 mg/dL)",
+            "url": null
+          }
+        ],
+        "imagenologia": []
       },
       "questions": [
         "¿Qué características morfológicas asociadas a edema celular reconoce?",
@@ -245,9 +305,24 @@
       "title": "Antracosis Pulmonar",
       "concept": "PIGMENTOS PATOLÓGICOS",
       "clinical": {
-        "patient": "Hombre de 67 años, trabajador industrial y minero jubilado",
-        "symptoms": "Disnea de esfuerzo, tos crónica no productiva",
-        "labs": "Radiografía: opacidades pulmonares, función pulmonar alterada"
+        "patient": "",
+        "edad": "67",
+        "sexo": "Hombre",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
+        "symptoms": "Trabajador industrial y minero jubilado. Disnea de esfuerzo, tos crónica no productiva",
+        "labs": [
+          {
+            "value": "Función pulmonar alterada",
+            "url": null
+          }
+        ],
+        "imagenologia": [
+          {
+            "value": "Radiografía: opacidades pulmonares",
+            "url": null
+          }
+        ]
       },
       "questions": [
         "¿Qué tipo de pigmento observa? Describa sus características morfológicas.",
@@ -284,9 +359,19 @@
       "title": "Infarto Renal",
       "concept": "NECROSIS COAGULATIVA",
       "clinical": {
-        "patient": "Varón de 55 años, hospitalizado por falla renal.",
-        "symptoms": "HTA de 10 años, mal controlada. Falla renal aguda dos semanas posteriores a un infarto al miocardio tratado con trombólisis y stent.",
-        "labs": "Creatinina sérica: 3.5 mg/dL (valor de referencia: 0.6-1.2 mg/dL), Urea sérica: 45 mg/dL (valor de referencia: 7-20 mg/dL)."
+        "patient": "",
+        "edad": "55",
+        "sexo": "Varón",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
+        "symptoms": "Hospitalizado por falla renal. HTA de 10 años, mal controlada. Falla renal aguda dos semanas posteriores a un infarto al miocardio tratado con trombólisis y stent.",
+        "labs": [
+          {
+            "value": "Creatinina sérica: 3.5 mg/dL (valor de referencia: 0.6-1.2 mg/dL), Urea sérica: 45 mg/dL (valor de referencia: 7-20 mg/dL).",
+            "url": null
+          }
+        ],
+        "imagenologia": []
       },
       "questions": [
         "¿Qué características morfológicas asociadas a necrosis coagulativa reconoce?",
@@ -322,9 +407,19 @@
       "title": "Hepatotoxicidad",
       "concept": "NECROSIS COAGULATIVA",
       "clinical": {
-        "patient": "Mujer de 35 años, hospitalizada por falla hepática",
-        "symptoms": "Antecedentes de depresión no tratada. Presenta ictericia  y dolor en el cuadrante superior derecho del abdomen tras sobredosis intencional con paracetamol.",
-        "labs": "Aspartato Transaminasa (AST): 1,200 U/L (valor normal: 10-40 U/L), Alanina Transaminasa (ALT): 1,500 U/L (valor normal: 7-56 U/L), Bilirrubina total: 8 mg/dL (valor normal: 0.1-1.2 mg/dL)."
+        "patient": "",
+        "edad": "35",
+        "sexo": "Mujer",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
+        "symptoms": "Hospitalizada por falla hepática. Antecedentes de depresión no tratada. Presenta ictericia  y dolor en el cuadrante superior derecho del abdomen tras sobredosis intencional con paracetamol.",
+        "labs": [
+          {
+            "value": "Aspartato Transaminasa (AST): 1,200 U/L (valor normal: 10-40 U/L), Alanina Transaminasa (ALT): 1,500 U/L (valor normal: 7-56 U/L), Bilirrubina total: 8 mg/dL (valor normal: 0.1-1.2 mg/dL).",
+            "url": null
+          }
+        ],
+        "imagenologia": []
       },
       "questions": [
         "¿Qué características morfológicas asociadas a necrosis coagulativa reconoce?",
@@ -360,9 +455,28 @@
       "title": "Tuberculosis Pulmonar",
       "concept": "NECROSIS CASEOSA",
       "clinical": {
-        "patient": "Hombre de 60 años, fumador",
-        "symptoms": "Presenta tos persistente, fiebre, pérdida de peso y sudores nocturnos.",
-        "labs": "Radiografía de tórax muestra múltiples lesiones pequeñas de distribución uniforme, prueba de tuberculina PPD - Positiva, Resultados de cultivo de esputo en espera."
+        "patient": "",
+        "edad": "60",
+        "sexo": "Hombre",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
+        "symptoms": "Fumador. Presenta tos persistente, fiebre, pérdida de peso y sudores nocturnos.",
+        "labs": [
+          {
+            "value": "Prueba de tuberculina PPD - Positiva",
+            "url": null
+          },
+          {
+            "value": "Resultados de cultivo de esputo en espera",
+            "url": null
+          }
+        ],
+        "imagenologia": [
+          {
+            "value": "Radiografía de tórax: múltiples lesiones pequeñas de distribución uniforme",
+            "url": null
+          }
+        ]
       },
       "questions": [
         "¿Qué características morfológicas asociadas a necrosis caseosa reconoce?",
@@ -398,9 +512,28 @@
       "title": "Apendicitis Aguda",
       "concept": "INFLAMACIÓN AGUDA",
       "clinical": {
-        "patient": "Varón de 20 años, sin antecedentes médicos de importancia.",
-        "symptoms": "Acude a urgencias por dolor abdominal localizado inicialmente en la región periumbilical, que en las últimas horas se ha desplazado al cuadrante inferior derecho. El dolor se acompaña de náuseas, vómitos y fiebre de 38.5°C.",
-        "labs": "Hemograma: Neutrófilos 14,000/µL (vr: 4,000-11,000/µL). Proteína C reactiva (PCR): 25 mg/L (vr: <5 mg/L). Ecografía abdominal: Apéndice no compresible, con diámetro de 8 mm, acompañado de aumento de la ecogenicidad del tejido graso periapendicular. No se observan fecalitos."
+        "patient": "",
+        "edad": "20",
+        "sexo": "Varón",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
+        "symptoms": "Sin antecedentes médicos de importancia. Acude a urgencias por dolor abdominal localizado inicialmente en la región periumbilical, que en las últimas horas se ha desplazado al cuadrante inferior derecho. El dolor se acompaña de náuseas, vómitos y fiebre de 38.5°C.",
+        "labs": [
+          {
+            "value": "Hemograma: Neutrófilos 14,000/µL (vr: 4,000-11,000/µL)",
+            "url": null
+          },
+          {
+            "value": "Proteína C reactiva (PCR): 25 mg/L (vr: <5 mg/L)",
+            "url": null
+          }
+        ],
+        "imagenologia": [
+          {
+            "value": "Ecografía abdominal: Apéndice no compresible, con diámetro de 8 mm, acompañado de aumento de la ecogenicidad del tejido graso periapendicular. No se observan fecalitos.",
+            "url": null
+          }
+        ]
       },
       "questions": [
         "¿Qué características morfológicas asociadas a inflamación aguda reconoce?",
@@ -436,9 +569,40 @@
       "title": "Cirrosis hepática",
       "concept": "INFLAMACIÓN CRÓNICA",
       "clinical": {
-        "patient": "Mujer de 47 años. Antecedentes de hepatitis B crónica diagnosticada hace 20 años y transplante ortotópico",
-        "symptoms": "Presenta fatiga, ictericia progresiva y molestias abdominales en el cuadrante superior derecho durante los últimos seis meses. Sin antecedentes de consumo problemático de alcohol ni obesidad.",
-        "labs": "Bilirrubina total 3.2 mg/dL (vr: 0.1-1.2 mg/dL), AST 85 U/L (vr: 10-40 U/L), ALT 78 U/L (vr: 7-56 U/L), Albúmina 2.8 g/dL (vr: 3.5-5.0 g/dL)., INR: 1.6 (vr: 0.8-1.2)., Ecografía abdominal: Hígado de contornos irregulares con aumento de la ecogenicidad, signos de hipertensión portal, y esplenomegalia."
+        "patient": "",
+        "edad": "47",
+        "sexo": "Mujer",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
+        "symptoms": "Antecedentes de hepatitis B crónica diagnosticada hace 20 años y transplante ortotópico. Presenta fatiga, ictericia progresiva y molestias abdominales en el cuadrante superior derecho durante los últimos seis meses. Sin antecedentes de consumo problemático de alcohol ni obesidad.",
+        "labs": [
+          {
+            "value": "Bilirrubina total 3.2 mg/dL (vr: 0.1-1.2 mg/dL)",
+            "url": null
+          },
+          {
+            "value": "AST 85 U/L (vr: 10-40 U/L)",
+            "url": null
+          },
+          {
+            "value": "ALT 78 U/L (vr: 7-56 U/L)",
+            "url": null
+          },
+          {
+            "value": "Albúmina 2.8 g/dL (vr: 3.5-5.0 g/dL)",
+            "url": null
+          },
+          {
+            "value": "INR: 1.6 (vr: 0.8-1.2)",
+            "url": null
+          }
+        ],
+        "imagenologia": [
+          {
+            "value": "Ecografía abdominal: Hígado de contornos irregulares con aumento de la ecogenicidad, signos de hipertensión portal, y esplenomegalia.",
+            "url": null
+          }
+        ]
       },
       "questions": [
         "¿Qué características morfológicas asociadas a inflamación crónica reconoce?",
@@ -474,9 +638,23 @@
       "title": "Fibroadenoma de mama",
       "concept": "NEOPLASIA BENIGNA FIBROEPITELIAL",
       "clinical": {
-        "patient": "Mujer de 28 años, madre de lactante de 14 meses.",
-        "symptoms": "Nódulo palpable en cuadrante superoexterno de mama izquierda, móvil, bien delimitado, no doloroso. Aparición hace 8 meses con crecimiento lento progresivo",
-        "labs": "Mamografía: nódulo bien circunscrito. Ecografía: masa hipoecogénica homogénea con márgenes regulares."
+        "patient": "",
+        "edad": "28",
+        "sexo": "Mujer",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
+        "symptoms": "Madre de lactante de 14 meses. Nódulo palpable en cuadrante superoexterno de mama izquierda, móvil, bien delimitado, no doloroso. Aparición hace 8 meses con crecimiento lento progresivo",
+        "labs": [],
+        "imagenologia": [
+          {
+            "value": "Mamografía: nódulo bien circunscrito",
+            "url": null
+          },
+          {
+            "value": "Ecografía: masa hipoecogénica homogénea con márgenes regulares",
+            "url": null
+          }
+        ]
       },
       "questions": [
         "Describa las características histológicas de esta muestra ¿Qué componentes tisulares identifica?",
@@ -513,9 +691,19 @@
       "title": "Polipo adenomatoso",
       "concept": "NEOPLASIA BENIGNA EPITELIAL",
       "clinical": {
-        "patient": "Mujer de 49 años",
+        "patient": "",
+        "edad": "49",
+        "sexo": "Mujer",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
         "symptoms": "Dolor abdominal intermitente, distensión abdominal, cambios en hábito intestinal con diarrea alternada con estreñimiento. Pérdida de peso de 4 kg en 6 meses. Heces más delgadas de lo normal.",
-        "labs": "Colonoscopía: lesión obstructiva en flexura esplénica del colon + múltiples pólipos distribuidos en todo el colon."
+        "labs": [],
+        "imagenologia": [
+          {
+            "value": "Colonoscopía: lesión obstructiva en flexura esplénica del colon + múltiples pólipos distribuidos en todo el colon.",
+            "url": null
+          }
+        ]
       },
       "questions": [
         "Describa las características histológicas de esta muestra ¿Qué características de benignidad logra observar?",
@@ -553,9 +741,19 @@
       "title": "Leiomioma Cutáneo",
       "concept": "NEOPLASIA BENIGNA DE MÚSCULO LISO",
       "clinical": {
-        "patient": "Hombre de 25 años. Antecedentes familiares de leiomioma uterino (madre)",
-        "symptoms": "Biopsia excisional de nódulo cutáneo doloroso en pierna derecha. Nódulo móvil al examen físico. Sin cambios de coloración, sangrado, ulceración o prurito. Antecedentes de nódulos cutáneos desde los 15 años. Paciente niega síntomas sistémicos como fiebre, pérdida de peso o malestar general",
-        "labs": "Resultados de pruebas genéticas en espera"
+        "patient": "",
+        "edad": "25",
+        "sexo": "Hombre",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
+        "symptoms": "Antecedentes familiares de leiomioma uterino (madre). Biopsia excisional de nódulo cutáneo doloroso en pierna derecha. Nódulo móvil al examen físico. Sin cambios de coloración, sangrado, ulceración o prurito. Antecedentes de nódulos cutáneos desde los 15 años. Paciente niega síntomas sistémicos como fiebre, pérdida de peso o malestar general",
+        "labs": [
+          {
+            "value": "Resultados de pruebas genéticas en espera",
+            "url": null
+          }
+        ],
+        "imagenologia": []
       },
       "questions": [
         "Describa las características histológicas de esta muestra ¿Qué características de benignidad logra observar?",
@@ -593,9 +791,24 @@
       "title": "Adenocarcinoma de colon",
       "concept": "NEOPLASIA MALIGNA EPITELIAL",
       "clinical": {
-        "patient": "Hombre de 60 años",
+        "patient": "",
+        "edad": "60",
+        "sexo": "Hombre",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
         "symptoms": "Presenta dolor abdominal persistente, acompañado de cambios en el hábito intestinal en los últimos meses, con predominio de estreñimiento. Ha experimentado una pérdida de peso de 5 kg en los últimos 4 meses sin modificaciones en su dieta.",
-        "labs": "Colonoscopía: lesión infiltrativa. Análisis genético: Mutación G12D en KRAS"
+        "labs": [
+          {
+            "value": "Análisis genético: Mutación G12D en KRAS",
+            "url": null
+          }
+        ],
+        "imagenologia": [
+          {
+            "value": "Colonoscopía: lesión infiltrativa",
+            "url": null
+          }
+        ]
       },
       "questions": [
         "Describa las características histológicas de esta muestra ¿Qué características de malignidad logra observar?",
@@ -632,9 +845,19 @@
       "title": "Leiomiosarcoma cutáneo grado 1",
       "concept": "NEOPLASIA MALIGNA DE MÚSCULO LISO",
       "clinical": {
-        "patient": "Hombre de 39 años.",
+        "patient": "",
+        "edad": "39",
+        "sexo": "Hombre",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
         "symptoms": "Biopsia excisional de masa sospechosa, no móvil, localizada en hombro izquierdo",
-        "labs": "Se solicita estudio de inmunohistoquímica (IHQ)"
+        "labs": [
+          {
+            "value": "Se solicita estudio de inmunohistoquímica (IHQ)",
+            "url": null
+          }
+        ],
+        "imagenologia": []
       },
       "questions": [
         "Describa las características histológicas de esta muestra ¿Qué características de malignidad logra observar?",
@@ -672,9 +895,19 @@
       "title": "Cerebro",
       "concept": "ACV",
       "clinical": {
-        "patient": "Mujer de 53 años de edad. Presento dolor de cabeza de comienzo suave hasta convertirse en insoportable y punzante, de acuerdo con su relato",
-        "symptoms": "La paciente relata hipertensión arterial y dislipidemia, las que controla pobremenTe con dieta y farmacos. Su marido relata qu e se encuentra tomando haciendo dieta y tomando unas pastillas para bajar de peso, las qué resultan contener fentermina.",
-        "labs": "AngioCT en estudio"
+        "patient": "",
+        "edad": "53",
+        "sexo": "Mujer",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
+        "symptoms": "Presento dolor de cabeza de comienzo suave hasta convertirse en insoportable y punzante, de acuerdo con su relato. La paciente relata hipertensión arterial y dislipidemia, las que controla pobremenTe con dieta y farmacos. Su marido relata qu e se encuentra tomando haciendo dieta y tomando unas pastillas para bajar de peso, las qué resultan contener fentermina.",
+        "labs": [],
+        "imagenologia": [
+          {
+            "value": "AngioCT en estudio",
+            "url": null
+          }
+        ]
       },
       "questions": [
         "Describa la etiología de la lesión",
@@ -712,9 +945,19 @@
       "title": "Aorta Abdominal",
       "concept": "ATEROMA",
       "clinical": {
-        "patient": "Hombre de 61 años de edad. Presenta vértigo acompañado de náuseas y vómitos.",
-        "symptoms": "El dolor inicio aproximadamente 6 horas de forma repentina e intensa que varía entre la zona abdominal y costados.",
-        "labs": "Resonancia magnética: Trombosis por placa ateromatosa de aorta abdominal"
+        "patient": "",
+        "edad": "61",
+        "sexo": "Hombre",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "",
+        "symptoms": "Presenta vértigo acompañado de náuseas y vómitos. El dolor inicio aproximadamente 6 horas de forma repentina e intensa que varía entre la zona abdominal y costados.",
+        "labs": [],
+        "imagenologia": [
+          {
+            "value": "Resonancia magnética: Trombosis por placa ateromatosa de aorta abdominal",
+            "url": null
+          }
+        ]
       },
       "questions": [
         "Describa la etiología de la lesión",
@@ -738,6 +981,175 @@
         {
           "label": "MSD Manuals",
           "url": "https://www.msdmanuals.com/es/professional/trastornos-cardiovasculares/arteriosclerosis/aterosclerosis"
+        }
+      ]
+    },
+    {
+      "id": "pielonefritis-cronica",
+      "practico": null,
+      "indiceEnPractico": null,
+      "unidadNumero": "II",
+      "unidadNombre": "Inflamación",
+      "temaId": "inflamacion-cronica",
+      "temaNombre": "Inflamación Crónica",
+      "title": "Pielonefritis Crónica",
+      "concept": "INFLAMACIÓN CRÓNICA",
+      "clinical": {
+        "patient": "",
+        "edad": "20",
+        "sexo": "Mujer",
+        "tipoBiopsia": "quirúrgica",
+        "sitioBiopsia": "riñón",
+        "symptoms": "Fiebre, vómitos y dolor en flanco, en el contexto de infecciones urinarias recurrentes de larga data.",
+        "labs": [
+          {
+            "value": "Urocultivos previos positivos a repetición; función renal en el límite normal",
+            "url": null
+          }
+        ],
+        "imagenologia": [
+          {
+            "value": "Ecografía renal: riñón de contorno irregular con adelgazamiento cortical focal",
+            "url": null
+          }
+        ]
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a inflamación crónica reconoce en la lámina?",
+        "¿En qué se diferencian los hallazgos de este caso de los de una pielonefritis aguda?",
+        "¿Qué factores predisponen a la cronicidad de esta infección?"
+      ],
+      "links": [
+        {
+          "label": "Ver Lámina",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FUndergraduate%2F1101.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://www.histologyguide.com/slideview/MH-143-kidney/16-slide-1.html"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/ency/article/003579.htm"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/infectious-diseases/urinary-tract-infections-utis/chronic-pyelonephritis"
+        }
+      ]
+    },
+    {
+      "id": "salpingitis-aguda-purulenta",
+      "practico": null,
+      "indiceEnPractico": null,
+      "unidadNumero": "II",
+      "unidadNombre": "Inflamación",
+      "temaId": "inflamacion-aguda",
+      "temaNombre": "Inflamación Aguda",
+      "title": "Salpingitis Aguda Purulenta",
+      "concept": "INFLAMACIÓN AGUDA SUPURATIVA",
+      "clinical": {
+        "patient": "",
+        "edad": "38",
+        "sexo": "Mujer",
+        "tipoBiopsia": "quirúrgica",
+        "sitioBiopsia": "trompa uterina (anexo derecho)",
+        "symptoms": "Dolor pélvico agudo en fosa ilíaca derecha, fiebre y flujo vaginal purulento; hallazgo intraoperatorio de masa tubo-ovárica derecha.",
+        "labs": [
+          {
+            "value": "Leucocitosis con neutrofilia; PCR elevada",
+            "url": null
+          },
+          {
+            "value": "Cultivo cervical positivo para Neisseria gonorrhoeae / Chlamydia trachomatis",
+            "url": null
+          }
+        ],
+        "imagenologia": [
+          {
+            "value": "Ecografía transvaginal: masa anexial derecha compleja compatible con absceso tubo-ovárico",
+            "url": null
+          }
+        ]
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a inflamación aguda supurativa reconoce en la lámina?",
+        "¿Cuáles son los agentes causales más frecuentes de esta entidad?",
+        "¿Qué complicaciones a largo plazo se asocian a este cuadro si no se trata a tiempo?"
+      ],
+      "links": [
+        {
+          "label": "Ver Lámina",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FPostgraduate%2FMaleki_FRCPath_collection%2FSet_011%2F334740.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-171-oviduct/18-slide-1.html"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/pelvicinflammatorydisease.html"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/gynecology-and-obstetrics/vaginitis-cervicitis-and-pelvic-inflammatory-disease/pelvic-inflammatory-disease-pid"
+        }
+      ]
+    },
+    {
+      "id": "tiroiditis-de-hashimoto",
+      "practico": null,
+      "indiceEnPractico": null,
+      "unidadNumero": "VII",
+      "unidadNombre": "Patología Especial de Sistemas",
+      "temaId": "endocrina",
+      "temaNombre": "Patología del Sistema Endocrino",
+      "title": "Tiroiditis de Hashimoto",
+      "concept": "TIROIDITIS AUTOINMUNE",
+      "clinical": {
+        "patient": "",
+        "edad": "34",
+        "sexo": "Femenino",
+        "tipoBiopsia": "Pieza quirúrgica",
+        "sitioBiopsia": "Tiroides",
+        "symptoms": "atiga progresiva, aumento de peso, intolerancia al frío, piel seca, bocio indoloro de crecimiento gradual en los últimos 8 meses.",
+        "labs": [
+          {
+            "value": "TSH: 12.4 mIU/L (vr: 0.4–4.0 mIU/L)",
+            "url": ""
+          },
+          {
+            "value": "T4 libre: 0.6 ng/dL (vr: 0.8–1.8 ng/dL)",
+            "url": ""
+          },
+          {
+            "value": "Anticuerpos anti-TPO: 620 UI/mL (vr: <35 UI/mL)",
+            "url": ""
+          }
+        ],
+        "imagenologia": []
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a tiroiditis de Hashimoto reconoce en la lámina?",
+        "Relacione los hallazgos morfológicos con las alteraciones hormonales del caso.",
+        "¿Por qué esta entidad se considera un trastorno autoinmune? Mencione el mecanismo involucrado."
+      ],
+      "links": [
+        {
+          "label": "Ver Lámina",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FUndergraduate%2F1058.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-151-thyroid/13-slide-1.html"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/ency/article/003684.htm"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/endocrine-and-metabolic-disorders/thyroid-disorders/hashimoto-thyroiditis"
         }
       ]
     }

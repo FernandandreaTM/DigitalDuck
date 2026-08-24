@@ -432,10 +432,15 @@
             `).join('');
         }
 
+        // Fuente primaria: backend PHP. Respaldo: data/laminas.json (hosting estático sin PHP).
         fetch('api/laminas.php')
-            .then(r => r.json())
+            .then(r => r.ok ? r.json() : Promise.reject())
+            .then(d => (Array.isArray(d) && d.length) ? d : Promise.reject())
+            .catch(() => fetch('data/laminas.json')
+                .then(r => r.json())
+                .then(d => Array.isArray(d) ? d : (d.laminas || [])))
             .then(data => { LAMINAS = data; })
-            .catch(() => { console.warn('No se pudo cargar el catálogo de láminas desde el servidor.'); })
+            .catch(() => { console.warn('No se pudo cargar el catálogo de láminas.'); })
             .finally(renderCatalogo);
     </script>
 </body>

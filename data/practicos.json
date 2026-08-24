@@ -1,0 +1,66 @@
+[
+  {
+    "file": "pra1.html",
+    "num": "01",
+    "name": "Introducción",
+    "title": "Introducción a la Patología Digital",
+    "icon": "🔬",
+    "description": "Aprende los fundamentos del laboratorio de anatomía patológica y familiarízate con el proceso de obtención, procesamiento y observación de muestras histológicas. Descubre cómo la patología digital revoluciona el aprendizaje tradicional."
+  },
+  {
+    "file": "pra2.html",
+    "num": "02",
+    "name": "Adaptación",
+    "title": "Adaptación Celular",
+    "icon": "🔄",
+    "description": "Explora los mecanismos de adaptación celular frente a estímulos diversos. Identifica cambios de hipertrofia, hiperplasia, atrofia y metaplasia en preparaciones histológicas reales y comprende su significado patológico."
+  },
+  {
+    "file": "pra3.html",
+    "num": "03",
+    "name": "Lesión",
+    "title": "Lesión Celular",
+    "icon": "⚠️",
+    "description": "Reconoce los signos microscópicos de lesión celular reversible e irreversible. Estudia las alteraciones morfológicas que preceden a la muerte celular y comprende los mecanismos bioquímicos subyacentes."
+  },
+  {
+    "file": "pra4.html",
+    "num": "04",
+    "name": "Muerte",
+    "title": "Muerte Celular",
+    "icon": "💀",
+    "description": "Diferencia los tipos de muerte celular: necrosis, apoptosis y autofagia. Identifica las características histológicas distintivas de cada tipo y comprende sus implicaciones clínicas y fisiopatológicas."
+  },
+  {
+    "file": "pra5.html",
+    "num": "05",
+    "name": "Inflamación",
+    "title": "Inflamación",
+    "icon": "🔥",
+    "description": "Analiza el proceso inflamatorio agudo y crónico a nivel microscópico. Identifica los componentes celulares del infiltrado inflamatorio y comprende los patrones de respuesta tisular ante diferentes agresiones."
+  },
+  {
+    "file": "pra6.html",
+    "num": "06",
+    "name": "Neoplasias Benignas",
+    "title": "Neoplasias Benignas",
+    "icon": "🧬",
+    "description": "Estudia las características histológicas de los tumores benignos. Aprende a diferenciarlos de tejidos normales, reconoce patrones de crecimiento organizados y comprende su comportamiento clínico favorable."
+  },
+  {
+    "file": "pra7.html",
+    "num": "07",
+    "name": "Neoplasias Malignas",
+    "title": "Neoplasias Malignas",
+    "icon": "☠️",
+    "description": "Identifica las características de malignidad en preparaciones histológicas. Reconoce atipia celular, mitosis anormales, patrón de crecimiento invasivo y comprende los criterios diagnósticos de cáncer."
+  },
+  {
+    "file": "pra8.html",
+    "num": "08",
+    "name": "Trombosis e Infarto",
+    "title": "Trombosis e Infarto",
+    "icon": "🩸",
+    "description": "Examina las alteraciones hemodinámicas y sus consecuencias tisulares. Identifica trombos, estudia la evolución del infarto y comprende los mecanismos de isquemia, necrosis y reparación vascular."
+  }
+]

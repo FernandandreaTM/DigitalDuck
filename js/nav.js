@@ -19,9 +19,12 @@ function renderNav(basePath) {
 
 // ===== Pill de Prácticos (dropdown compartido en la topbar) =====
 
+// Fuente primaria: backend PHP. Respaldo: data/practicos.json (hosting estático sin PHP).
 function fetchPracticos() {
     return fetch('api/practicos.php')
-        .then(r => r.json())
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(d => (Array.isArray(d) && d.length) ? d : Promise.reject())
+        .catch(() => fetch('data/practicos.json').then(r => r.json()))
         .catch(() => { console.warn('No se pudo cargar el listado de prácticos.'); return []; });
 }
 

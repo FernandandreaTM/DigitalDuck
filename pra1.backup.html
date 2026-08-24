@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introducción a la Patología Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: ui-sans-serif, system-ui, sans-serif;
+            overflow-x: hidden;
+            height: 100vh;
+        }
+        .slide-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        @media (max-width: 768px) {
+            .slide-container {
+                min-height: 100vh;
+                height: auto;
+            }
+            .mobile-title { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+            .mobile-subtitle { font-size: 1.25rem !important; line-height: 1.75rem !important; }
+            .mobile-text { font-size: 1rem !important; line-height: 1.5rem !important; }
+            .mobile-small { font-size: 0.875rem !important; line-height: 1.25rem !important; }
+        }
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        @media (max-width: 768px) {
+            .content-area {
+                padding: 0;
+            }
+            .mobile-content {
+                padding: 1rem;
+                min-height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+            .mobile-no-center {
+                justify-content: flex-start !important;
+                align-items: stretch !important;
+            }
+        }
+        .nav-button {
+            min-height: 44px;
+            min-width: 44px;
+            touch-action: manipulation;
+        }
+        .transition-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .link-card {
+            transition: all 0.2s ease;
+            transform: scale(1);
+        }
+        .link-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .link-card:active {
+            transform: scale(0.98);
+        }
+        @media (min-width: 769px) {
+            body {
+                background-color: #f9f4f2;
+            }
+            .slide-container {
+                margin: 1rem;
+                height: calc(100vh - 2rem);
+                border-radius: 0.75rem;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                overflow: hidden;
+            }
+            .content-area {
+                overflow-y: auto;
+            }
+            .desktop-fit {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                justify-content: center;
+                padding: 1.25rem;
+            }
+            .desktop-compact h1 {
+                font-size: 2.5rem !important;
+                margin-bottom: 1rem !important;
+            }
+            .desktop-compact h2 {
+                font-size: 1.5rem !important;
+                margin-bottom: 1rem !important;
+            }
+            .desktop-compact h3 {
+                font-size: 1.25rem !important;
+                margin-bottom: 0.75rem !important;
+            }
+            .desktop-compact p, .desktop-compact li {
+                font-size: 1rem !important;
+                line-height: 1.4 !important;
+            }
+            .desktop-compact .space-y-6 > * + * {
+                margin-top: 1rem !important;
+            }
+            .desktop-compact .space-y-4 > * + * {
+                margin-top: 0.75rem !important;
+            }
+            .desktop-compact .space-y-3 > * + * {
+                margin-top: 0.5rem !important;
+            }
+            .desktop-title-with-icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+            .desktop-title-icon {
+                flex-shrink: 0;
+            }
+            .desktop-main-title {
+                text-align: left;
+            }
+        }
+        .swipe-hint {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .swipe-hint {
+                display: block;
+                position: fixed;
+                bottom: 120px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                z-index: 1000;
+                animation: fadeIn 2s ease-in-out;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <!-- Header -->
+        <div class="bg-purple-900 text-white p-3 md:p-4 flex justify-between items-center relative z-10 shadow-lg">
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <a href="practicos.html" class="flex items-center gap-1 text-yellow-400 hover:text-yellow-200 transition-smooth flex-shrink-0" title="Volver a Prácticos">
+                    <i data-lucide="arrow-left" class="w-5 h-5 md:w-6 md:h-6"></i>
+                    <span class="hidden lg:inline text-sm">Prácticos</span>
+                </a>
+                <i data-lucide="microscope" class="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 text-yellow-400"></i>
+                <span class="text-sm md:text-base lg:text-lg font-semibold truncate">Patología Básica - UACh</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span id="slide-counter" class="text-sm md:text-base font-mono">1 / 17</span>
+            </div>
+        </div>
+        
+        <!-- Slide Content -->
+        <div id="slideContent" class="content-area animate-fade-in"></div>
+        
+        <!-- Navigation -->
+        <div class="bg-purple-900 text-white relative z-10 shadow-lg">
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex px-6 py-3 justify-between items-center">
+                <button id="prevBtn" class="nav-button flex items-center hover:text-yellow-200 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="chevron-left" class="w-5 h-5 mr-1 text-yellow-400"></i>
+                    <span class="text-sm">Anterior</span>
+                </button>
+                <div id="pagination" class="flex space-x-2 max-w-xs"></div>
+                <button id="nextBtn" class="nav-button flex items-center hover:text-yellow-200 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span class="text-sm">Siguiente</span>
+                    <i data-lucide="chevron-right" class="w-5 h-5 ml-1 text-yellow-400"></i>
+                </button>
+            </div>
+            <!-- Mobile Navigation -->
+            <div class="md:hidden flex items-center justify-between p-4">
+                <button id="prevBtnMobile" class="nav-button flex items-center justify-center w-12 h-12 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="chevron-left" class="w-6 h-6 text-yellow-400"></i>
+                </button>
+                <div id="paginationMobile" class="flex space-x-1 overflow-x-auto px-2"></div>
+                <button id="nextBtnMobile" class="nav-button flex items-center justify-center w-12 h-12 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="chevron-right" class="w-6 h-6 text-yellow-400"></i>
+                </button>
+            </div>
+            <!-- Progress Bar Mobile -->
+            <div class="md:hidden">
+                <div class="w-full bg-purple-800 h-1">
+                    <div id="progressBar" class="bg-yellow-300 h-1 transition-all duration-300 ease-out"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="swipeHint" class="swipe-hint">
+        <i data-lucide="move-horizontal" class="w-4 h-4 inline mr-1 text-yellow-400"></i>
+        Desliza para navegar
+    </div>
+
+    <script>
+        const slides = [
+            // Slide 1 - Title
+            {
+                type: 'title',
+                content: {
+                    title: 'Introducción a la Patología Digital',
+                    subtitle: 'PATOLOGÍA BÁSICA - TECNOLOGÍA MÉDICA 2026',
+                    info: 'Semana del 24 de Agosto, 2026',
+                    instructor: 'TM. Fernanda López M., PhD',
+                    email: 'fernanda.lopez@uach.cl'
+                }
+            },
+            // Slide 2 - Objectives
+            {
+                type: 'objectives',
+                content: {
+                    title: 'Objetivos del Práctico',
+                    items: [
+                        'Conocer el contexto del laboratorio de anatomía patológica tradicional',
+                        'Comprender las ventajas de la patología digital en la docencia',
+                        'Aprender a navegar en las plataformas Virtual Pathology Leeds e Histology Guide',
+                        'Familiarizarse con la dinámica de trabajo del curso y evaluaciones prácticas'
+                    ]
+                }
+            },
+            // Slide 3 - Lab Process Part 1
+            {
+                type: 'process',
+                content: {
+                    title: 'El Laboratorio de Anatomía Patológica',
+                    subtitle: 'Proceso Tradicional - Parte I',
+                    steps: [
+                        { number: '1', title: 'Fijación', description: 'Preservación del tejido con formalina' },
+                        { number: '2', title: 'Deshidratación', description: 'Eliminación progresiva del agua' }
+                    ],
+                    imageSpace: true
+                }
+            },
+            // Slide 4 - Lab Process Part 2
+            {
+                type: 'process',
+                content: {
+                    title: 'El Laboratorio de Anatomía Patológica',
+                    subtitle: 'Proceso Tradicional - Parte II',
+                    steps: [
+                        { number: '3', title: 'Inclusión en Parafina', description: 'Formación de bloques para corte' },
+                        { number: '4', title: 'Corte y Tinción', description: 'Obtención de láminas histológicas' }
+                    ],
+                    imageSpace: true
+                }
+            },
+            // Slide 5 - Limitations
+            {
+                type: 'content',
+                content: {
+                    title: 'Limitaciones del Material Físico',
+                    items: [
+                        'Disponibilidad limitada de especímenes',
+                        'Deterioro progresivo de las láminas',
+                        'Dificultad para compartir casos raros',
+                        'Restricciones de acceso fuera del laboratorio',
+                        'Costos de mantenimiento y reposición',
+                        'Limitaciones de tiempo para observación grupal'
+                    ]
+                }
+            },
+            // Slide 6 - Digital Pathology Advantages
+            {
+                type: 'content',
+                content: {
+                    title: 'Ventajas de la Patología Digital',
+                    items: [
+                        'Acceso 24/7 desde cualquier dispositivo',
+                        'Calidad de imagen consistente y de alta resolución',
+                        'Capacidad de compartir y anotar colaborativamente',
+                        'Sin deterioro del material digitalizado',
+                        'Múltiples estudiantes pueden observar simultáneamente',
+                        'Integración con telemedicina y consulta remota'
+                    ]
+                }
+            },
+            // Slide 7 - Virtual Pathology Leeds
+            {
+                type: 'platform',
+                content: {
+                    title: 'Virtual Pathology Leeds',
+                    url: 'https://www.virtualpathology.leeds.ac.uk/',
+                    features: [
+                        'Escaneos completos de láminas histológicas',
+                        'Casos con contexto clínico',
+                        'Herramientas de navegación y zoom',
+                        'Medición y anotación',
+                        'Acceso directo mediante enlaces'
+                    ]
+                }
+            },
+            // Slide 8 - Navigation Tutorial
+            {
+                type: 'tutorial',
+                content: {
+                    title: 'Tutorial de Navegación',
+                    steps: [
+                        'Acceder al enlace proporcionado',
+                        'Usar controles de zoom (+/-) o rueda del mouse',
+                        'Navegar arrastrando la imagen',
+                        'Utilizar el mapa de navegación (esquina inferior)',
+                        'Ajustar brillo y contraste si es necesario',
+                        'Tomar capturas de pantalla para estudio'
+                    ]
+                }
+            },
+            // Slide 9 - Histology Guide
+            {
+                type: 'platform',
+                content: {
+                    title: 'Histology Guide',
+                    url: 'https://histologyguide.com/slidebox/slidebox.html',
+                    features: [
+                        'Láminas representativas de histología normal',
+                        'Referencia para comparación con patología',
+                        'Organizado por sistemas orgánicos',
+                        'Descripciones detalladas de estructuras',
+                        'Complemento esencial para el diagnóstico'
+                    ]
+                }
+            },
+            // Slide 10 - Practice Activity
+            {
+                type: 'activity',
+                content: {
+                    title: 'Actividad Práctica',
+                    instructions: [
+                        'Elijan una patología que conozcan o les llame la atención',
+                        'Busquen el caso en Virtual Pathology Leeds',
+                        'Exploren diferentes aumentos (4x, 10x, 20x, 40x)',
+                        'Comparen con histología normal en Histology Guide',
+                        'Identifiquen al menos 3 características morfológicas'
+                    ]
+                }
+            },
+            // Slide 11 - Course Dynamics
+            {
+                type: 'content',
+                content: {
+                    title: 'Dinámica del Curso',
+                    items: [
+                        'Prácticos con láminas virtuales y contexto clínico',
+                        'Análisis de casos paso a paso',
+                        'Correlación clínico-patológica',
+                        'Trabajo en grupos pequeños',
+                        'Discusión y presentación de hallazgos'
+                    ]
+                }
+            },
+            // Slide 12 - Assessments
+            {
+                type: 'assessment',
+                content: {
+                    title: 'Evaluaciones Prácticas',
+                    items: [
+                        { name: 'Primera Prueba Práctica', date: 'Semana del 21 de septiembre', content: 'Adaptación, lesión y muerte celular', weight: '20%' },
+                        { name: 'Segunda Prueba Práctica', date: 'Semana del 9 de noviembre', content: 'Inflamación, neoplasias y trastornos circulatorios', weight: '20%' },
+                        { name: 'Evaluación ABP', date: '9 de diciembre', content: 'Aprendizaje Basado en Problemas', weight: '10%' }
+                    ]
+                }
+            },
+            // Slide 13 - ABP Methodology
+            {
+                type: 'content',
+                content: {
+                    title: 'Metodología ABP',
+                    subtitle: 'Aprendizaje Basado en Problemas',
+                    items: [
+                        'Casos clínicos reales con información progresiva',
+                        'Trabajo colaborativo en grupos',
+                        'Búsqueda autónoma de información',
+                        'Análisis crítico y toma de decisiones',
+                        'Presentación oral de conclusiones',
+                        'Integración de conocimientos teóricos y prácticos'
+                    ]
+                }
+            },
+            // Slide 14 - Recommendations
+            {
+                type: 'content',
+                content: {
+                    title: 'Recomendaciones para el Éxito',
+                    items: [
+                        '📚 Revisar histología normal antes de cada práctico',
+                        '🔍 Practicar navegación en ambas plataformas',
+                        '📝 Tomar notas y capturas de pantalla',
+                        '🤝 Participar activamente en discusiones grupales',
+                        '⏰ Dedicar tiempo de estudio autónomo',
+                        '❓ Hacer preguntas durante las sesiones prácticas'
+                    ]
+                }
+            },
+            // Slide 15 - Resources Summary
+            {
+                type: 'resources',
+                content: {
+                    title: 'Recursos del Curso',
+                    platforms: [
+                        { name: 'Virtual Pathology Leeds', url: 'www.virtualpathology.leeds.ac.uk', purpose: 'Casos patológicos con contexto clínico' },
+                        { name: 'Histology Guide', url: 'histologyguide.com/slidebox/', purpose: 'Referencia de histología normal' },
+                        { name: 'MSD Manual', url: 'www.msdmanuals.com/professional/', purpose: 'Información clínica detallada' }
+                    ]
+                }
+            },
+            // Slide 16 - Q&A
+            {
+                type: 'qa',
+                content: {
+                    title: '¿Preguntas?',
+                    subtitle: 'Momento para resolver dudas',
+                    contact: {
+                        email: 'fernanda.lopez@uach.cl',
+                        office: 'Laboratorio TecmedHUB Ed.500 3er piso',
+                        hours: 'Lunes 14:50-16:20 hrs'
+                    }
+                }
+            },
+            // Slide 17 - Next Steps
+            {
+                type: 'content',
+                content: {
+                    title: 'Próximos Pasos',
+                    items: [
+                        '📅 Próximo práctico: "Adaptación Celular" (semana del 31 de agosto)',
+                        '🔬 Revisar conceptos de hipertrofia, hiperplasia, atrofia y metaplasia',
+                        '📖 Estudiar histología normal de músculo esquelético y esófago',
+                        '💻 Familiarizarse con las plataformas digitales',
+                        '📝 Prepararse para análisis de casos clínicos'
+                    ]
+                }
+            }
+        ];
+
+        let currentSlide = 0;
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            renderSlide();
+            updateNavigation();
+            setupTouchHandling();
+            hideSwipeHint();
+        });
+
+        function hideSwipeHint() {
+            setTimeout(() => {
+                const hint = document.getElementById('swipeHint');
+                if (hint) {
+                    hint.style.opacity = '0';
+                    setTimeout(() => hint.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        function setupTouchHandling() {
+            const slideContent = document.getElementById('slideContent');
+            slideContent.addEventListener('touchstart', handleTouchStart, { passive: true });
+            slideContent.addEventListener('touchmove', handleTouchMove, { passive: true });
+            slideContent.addEventListener('touchend', handleTouchEnd, { passive: true });
+        }
+
+        function handleTouchStart(e) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }
+
+        function handleTouchMove(e) {
+            const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+            const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+            if (deltaX > deltaY && deltaX > 10) {
+                e.preventDefault();
+            }
+        }
+
+        function handleTouchEnd(e) {
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+                if (deltaX > 0 && currentSlide > 0) {
+                    previousSlide();
+                } else if (deltaX < 0 && currentSlide < slides.length - 1) {
+                    nextSlide();
+                }
+            }
+        }
+
+        function renderSlide() {
+            const slide = slides[currentSlide];
+            const container = document.getElementById('slideContent');
+            container.innerHTML = getSlideHTML(slide);
+            
+            // Update progress bar
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            lucide.createIcons();
+        }
+
+        function getSlideHTML(slide) {
+            switch(slide.type) {
+                case 'title':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-purple-50 to-indigo-50 flex items-center justify-center p-6 md:p-8">
+                            <div class="text-center max-w-4xl animate-slide-up w-full">
+                                <div class="mb-8 flex justify-center">
+                                    <i data-lucide="microscope" class="w-20 h-20 md:w-32 md:h-32 text-yellow-400"></i>
+                                </div>
+                                <h1 class="mobile-title md:text-5xl lg:text-6xl font-bold mb-6 text-gray-800 leading-tight">${slide.content.title}</h1>
+                                <h2 class="mobile-subtitle md:text-3xl lg:text-4xl font-light mb-8 text-purple-600">${slide.content.subtitle}</h2>
+                                <div class="mobile-text md:text-xl lg:text-2xl space-y-3">
+                                    ${slide.content.info ? `<p class="text-gray-600">${slide.content.info}</p>` : ''}
+                                    <p class="font-medium text-gray-800">${slide.content.instructor}</p>
+                                    <p class="text-purple-600">${slide.content.email}</p>
+                                </div>
+                            </div>
+                        </div>`;
+
+                case 'objectives':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-green-50 to-emerald-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="text-center mb-6">
+                                    <i data-lucide="target" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                                    <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                                </div>
+                                <div class="space-y-3">
+                                    ${slide.content.items.map(item => `
+                                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+                                            <div class="flex items-start space-x-3">
+                                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0"></i>
+                                                <p class="mobile-text text-gray-700">${item}</p>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit desktop-compact">
+                                <div class="desktop-title-with-icon">
+                                    <i data-lucide="target" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                                    <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 max-w-5xl mx-auto">
+                                    ${slide.content.items.map(item => `
+                                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+                                            <div class="flex items-start space-x-3">
+                                                <i data-lucide="check-circle" class="w-6 h-6 text-green-500 mt-0.5 flex-shrink-0"></i>
+                                                <p class="text-gray-700">${item}</p>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>`;
+
+                case 'process':
+                    const slideIndex = slides.indexOf(slide);
+                    const imageSrc = slideIndex === 2 ? "https://www.leicabiosystems.com/sites/default/files/styles/720_tablet_portrait_fallback/public/media_image-file/2021-04/csm_inserting_basket__5_02_974c4a0100.jpg?itok=KOkxfyW1" :
+                                     slideIndex === 3 ? "https://img.waimaoniu.net/2547/2547-202306290935423940.png" : "";
+                    return `
+                        <div class="h-full bg-gradient-to-br from-blue-50 to-indigo-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="text-center mb-4">
+                                    <i data-lucide="flask-conical" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                                    <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                                    <h2 class="mobile-subtitle text-purple-600 mt-2">${slide.content.subtitle}</h2>
+                                </div>
+                                <div class="space-y-3 mb-4">
+                                    ${slide.content.steps.map(step => `
+                                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                                            <div class="flex items-start space-x-3">
+                                                <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                                    ${step.number}
+                                                </span>
+                                                <div>
+                                                    <h3 class="font-semibold text-gray-800">${step.title}</h3>
+                                                    <p class="mobile-small text-gray-600">${step.description}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                ${imageSrc ? `
+                                    <div class="bg-gray-100 rounded-lg p-2 flex items-center justify-center">
+                                        <img src="${imageSrc}" alt="${slide.content.subtitle}" class="max-w-full h-auto max-h-48 object-contain rounded-md shadow-sm">
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit desktop-compact">
+                                <div class="desktop-title-with-icon">
+                                    <i data-lucide="flask-conical" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                                    <div>
+                                        <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                                        <h2 class="text-xl text-purple-600">${slide.content.subtitle}</h2>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-6 max-w-5xl mx-auto">
+                                    <div class="space-y-4">
+                                        ${slide.content.steps.map(step => `
+                                            <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-purple-500">
+                                                <div class="flex items-start space-x-4">
+                                                    <span class="bg-purple-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
+                                                        ${step.number}
+                                                    </span>
+                                                    <div>
+                                                        <h3 class="text-lg font-semibold text-gray-800 mb-1">${step.title}</h3>
+                                                        <p class="text-gray-600">${step.description}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <div class="bg-gray-100 rounded-lg flex items-center justify-center p-4">
+                                        ${imageSrc ? `<img src="${imageSrc}" alt="${slide.content.subtitle}" class="max-w-full h-auto max-h-64 object-contain rounded-md shadow-sm">` : '<p class="text-gray-500">Espacio para imagen</p>'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+
+                case 'content':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-purple-50 to-indigo-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="text-center mb-6">
+                                    <i data-lucide="list" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                                    <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                                    ${slide.content.subtitle ? `<h2 class="mobile-subtitle text-purple-600 mt-2">${slide.content.subtitle}</h2>` : ''}
+                                </div>
+                                <div class="space-y-3">
+                                    ${slide.content.items.map(item => `
+                                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                                            <p class="mobile-text text-gray-700">${item}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit desktop-compact">
+                                <div class="desktop-title-with-icon">
+                                    <i data-lucide="list" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                                    <div>
+                                        <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                                        ${slide.content.subtitle ? `<h2 class="text-xl text-purple-600">${slide.content.subtitle}</h2>` : ''}
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 max-w-5xl mx-auto">
+                                    ${slide.content.items.map(item => `
+                                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                                            <p class="text-gray-700">${item}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>`;
+
+                case 'platform':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-blue-50 to-cyan-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="text-center mb-6">
+                                    <i data-lucide="monitor" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                                    <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                                </div>
+                                <div class="bg-purple-100 p-4 rounded-lg mb-4">
+                                    <p class="mobile-text font-semibold text-purple-800 break-words">🌐 ${slide.content.url}</p>
+                                </div>
+                                <div class="space-y-3">
+                                    ${slide.content.features.map(feature => `
+                                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+                                            <div class="flex items-start space-x-3">
+                                                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                <p class="mobile-text text-gray-700">${feature}</p>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit desktop-compact">
+                                <div class="desktop-title-with-icon">
+                                    <i data-lucide="monitor" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                                    <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                                </div>
+                                <div class="max-w-4xl mx-auto">
+                                    <div class="bg-purple-100 p-4 rounded-lg mb-6">
+                                        <p class="text-lg font-semibold text-purple-800">🌐 ${slide.content.url}</p>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        ${slide.content.features.map(feature => `
+                                            <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+                                                <div class="flex items-start space-x-3">
+                                                    <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                    <p class="text-gray-700">${feature}</p>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+
+                case 'tutorial':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-amber-50 to-yellow-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="text-center mb-6">
+                                    <i data-lucide="compass" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                                    <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                                </div>
+                                <div class="space-y-3">
+                                    ${slide.content.steps.map((step, index) => `
+                                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                                            <div class="flex items-start space-x-3">
+                                                <span class="bg-purple-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                                    ${index + 1}
+                                                </span>
+                                                <p class="mobile-text text-gray-700">${step}</p>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit desktop-compact">
+                                <div class="desktop-title-with-icon">
+                                    <i data-lucide="compass" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                                    <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 max-w-5xl mx-auto">
+                                    ${slide.content.steps.map((step, index) => `
+                                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                                            <div class="flex items-start space-x-3">
+                                                <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                                    ${index + 1}
+                                                </span>
+                                                <p class="text-gray-700">${step}</p>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>`;
+
+                case 'activity':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-yellow-50 to-amber-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="text-center mb-6">
+                                    <i data-lucide="pencil" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                                    <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                                </div>
+                                <div class="bg-yellow-100 p-4 rounded-xl border-2 border-yellow-300">
+                                    <div class="space-y-3">
+                                        ${slide.content.instructions.map((instruction, index) => `
+                                            <div class="flex items-start space-x-3">
+                                                <span class="bg-yellow-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                                    ${index + 1}
+                                                </span>
+                                                <p class="mobile-text text-gray-800">${instruction}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit desktop-compact">
+                                <div class="desktop-title-with-icon">
+                                    <i data-lucide="pencil" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                                    <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                                </div>
+                                <div class="bg-yellow-100 p-6 rounded-xl border-2 border-yellow-300 max-w-4xl mx-auto">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        ${slide.content.instructions.map((instruction, index) => `
+                                            <div class="flex items-start space-x-3 bg-white p-4 rounded-lg">
+                                                <span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                                    ${index + 1}
+                                                </span>
+                                                <p class="text-gray-800">${instruction}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+
+                case 'assessment':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-red-50 to-orange-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="text-center mb-6">
+                                    <i data-lucide="clipboard-check" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                                    <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                                </div>
+                                <div class="space-y-3">
+                                    ${slide.content.items.map(item => `
+                                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-red-500">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <h3 class="font-semibold text-gray-800">${item.name}</h3>
+                                                <span class="bg-purple-100 px-2 py-1 rounded-full text-purple-800 font-semibold text-xs">${item.weight}</span>
+                                            </div>
+                                            <p class="mobile-small text-gray-600 mb-1">${item.content}</p>
+                                            <p class="mobile-small text-purple-600 font-semibold">📅 ${item.date}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit desktop-compact">
+                                <div class="desktop-title-with-icon">
+                                    <i data-lucide="clipboard-check" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                                    <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                                </div>
+                                <div class="space-y-4 max-w-4xl mx-auto">
+                                    ${slide.content.items.map(item => `
+                                        <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-red-500">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <h3 class="text-xl font-semibold text-gray-800 mb-1">${item.name}</h3>
+                                                    <p class="text-gray-600 mb-1">${item.content}</p>
+                                                    <p class="text-purple-600 font-semibold">📅 ${item.date}</p>
+                                                </div>
+                                                <span class="bg-purple-100 px-3 py-1 rounded-full text-purple-800 font-semibold">${item.weight}</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>`;
+
+                case 'resources':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-indigo-50 to-purple-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="text-center mb-6">
+                                    <i data-lucide="library" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                                    <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
+                                </div>
+                                <div class="space-y-3">
+                                    ${slide.content.platforms.map((platform, index) => {
+                                        const colors = ['purple', 'green', 'blue'];
+                                        const color = colors[index % colors.length];
+                                        return `
+                                            <div class="link-card bg-white p-4 rounded-lg shadow-sm border-l-4 border-${color}-500">
+                                                <div class="flex items-start space-x-3">
+                                                    <i data-lucide="book-open" class="w-5 h-5 text-${color}-500 mt-0.5 flex-shrink-0"></i>
+                                                    <div>
+                                                        <h3 class="font-semibold text-gray-800 mb-1">${platform.name}</h3>
+                                                        <p class="mobile-small text-purple-600 mb-1 break-words">🌐 ${platform.url}</p>
+                                                        <p class="mobile-small text-gray-600">${platform.purpose}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit desktop-compact">
+                                <div class="desktop-title-with-icon">
+                                    <i data-lucide="library" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
+                                    <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
+                                </div>
+                                <div class="space-y-4 max-w-4xl mx-auto">
+                                    ${slide.content.platforms.map((platform, index) => {
+                                        const colors = ['purple', 'green', 'blue'];
+                                        const color = colors[index % colors.length];
+                                        return `
+                                            <div class="link-card bg-white p-5 rounded-lg shadow-sm border-l-4 border-${color}-500">
+                                                <div class="flex items-start space-x-4">
+                                                    <i data-lucide="book-open" class="w-6 h-6 text-${color}-500 mt-0.5 flex-shrink-0"></i>
+                                                    <div>
+                                                        <h3 class="text-xl font-semibold text-gray-800 mb-1">${platform.name}</h3>
+                                                        <p class="text-purple-600 mb-1">🌐 ${platform.url}</p>
+                                                        <p class="text-gray-600">${platform.purpose}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>`;
+
+                case 'qa':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-indigo-50 to-purple-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="text-center mb-6">
+                                    <i data-lucide="message-circle" class="w-16 h-16 mx-auto mb-4 text-yellow-400"></i>
+                                    <h1 class="mobile-title font-bold text-gray-800 mb-3">${slide.content.title}</h1>
+                                    <h2 class="mobile-subtitle text-purple-600">${slide.content.subtitle}</h2>
+                                </div>
+                                <div class="bg-white p-6 rounded-xl shadow-lg text-center">
+                                    <h3 class="font-bold text-gray-800 mb-4">Información de Contacto</h3>
+                                    <div class="space-y-3">
+                                        <p class="mobile-text text-gray-700">📧 ${slide.content.contact.email}</p>
+                                        <p class="mobile-text text-gray-700">🏢 ${slide.content.contact.office}</p>
+                                        <p class="mobile-text text-gray-700">🕐 ${slide.content.contact.hours}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:flex desktop-fit items-center justify-center">
+                                <div class="text-center max-w-2xl">
+                                    <i data-lucide="message-circle" class="w-20 h-20 mx-auto mb-6 text-yellow-400"></i>
+                                    <h1 class="text-5xl font-bold text-gray-800 mb-4">${slide.content.title}</h1>
+                                    <h2 class="text-2xl text-purple-600 mb-8">${slide.content.subtitle}</h2>
+                                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                                        <h3 class="text-xl font-bold text-gray-800 mb-6">Información de Contacto</h3>
+                                        <div class="space-y-4">
+                                            <p class="text-lg text-gray-700">📧 ${slide.content.contact.email}</p>
+                                            <p class="text-lg text-gray-700">🏢 ${slide.content.contact.office}</p>
+                                            <p class="text-lg text-gray-700">🕐 ${slide.content.contact.hours}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+
+                default:
+                    return `<div class="h-full flex items-center justify-center p-6"><p class="text-2xl text-gray-500">Contenido no disponible</p></div>`;
+            }
+        }
+
+        function createPagination() {
+            const pagination = document.getElementById('pagination');
+            const paginationMobile = document.getElementById('paginationMobile');
+            
+            pagination.innerHTML = '';
+            for (let i = 0; i < slides.length; i++) {
+                const dot = document.createElement('button');
+                dot.className = `w-3 h-3 rounded-full transition-smooth ${i === currentSlide ? 'bg-white scale-125' : 'bg-purple-400 hover:bg-purple-300'}`;
+                dot.addEventListener('click', () => goToSlide(i));
+                pagination.appendChild(dot);
+            }
+            
+            paginationMobile.innerHTML = '';
+            for (let i = 0; i < slides.length; i++) {
+                const dot = document.createElement('button');
+                dot.className = `w-2 h-2 rounded-full transition-smooth ${i === currentSlide ? 'bg-white scale-125' : 'bg-purple-400'}`;
+                dot.addEventListener('click', () => goToSlide(i));
+                paginationMobile.appendChild(dot);
+            }
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const prevBtnMobile = document.getElementById('prevBtnMobile');
+            const nextBtnMobile = document.getElementById('nextBtnMobile');
+            
+            document.getElementById('slide-counter').textContent = `${currentSlide + 1} / ${slides.length}`;
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === slides.length - 1;
+            prevBtnMobile.disabled = currentSlide === 0;
+            nextBtnMobile.disabled = currentSlide === slides.length - 1;
+            
+            createPagination();
+        }
+
+        function previousSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                renderSlide();
+                updateNavigation();
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                renderSlide();
+                updateNavigation();
+            }
+        }
+
+        function goToSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                currentSlide = index;
+                renderSlide();
+                updateNavigation();
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('prevBtn').addEventListener('click', previousSlide);
+        document.getElementById('nextBtn').addEventListener('click', nextSlide);
+        document.getElementById('prevBtnMobile').addEventListener('click', previousSlide);
+        document.getElementById('nextBtnMobile').addEventListener('click', nextSlide);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                previousSlide();
+            } else if (e.key === 'ArrowRight') {
+                nextSlide();
+            } else if (e.key === 'Home') {
+                goToSlide(0);
+            } else if (e.key === 'End') {
+                goToSlide(slides.length - 1);
+            }
+        });
+    </script>
+</body>
+</html>

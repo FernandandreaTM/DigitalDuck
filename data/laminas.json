@@ -1164,6 +1164,60 @@
           "url": "https://www.msdmanuals.com/professional/endocrine-and-metabolic-disorders/thyroid-disorders/hashimoto-thyroiditis"
         }
       ]
+    },
+    {
+      "id": "atrofia-neurogenica",
+      "practico": null,
+      "indiceEnPractico": null,
+      "unidadNumero": "I",
+      "unidadNombre": "Patología Celular",
+      "temaId": "adaptacion-celular",
+      "temaNombre": "Adaptación Celular",
+      "title": "Atrofia Muscular Neurogénica",
+      "concept": "ATROFIA",
+      "clinical": {
+        "patient": "",
+        "edad": "82",
+        "sexo": "Masculino",
+        "tipoBiopsia": "",
+        "sitioBiopsia": "músculo esquelético",
+        "symptoms": "Dificultad generalizada para caminar y caídas a repetición, con evidencia clínica de denervación.",
+        "labs": [
+          {
+            "value": "Creatina quinasa (CK) = 700 U/L (valor de referencia: 39-308 U/L)",
+            "url": null
+          }
+        ],
+        "imagenologia": []
+      },
+      "questions": [
+        "¿Qué características morfológicas asociadas a atrofia reconoce?",
+        "Relacione los hallazgos morfológicos con el contexto clínico",
+        "Investigue cómo podría progresar esta alteración",
+        "La lámina incluye una histoquímica adicional: ¿qué enzima muscular detecta y por qué tiñe distinto las fibras sanas de las atróficas?"
+      ],
+      "links": [
+        {
+          "label": "Ver Lámina",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FSlide_Library%2FNeuropath_collection%2FMisc1%2F34634.svs"
+        },
+        {
+          "label": "Histoquímica (enzima oxidativa mitocondrial - NADH-TR/SDH)",
+          "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FSlide_Library%2FNeuropath_collection%2FMisc1%2F34633.svs"
+        },
+        {
+          "label": "Histología Referencia",
+          "url": "https://histologyguide.com/slideview/MH-055a-skeletal-muscle/04-slide-1.html?b=ax1x1x3x35783x41961x-1"
+        },
+        {
+          "label": "MedlinePlus",
+          "url": "https://medlineplus.gov/lab-tests/creatine-kinase/"
+        },
+        {
+          "label": "MSD Manuals",
+          "url": "https://www.msdmanuals.com/professional/neurologic-disorders/peripheral-nervous-system-and-motor-unit-disorders/amyotrophic-lateral-sclerosis-als-and-other-motor-neuron-diseases-mnds"
+        }
+      ]
     }
   ]
 }

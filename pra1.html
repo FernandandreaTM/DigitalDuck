@@ -41,6 +41,12 @@
             background: white;
         }
         @media (max-width: 768px) {
+            /* permite el scroll vertical de la pagina cuando la lamina es mas alta que la pantalla */
+            body, html {
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto;
+            }
             .slide-container {
                 min-height: 100vh;
                 height: auto;
@@ -71,9 +77,14 @@
             }
         }
         .nav-button {
-            min-height: 44px;
-            min-width: 44px;
             touch-action: manipulation;
+        }
+        /* area tactil de 44px solo donde hace falta: pantallas tactiles / movil */
+        @media (max-width: 768px) {
+            .nav-button {
+                min-height: 44px;
+                min-width: 44px;
+            }
         }
         .transition-smooth {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -175,8 +186,8 @@
 <body>
     <div class="slide-container">
         <!-- Header -->
-        <div class="bg-purple-900 text-white p-3 md:p-4 flex justify-between items-center relative z-10 shadow-lg">
-            <div class="flex items-center space-x-2 md:space-x-4">
+        <div class="bg-purple-900 text-white px-3 py-2 md:px-4 md:py-2 flex justify-between items-center relative z-10 shadow-lg">
+            <div class="flex items-center space-x-2 md:space-x-4 min-w-0 flex-1">
                 <a href="practicos.html" class="flex items-center gap-1 text-yellow-400 hover:text-yellow-200 transition-smooth flex-shrink-0" title="Volver a Prácticos">
                     <i data-lucide="arrow-left" class="w-5 h-5 md:w-6 md:h-6"></i>
                     <span class="hidden lg:inline text-sm">Prácticos</span>
@@ -184,8 +195,11 @@
                 <i data-lucide="microscope" class="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 text-yellow-400"></i>
                 <span class="text-sm md:text-base lg:text-lg font-semibold truncate">Patología Básica - UACh</span>
             </div>
-            <div class="flex items-center space-x-4">
-                <span id="slide-counter" class="text-sm md:text-base font-mono">1 / 17</span>
+            <div class="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
+                <button id="fullscreenBtn" class="nav-button hidden md:flex p-1.5 rounded-lg hover:bg-purple-800 transition-colors flex items-center justify-center" title="Pantalla completa (F)">
+                    <i data-lucide="maximize" class="w-5 h-5 text-yellow-400"></i>
+                </button>
+                <span id="slide-counter" class="text-sm md:text-base font-mono whitespace-nowrap">1 / 17</span>
             </div>
         </div>
         
@@ -195,7 +209,7 @@
         <!-- Navigation -->
         <div class="bg-purple-900 text-white relative z-10 shadow-lg">
             <!-- Desktop Navigation -->
-            <div class="hidden md:flex px-6 py-3 justify-between items-center">
+            <div class="hidden md:flex px-6 py-1.5 justify-between items-center">
                 <button id="prevBtn" class="nav-button flex items-center hover:text-yellow-200 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
                     <i data-lucide="chevron-left" class="w-5 h-5 mr-1 text-yellow-400"></i>
                     <span class="text-sm">Anterior</span>
@@ -207,12 +221,12 @@
                 </button>
             </div>
             <!-- Mobile Navigation -->
-            <div class="md:hidden flex items-center justify-between p-4">
-                <button id="prevBtnMobile" class="nav-button flex items-center justify-center w-12 h-12 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+            <div class="md:hidden flex items-center justify-between px-4 py-2">
+                <button id="prevBtnMobile" class="nav-button flex items-center justify-center w-10 h-10 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
                     <i data-lucide="chevron-left" class="w-6 h-6 text-yellow-400"></i>
                 </button>
                 <div id="paginationMobile" class="flex space-x-1 overflow-x-auto px-2"></div>
-                <button id="nextBtnMobile" class="nav-button flex items-center justify-center w-12 h-12 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+                <button id="nextBtnMobile" class="nav-button flex items-center justify-center w-10 h-10 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
                     <i data-lucide="chevron-right" class="w-6 h-6 text-yellow-400"></i>
                 </button>
             </div>
@@ -225,6 +239,12 @@
         </div>
     </div>
     
+    <!-- Visor de imagen ampliada -->
+    <div id="lightbox" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-80 p-4 cursor-zoom-out">
+        <img id="lightboxImg" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
+        <button type="button" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black bg-opacity-60 text-white text-3xl leading-none flex items-center justify-center" aria-label="Cerrar">&times;</button>
+    </div>
+
     <div id="swipeHint" class="swipe-hint">
         <i data-lucide="move-horizontal" class="w-4 h-4 inline mr-1 text-yellow-400"></i>
         Desliza para navegar
@@ -280,9 +300,9 @@
                     items: [
                         { icon: 'layers', image: 'images/citologia-exfoliativa.jpg', name: 'Citología exfoliativa', description: 'Células desprendidas espontáneamente o por raspado. Ejemplos: Papanicolaou cervicouterino, esputo, orina' },
                         { icon: 'syringe', image: 'images/citologia-paaf.jpg', name: 'Punción aspirativa con aguja fina', description: 'PAAF sobre lesión palpable o guiada por ecografía. Ejemplos: nódulo tiroideo, mama, ganglio linfático' },
-                        { icon: 'flask-conical', image: 'images/citologia-liquidos.jpg', name: 'Líquidos y lavados', description: 'Derrame pleural, líquido ascítico, LCR, lavado broncoalveolar' },
-                        { icon: 'alert-triangle', image: 'images/citologia-microscopia.jpg', name: 'Alcance y límite', description: 'Rápida, económica y poco invasiva, pero no muestra invasión ni arquitectura: orienta la sospecha, rara vez cierra el diagnóstico' }
-                    ]
+                        { icon: 'flask-conical', image: 'images/citologia-liquidos.jpg', name: 'Líquidos y lavados', description: 'Derrame pleural, líquido ascítico, LCR, lavado broncoalveolar' }
+                    ],
+                    note: { icon: 'alert-triangle', title: 'Alcance y límite de la citología', text: 'Rápida, económica y poco invasiva, pero no muestra invasión ni arquitectura tisular: orienta la sospecha y rara vez cierra el diagnóstico' }
                 }
             },
             // 5 - Biopsias
@@ -292,12 +312,13 @@
                     title: 'Tipos de Muestra II: Biopsias y Piezas',
                     subtitle: 'Se conserva la arquitectura del tejido',
                     items: [
-                        { icon: 'scissors', image: 'images/biopsia-incisional.jpg', name: 'Incisional', description: 'Se extrae solo un fragmento representativo de una lesión extensa, para diagnosticar antes de operar' },
-                        { icon: 'circle-dot', image: 'images/biopsia-excisional.jpg', name: 'Excisional', description: 'Se extrae la lesión completa con un margen de tejido sano. Diagnóstica y potencialmente curativa' },
-                        { icon: 'minus', image: 'images/biopsia-core.jpg', name: 'Core o Tru-cut', description: 'Cilindro de tejido obtenido con aguja gruesa. Habitual en mama, próstata, hígado y riñón' },
-                        { icon: 'search', image: 'images/biopsia-endoscopica.jpg', name: 'Endoscópica y punch', description: 'Pinza a través de un endoscopio (estómago, colon, bronquio) o sacabocado en piel' },
-                        { icon: 'timer', image: 'images/biopsia-congelacion.jpg', name: 'Intraoperatoria por congelación', description: 'Respuesta en unos 15 minutos con el paciente en pabellón. Define márgenes o naturaleza de la lesión' },
-                        { icon: 'package', image: 'images/pieza-quirurgica.jpg', name: 'Pieza quirúrgica y necropsia', description: 'Órgano o segmento completo resecado. La necropsia estudia la causa y los mecanismos de la muerte' }
+                        { icon: 'scissors', image: 'images/biopsia-incisional.jpg', name: 'Incisional', description: 'Fragmento representativo de una lesión extensa, para diagnosticar antes de operar' },
+                        { icon: 'circle-dot', image: 'images/biopsia-excisional.jpg', name: 'Excisional', description: 'Lesión completa con margen de tejido sano. Diagnóstica y potencialmente curativa' },
+                        { icon: 'minus', image: 'images/biopsia-core.jpg', name: 'Core o Tru-cut', description: 'Cilindro de tejido con aguja gruesa. Mama, próstata, hígado y riñón' },
+                        { icon: 'search', image: 'images/biopsia-endoscopica.jpg', name: 'Endoscópica', description: 'Pinza por el canal del endoscopio. Estómago, colon y bronquio' },
+                        { icon: 'circle', image: 'images/biopsia-punch.jpg', name: 'Punch', description: 'Sacabocado que toma piel en todo su espesor, de epidermis a dermis' },
+                        { icon: 'timer', image: 'images/biopsia-congelacion.jpg', name: 'Intraoperatoria por congelación', description: 'Respuesta en 15 minutos con el paciente en pabellón. Define márgenes' },
+                        { icon: 'package', image: 'images/pieza-quirurgica.jpg', name: 'Pieza quirúrgica y necropsia', description: 'Órgano o segmento completo resecado. La necropsia estudia la causa de muerte' }
                     ]
                 }
             },
@@ -353,12 +374,12 @@
                     title: 'Cuando la H-E No Basta',
                     subtitle: 'Estudios complementarios que se solicitan sobre el mismo bloque',
                     items: [
-                        { icon: 'palette', name: 'PAS', description: 'Hidratos de carbono: glucógeno, membranas basales y paredes de hongos' },
-                        { icon: 'palette', name: 'Ziehl-Neelsen', description: 'Bacilos ácido-alcohol resistentes. Sospecha de tuberculosis' },
-                        { icon: 'palette', name: 'Tricrómico de Masson', description: 'Colágeno en azul. Permite estimar el grado de fibrosis, por ejemplo en cirrosis hepática' },
-                        { icon: 'palette', name: 'Perls', description: 'Hierro en azul. Hemosiderina en hemorragia antigua o hemocromatosis' },
-                        { icon: 'target', name: 'Inmunohistoquímica', description: 'Anticuerpos contra proteínas específicas: origen del tumor, receptores hormonales, HER2, Ki-67' },
-                        { icon: 'dna', name: 'Biología molecular', description: 'Mutaciones y reordenamientos que definen terapias dirigidas y pronóstico' }
+                        { icon: 'palette', image: 'images/tincion-pas.jpg', name: 'PAS', description: 'Hidratos de carbono: glucógeno, membranas basales y paredes de hongos' },
+                        { icon: 'palette', image: 'images/tincion-ziehl.jpg', name: 'Ziehl-Neelsen', description: 'Bacilos ácido-alcohol resistentes. Sospecha de tuberculosis' },
+                        { icon: 'palette', image: 'images/tincion-tricromico.jpg', name: 'Tricrómico de Masson', description: 'Colágeno en azul. Permite estimar el grado de fibrosis, por ejemplo en cirrosis hepática' },
+                        { icon: 'palette', image: 'images/tincion-perls.jpg', name: 'Perls', description: 'Hierro en azul. Hemosiderina en hemorragia antigua o hemocromatosis' },
+                        { icon: 'target', image: 'images/inmunohistoquimica.jpg', name: 'Inmunohistoquímica', description: 'Anticuerpos contra proteínas específicas: origen del tumor, receptores hormonales, HER2, Ki-67' },
+                        { icon: 'dna', image: 'images/biologia-molecular.jpg', name: 'Biología molecular', description: 'Mutaciones y reordenamientos que definen terapias dirigidas y pronóstico' }
                     ]
                 }
             },
@@ -443,7 +464,7 @@
                     title: 'Plataformas del Curso',
                     platforms: [
                         { name: 'Virtual Pathology Leeds', url: 'virtualpathology.leeds.ac.uk/slides/library', purpose: 'Miles de láminas patológicas escaneadas completas. Es la fuente de los casos del curso. Está en inglés: busquen con términos en inglés' },
-                        { name: 'Histology Guide', url: 'histologyguide.com/slidebox', purpose: 'Histología normal de referencia. La regla del curso es comparar siempre la lesión contra el tejido sano' },
+                        { name: 'Histology Guide', url: 'https://histologyguide.com/slidebox/slidebox.html', purpose: 'Histología normal de referencia. La regla del curso es comparar siempre la lesión contra el tejido sano' },
                         { name: 'MSD Manual Professional', url: 'msdmanuals.com/professional', purpose: 'Información clínica revisada por expertos: mecanismos, diagnóstico y tratamiento' },
                         { name: 'MedlinePlus', url: 'medlineplus.gov', purpose: 'Descripción general de enfermedades y exámenes, en lenguaje accesible y en español' },
                         { name: 'Catálogo del curso', url: 'catalogo.html', purpose: 'Índice propio de láminas, casos y recursos organizados por unidad del programa' }
@@ -541,16 +562,29 @@
             },
             // 22 - Próximos pasos
             {
-                type: 'content',
+                type: 'closing',
                 content: {
                     title: 'Próximos Pasos',
+                    subtitle: 'Ya conocen el laboratorio, las plataformas y la dinámica. Desde la próxima sesión se trabaja con casos.',
+                    next: {
+                        label: 'Próximo práctico',
+                        title: 'Práctico II: "Adaptación Celular"',
+                        date: 'Semana del 31 de agosto'
+                    },
                     items: [
-                        '📅 Próximo práctico: "Adaptación Celular" (semana del 31 de agosto)',
-                        '🔬 Revisar hipertrofia, hiperplasia, atrofia y metaplasia antes de la sesión',
-                        '📖 Repasar histología normal de esófago, intestino delgado, próstata y músculo esquelético',
-                        '💻 Probar las plataformas desde su propio dispositivo antes de la sesión',
-                        '📝 Confirmar la conformación definitiva de los grupos de trabajo'
-                    ]
+                        '<strong>Confirmar los grupos de trabajo</strong> — se mantienen durante todo el semestre',
+                        '<strong>Consultar dudas antes de la próxima sesión</strong> — lunes 14:50-16:20, Lab. TecmedHUB',
+                        '<strong>Revisar</strong> hipertrofia, hiperplasia, atrofia y metaplasia',
+                        '<strong>Repasar</strong> histología normal de esófago, intestino delgado, próstata y músculo esquelético',
+                        '<strong>Probar las plataformas</strong> desde su propio dispositivo antes de llegar'
+                    ],
+                    alert: {
+                        title: 'Ojo con las fechas',
+                        items: [
+                            '<strong>Primera Prueba Práctica: semana del 21 de septiembre</strong>',
+                            'Entra el contenido de los prácticos I al IV. El contenido se acumula: ponerse al día clase a clase es lo que hace manejable la prueba.'
+                        ]
+                    }
                 }
             }
         ];
@@ -586,6 +620,7 @@
         }
 
         function handleTouchStart(e) {
+            if (isLightboxOpen()) return;
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
         }
@@ -710,7 +745,7 @@
                                 </div>
                                 ${imageSrc ? `
                                     <div class="bg-gray-100 rounded-lg p-2 flex items-center justify-center">
-                                        <img src="${imageSrc}" onerror="this.style.display='none'" alt="${slide.content.subtitle}" class="max-w-full h-auto max-h-48 object-contain rounded-md shadow-sm">
+                                        <img src="${imageSrc}" onerror="this.style.display='none'" alt="${slide.content.subtitle}" onclick="openLightbox(this.src, this.alt)" title="Tocar para ampliar" class="max-w-full h-auto max-h-48 object-contain rounded-md shadow-sm cursor-zoom-in">
                                     </div>
                                 ` : ''}
                             </div>
@@ -740,7 +775,7 @@
                                         `).join('')}
                                     </div>
                                     <div class="bg-gray-100 rounded-lg flex items-center justify-center p-3">
-                                        ${imageSrc ? `<img src="${imageSrc}" onerror="this.style.display='none'" alt="${slide.content.subtitle}" class="max-w-full h-auto max-h-64 object-contain rounded-md shadow-sm">` : '<p class="text-gray-500">Espacio para imagen</p>'}
+                                        ${imageSrc ? `<img src="${imageSrc}" onerror="this.style.display='none'" alt="${slide.content.subtitle}" onclick="openLightbox(this.src, this.alt)" title="Clic para ampliar" class="max-w-full h-auto max-h-64 object-contain rounded-md shadow-sm cursor-zoom-in">` : '<p class="text-gray-500">Espacio para imagen</p>'}
                                     </div>
                                 </div>
                             </div>
@@ -1000,17 +1035,17 @@
                                     <i data-lucide="library" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
                                     <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
                                 </div>
-                                <div class="grid grid-cols-2 gap-3 max-w-5xl mx-auto">
+                                <div class="grid grid-cols-2 gap-2.5 max-w-5xl mx-auto">
                                     ${slide.content.platforms.map((platform, index) => {
                                         const colors = ['purple', 'green', 'blue'];
                                         const color = colors[index % colors.length];
                                         return `
-                                            <div class="link-card bg-white p-4 rounded-lg shadow-sm border-l-4 border-${color}-500">
-                                                <div class="flex items-start space-x-3">
-                                                    <i data-lucide="book-open" class="w-5 h-5 text-${color}-500 mt-0.5 flex-shrink-0"></i>
+                                            <div class="link-card bg-white p-3 rounded-lg shadow-sm border-l-4 border-${color}-500">
+                                                <div class="flex items-start space-x-2">
+                                                    <i data-lucide="book-open" class="w-4 h-4 text-${color}-500 mt-0.5 flex-shrink-0"></i>
                                                     <div>
-                                                        <h3 class="text-base font-semibold text-gray-800 mb-1">${platform.name}</h3>
-                                                        <p class="text-sm text-purple-600 mb-1 break-words">🌐 ${platform.url}</p>
+                                                        <h3 class="text-base font-semibold text-gray-800">${platform.name}</h3>
+                                                        <p class="text-sm text-purple-600 break-words">🌐 ${platform.url}</p>
                                                         <p class="text-sm text-gray-600 leading-snug">${platform.purpose}</p>
                                                     </div>
                                                 </div>
@@ -1036,7 +1071,7 @@
                                         <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-teal-500">
                                             <div class="flex items-start space-x-3">
                                                 ${item.image
-                                                    ? `<img src="${item.image}" alt="${item.name}" onerror="this.style.display='none'" class="w-16 h-16 object-cover rounded-md flex-shrink-0">`
+                                                    ? `<img src="${item.image}" alt="${item.name}" onerror="this.style.display='none'" onclick="openLightbox(this.src, this.alt)" class="w-16 h-16 object-cover rounded-md flex-shrink-0 cursor-zoom-in">`
                                                     : `<i data-lucide="${item.icon || 'circle'}" class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0"></i>`}
                                                 <div>
                                                     <h3 class="font-semibold text-gray-800">${item.name}</h3>
@@ -1046,6 +1081,16 @@
                                         </div>
                                     `).join('')}
                                 </div>
+                                ${slide.content.note ? `
+                                    <div class="mt-4 bg-amber-50 border-2 border-amber-300 rounded-lg p-4">
+                                        <div class="flex items-start space-x-3">
+                                            <i data-lucide="${slide.content.note.icon || 'alert-triangle'}" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                                            <div>
+                                                <h3 class="font-semibold text-amber-900">${slide.content.note.title}</h3>
+                                                <p class="mobile-small text-amber-800">${slide.content.note.text}</p>
+                                            </div>
+                                        </div>
+                                    </div>` : ''}
                             </div>
                             <!-- Desktop -->
                             <div class="hidden md:block desktop-fit desktop-compact">
@@ -1056,10 +1101,10 @@
                                         ${slide.content.subtitle ? `<h2 class="text-xl text-purple-600">${slide.content.subtitle}</h2>` : ''}
                                     </div>
                                 </div>
-                                <div class="grid gap-4 max-w-6xl mx-auto" style="grid-template-columns: repeat(${slide.content.items.length <= 4 ? slide.content.items.length : 3}, minmax(0, 1fr))">
+                                <div class="grid gap-4 max-w-6xl mx-auto" style="grid-template-columns: repeat(${slide.content.items.length <= 4 ? slide.content.items.length : Math.ceil(slide.content.items.length / 2)}, minmax(0, 1fr))">
                                     ${slide.content.items.map(item => `
                                         <div class="bg-white rounded-lg shadow-sm border-t-4 border-teal-500 overflow-hidden">
-                                            ${item.image ? `<img src="${item.image}" alt="${item.name}" onerror="this.style.display='none'" class="w-full h-20 2xl:h-28 object-cover">` : ''}
+                                            ${item.image ? `<img src="${item.image}" alt="${item.name}" onerror="this.style.display='none'" onclick="openLightbox(this.src, this.alt)" title="Clic para ampliar" class="w-full h-20 2xl:h-28 object-cover cursor-zoom-in">` : ''}
                                             <div class="p-3">
                                                 ${item.image ? '' : `<i data-lucide="${item.icon || 'circle'}" class="w-7 h-7 text-teal-500 mb-2"></i>`}
                                                 <h3 class="text-base font-semibold text-gray-800 mb-1">${item.name}</h3>
@@ -1068,6 +1113,16 @@
                                         </div>
                                     `).join('')}
                                 </div>
+                                ${slide.content.note ? `
+                                    <div class="max-w-6xl mx-auto mt-4 bg-amber-50 border-2 border-amber-300 rounded-lg p-4">
+                                        <div class="flex items-start space-x-3">
+                                            <i data-lucide="${slide.content.note.icon || 'alert-triangle'}" class="w-6 h-6 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                                            <div>
+                                                <h3 class="text-base font-semibold text-amber-900 mb-1">${slide.content.note.title}</h3>
+                                                <p class="text-sm text-amber-800 leading-snug">${slide.content.note.text}</p>
+                                            </div>
+                                        </div>
+                                    </div>` : ''}
                             </div>
                         </div>`;
 
@@ -1094,25 +1149,96 @@
                                 <p class="mobile-small text-gray-600 mt-4 text-center">Buscar en la biblioteca de Virtual Pathology Leeds</p>
                             </div>
                             <!-- Desktop -->
-                            <div class="hidden md:block desktop-fit desktop-compact">
+                            <div class="hidden md:block desktop-fit">
                                 <div class="desktop-title-with-icon">
                                     <i data-lucide="list-checks" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
                                     <div>
-                                        <h1 class="desktop-main-title text-4xl font-bold text-gray-800">${slide.content.title}</h1>
-                                        ${slide.content.subtitle ? `<h2 class="text-xl text-purple-600">${slide.content.subtitle}</h2>` : ''}
+                                        <h1 class="desktop-main-title text-3xl font-bold text-gray-800">${slide.content.title}</h1>
+                                        ${slide.content.subtitle ? `<h2 class="text-base text-purple-600">${slide.content.subtitle}</h2>` : ''}
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-3 gap-4 max-w-6xl mx-auto">
+                                <div class="grid grid-cols-3 gap-2.5 max-w-6xl mx-auto">
                                     ${slide.content.items.map(item => `
-                                        <div class="bg-white p-4 rounded-lg shadow-sm border-t-4 border-rose-500">
-                                            <h3 class="text-lg font-semibold text-gray-800">${item.name}</h3>
-                                            <p class="text-sm text-gray-500 mb-2">${item.organ}</p>
-                                            <p class="text-sm text-gray-600 mb-3">${item.hint}</p>
-                                            <p class="text-sm font-mono bg-rose-50 text-rose-700 px-2 py-1 rounded inline-block">🔎 ${item.search}</p>
+                                        <div class="bg-white p-3 rounded-lg shadow-sm border-t-4 border-rose-500">
+                                            <h3 class="text-base font-semibold text-gray-800 leading-snug">${item.name}</h3>
+                                            <p class="text-xs text-gray-500 mb-1">${item.organ}</p>
+                                            <p class="text-xs text-gray-600 mb-2 leading-snug">${item.hint}</p>
+                                            <p class="text-xs font-mono bg-rose-50 text-rose-700 px-2 py-1 rounded inline-block">🔎 ${item.search}</p>
                                         </div>
                                     `).join('')}
                                 </div>
                                 <p class="text-center text-gray-600 mt-4">Buscar el término en inglés en la biblioteca de <strong>Virtual Pathology Leeds</strong></p>
+                            </div>
+                        </div>`;
+
+                case 'closing':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-slate-50 to-white md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="flex items-center gap-3 mb-1">
+                                    <i data-lucide="footprints" class="w-7 h-7 text-yellow-400 flex-shrink-0"></i>
+                                    <h1 class="mobile-title font-bold text-gray-900">${slide.content.title}</h1>
+                                </div>
+                                ${slide.content.subtitle ? `<p class="text-sm text-gray-500 leading-snug mb-4">${slide.content.subtitle}</p>` : '<div class="mb-4"></div>'}
+                                ${slide.content.next ? `
+                                <div class="bg-white border-l-4 border-amber-400 rounded-r-lg shadow-sm px-4 py-3 mb-3">
+                                    <p class="text-[11px] font-semibold uppercase tracking-widest text-amber-600 mb-1.5"><span class="text-sm align-middle mr-1.5">📅</span>${slide.content.next.label || 'Próximo práctico'}</p>
+                                    <p class="text-lg font-semibold text-gray-900 leading-snug">${slide.content.next.title}</p>
+                                    <p class="text-sm font-semibold text-gray-700">${slide.content.next.date}</p>
+                                    ${slide.content.next.note ? `<p class="text-xs text-gray-500 mt-1 leading-snug">${slide.content.next.note}</p>` : ''}
+                                </div>` : ''}
+                                <div class="bg-white border-l-4 border-purple-400 rounded-r-lg shadow-sm px-4 py-3 mb-3">
+                                    <p class="text-[11px] font-semibold uppercase tracking-widest text-purple-600 mb-2"><span class="text-sm align-middle mr-1.5">📝</span>${slide.content.itemsLabel || 'Para la próxima sesión'}</p>
+                                    <ul class="space-y-2">
+                                        ${slide.content.items.map(item => `
+                                            <li class="flex gap-2.5">
+                                                <span class="mt-2 w-1.5 h-1.5 rounded-full bg-purple-300 flex-shrink-0"></span>
+                                                <span class="text-sm text-gray-700 leading-snug">${item}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                                ${slide.content.alert ? `
+                                <div class="bg-white border-l-4 border-red-400 rounded-r-lg shadow-sm px-4 py-3">
+                                    <p class="text-[11px] font-semibold uppercase tracking-widest text-red-600 mb-1.5"><span class="text-sm align-middle mr-1.5">⚠️</span>${slide.content.alert.title}</p>
+                                    ${slide.content.alert.items.map((a, i) => `<p class="text-sm ${i === 0 ? 'text-gray-900 font-medium' : 'text-gray-600 mt-1'} leading-snug">${a}</p>`).join('')}
+                                </div>` : ''}
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit">
+                                <div class="max-w-5xl mx-auto w-full">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="footprints" class="w-8 h-8 text-yellow-400 flex-shrink-0"></i>
+                                        <h1 class="text-3xl font-bold text-gray-900">${slide.content.title}</h1>
+                                    </div>
+                                    ${slide.content.subtitle ? `<p class="text-sm text-gray-500 mt-1 mb-4">${slide.content.subtitle}</p>` : '<div class="mb-4"></div>'}
+                                    ${slide.content.next ? `
+                                    <div class="bg-white border-l-4 border-amber-400 rounded-r-lg shadow-sm px-5 py-3 mb-3 flex items-center justify-between gap-6">
+                                        <div class="min-w-0">
+                                            <p class="text-[11px] font-semibold uppercase tracking-widest text-amber-600 mb-1"><span class="text-sm align-middle mr-1.5">📅</span>${slide.content.next.label || 'Próximo práctico'}</p>
+                                            <p class="text-xl font-semibold text-gray-900 leading-snug">${slide.content.next.title}</p>
+                                            ${slide.content.next.note ? `<p class="text-xs text-gray-500 mt-0.5">${slide.content.next.note}</p>` : ''}
+                                        </div>
+                                        <p class="text-base font-semibold text-gray-700 flex-shrink-0">${slide.content.next.date}</p>
+                                    </div>` : ''}
+                                    <div class="bg-white border-l-4 border-purple-400 rounded-r-lg shadow-sm px-5 py-3 mb-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-widest text-purple-600 mb-2"><span class="text-sm align-middle mr-1.5">📝</span>${slide.content.itemsLabel || 'Para la próxima sesión'}</p>
+                                        <ul class="grid grid-cols-2 gap-x-8 gap-y-2">
+                                            ${slide.content.items.map(item => `
+                                                <li class="flex gap-2.5">
+                                                    <span class="mt-2 w-1.5 h-1.5 rounded-full bg-purple-300 flex-shrink-0"></span>
+                                                    <span class="text-sm text-gray-700 leading-snug">${item}</span>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                    ${slide.content.alert ? `
+                                    <div class="bg-white border-l-4 border-red-400 rounded-r-lg shadow-sm px-5 py-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-widest text-red-600 mb-1"><span class="text-sm align-middle mr-1.5">⚠️</span>${slide.content.alert.title}</p>
+                                        ${slide.content.alert.items.map((a, i) => `<p class="text-sm ${i === 0 ? 'text-gray-900 font-medium' : 'text-gray-600 mt-1'} leading-snug">${a}</p>`).join('')}
+                                    </div>` : ''}
+                                </div>
                             </div>
                         </div>`;
 
@@ -1226,7 +1352,34 @@
         document.getElementById('nextBtnMobile').addEventListener('click', nextSlide);
 
         // Keyboard navigation
+        // Visor de imagen: muestra la imagen ampliada sobre la lamina
+        function openLightbox(src, alt) {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightboxImg');
+            img.src = src;
+            img.alt = alt || '';
+            lb.classList.remove('hidden');
+            lb.classList.add('flex');
+        }
+
+        function closeLightbox() {
+            const lb = document.getElementById('lightbox');
+            lb.classList.add('hidden');
+            lb.classList.remove('flex');
+            document.getElementById('lightboxImg').src = '';
+        }
+
+        function isLightboxOpen() {
+            return !document.getElementById('lightbox').classList.contains('hidden');
+        }
+
+        document.getElementById('lightbox').addEventListener('click', closeLightbox);
+
         document.addEventListener('keydown', (e) => {
+            if (isLightboxOpen()) {
+                if (e.key === 'Escape') closeLightbox();
+                return;
+            }
             if (e.key === 'ArrowLeft') {
                 previousSlide();
             } else if (e.key === 'ArrowRight') {
@@ -1237,6 +1390,34 @@
                 goToSlide(slides.length - 1);
             }
         });
-    </script>
+    
+        // Pantalla completa: boton del header y tecla F
+        (function () {
+            const fsBtn = document.getElementById('fullscreenBtn');
+            if (!fsBtn) return;
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            fsBtn.addEventListener('click', toggleFullscreen);
+            document.addEventListener('fullscreenchange', () => {
+                const icon = document.fullscreenElement ? 'minimize' : 'maximize';
+                fsBtn.innerHTML = '<i data-lucide="' + icon + '" class="w-5 h-5 text-yellow-400"></i>';
+                fsBtn.title = document.fullscreenElement ? 'Salir de pantalla completa (F)' : 'Pantalla completa (F)';
+                if (window.lucide) lucide.createIcons();
+            });
+            document.addEventListener('keydown', (e) => {
+                if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                    const t = e.target.tagName;
+                    if (t === 'INPUT' || t === 'TEXTAREA' || e.target.isContentEditable) return;
+                    e.preventDefault();
+                    toggleFullscreen();
+                }
+            });
+        })();
+</script>
 </body>
 </html>

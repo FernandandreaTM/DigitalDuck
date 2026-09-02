@@ -41,6 +41,12 @@
             background: white;
         }
         @media (max-width: 768px) {
+            /* permite el scroll vertical de la pagina cuando la lamina es mas alta que la pantalla */
+            body, html {
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto;
+            }
             .slide-container {
                 min-height: 100vh;
                 height: auto;
@@ -72,9 +78,14 @@
             }
         }
         .nav-button {
-            min-height: 44px;
-            min-width: 44px;
             touch-action: manipulation;
+        }
+        /* area tactil de 44px solo donde hace falta: pantallas tactiles / movil */
+        @media (max-width: 768px) {
+            .nav-button {
+                min-height: 44px;
+                min-width: 44px;
+            }
         }
         .transition-smooth {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -227,7 +238,7 @@
             .desktop-dropdown-trigger {
                 display: flex;
                 align-items: center;
-                padding: 0.5rem 1rem;
+                padding: 0.375rem 0.875rem;
                 background-color: #4b154a;
                 border-radius: 0.5rem;
                 font-weight: 500;
@@ -245,8 +256,8 @@
 </head>
 <body>
     <div class="slide-container">
-        <div class="bg-purple-900 text-white p-3 md:p-4 flex justify-between items-center relative z-10 shadow-lg">
-            <div class="flex items-center space-x-2 md:space-x-4">
+        <div class="bg-purple-900 text-white px-3 py-2 md:px-4 md:py-2 flex justify-between items-center relative z-10 shadow-lg">
+            <div class="flex items-center space-x-2 md:space-x-4 min-w-0 flex-1">
                 <a href="practicos.html" class="flex items-center gap-1 text-yellow-400 hover:text-yellow-200 transition-smooth flex-shrink-0" title="Volver a Prácticos">
                     <i data-lucide="arrow-left" class="w-5 h-5 md:w-6 md:h-6"></i>
                     <span class="hidden lg:inline text-sm">Prácticos</span>
@@ -254,10 +265,13 @@
                 <i data-lucide="microscope" class="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 text-yellow-400"></i>
                 <span class="text-sm md:text-base lg:text-lg font-semibold truncate">Patología Básica - UACh</span>
             </div>
-            <div class="flex items-center space-x-4">
-                <span id="slide-counter" class="text-sm md:text-base font-mono">1 / 14</span>
+            <div class="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
+                <button id="fullscreenBtn" class="nav-button hidden md:flex p-1.5 rounded-lg hover:bg-purple-800 transition-colors flex items-center justify-center" title="Pantalla completa (F)">
+                    <i data-lucide="maximize" class="w-5 h-5 text-yellow-400"></i>
+                </button>
+                <span id="slide-counter" class="text-sm md:text-base font-mono whitespace-nowrap">1 / 14</span>
                 <div class="relative">
-                    <button id="mobile-menu" class="md:hidden nav-button p-2 rounded-lg hover:bg-purple-800 transition-colors flex items-center justify-center">
+                    <button id="mobile-menu" class="md:hidden nav-button p-1.5 rounded-lg hover:bg-purple-800 transition-colors flex items-center justify-center">
                         <i data-lucide="menu" class="w-5 h-5 text-yellow-400"></i>
                     </button>
                     <button id="desktop-menu" class="hidden md:flex desktop-dropdown-trigger">
@@ -265,15 +279,15 @@
                         <i data-lucide="chevron-down" class="w-4 h-4 text-yellow-200"></i>
                     </button>
                     <div id="dropdownMenu" class="dropdown-menu">
-                        <button class="dropdown-item" data-slide="8">Adenocarcinoma de colon</button>
-                        <button class="dropdown-item" data-slide="9">Leiomiosarcoma cutáneo</button>
+                        <button class="dropdown-item" data-slide="7">Caso 1: Adenocarcinoma de Colon</button>
+                        <button class="dropdown-item" data-slide="8">Caso 2: Leiomiosarcoma Cutáneo</button>
                     </div>
                 </div>
             </div>
         </div>
         <div id="slideContent" class="content-area animate-fade-in"></div>
         <div class="bg-purple-900 text-white relative z-10 shadow-lg">
-            <div class="hidden md:flex px-6 py-3 justify-between items-center">
+            <div class="hidden md:flex px-6 py-1.5 justify-between items-center">
                 <button id="prevBtn" class="nav-button flex items-center hover:text-yellow-200 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
                     <i data-lucide="chevron-left" class="w-5 h-5 mr-1 text-yellow-400"></i>
                     <span class="text-sm">Anterior</span>
@@ -284,12 +298,12 @@
                     <i data-lucide="chevron-right" class="w-5 h-5 ml-1 text-yellow-400"></i>
                 </button>
             </div>
-            <div class="md:hidden flex items-center justify-between p-4">
-                <button id="prevBtnMobile" class="nav-button flex items-center justify-center w-12 h-12 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+            <div class="md:hidden flex items-center justify-between px-4 py-2">
+                <button id="prevBtnMobile" class="nav-button flex items-center justify-center w-10 h-10 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
                     <i data-lucide="chevron-left" class="w-6 h-6 text-yellow-400"></i>
                 </button>
                 <div id="paginationMobile" class="flex space-x-1 overflow-x-auto px-2"></div>
-                <button id="nextBtnMobile" class="nav-button flex items-center justify-center w-12 h-12 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+                <button id="nextBtnMobile" class="nav-button flex items-center justify-center w-10 h-10 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
                     <i data-lucide="chevron-right" class="w-6 h-6 text-yellow-400"></i>
                 </button>
             </div>
@@ -306,256 +320,253 @@
     </div>
     <script>
         const slides = [
+            // 1 - Portada
             {
                 type: 'title',
                 content: {
                     title: 'Neoplasias Malignas',
-                    subtitle: 'Patología Básica ETMP148',
-                    info: 'Miércoles 01 de Octubre, 2025',
+                    subtitle: 'PATOLOGÍA BÁSICA - TECNOLOGÍA MÉDICA 2026',
+                    info: 'Práctico VII · Semana del 26 de Octubre, 2026',
                     instructor: 'TM. Fernanda López M., PhD',
                     email: 'fernanda.lopez@uach.cl'
                 }
             },
+            // 2 - Objetivos
             {
                 type: 'objectives',
                 content: {
-                    title: 'Objetivos de Aprendizaje',
-                    subtitle: 'Al finalizar esta actividad práctica, serás capaz de:',
+                    title: 'Objetivos del Práctico',
+                    subtitle: 'Al finalizar esta sesión, serás capaz de:',
                     objectives: [
-                        'Identificar y analizar neoplasias malignas de distinto origen en láminas histológicas virtuales, reconociendo criterios de malignidad como atipia celular, pleomorfismo, mitosis atípicas, invasión tisular y patrones metastásicos',
-                        'Relacionar los hallazgos microscópicos con la información clínica del paciente para distinguir entre diferentes tipos de neoplasias malignas, evaluar su agresividad y correlacionar con el pronóstico'
+                        'Reconocer en láminas virtuales los criterios morfológicos de malignidad: atipia, pleomorfismo, mitosis atípicas, necrosis e invasión',
+                        'Comparar una neoplasia maligna con su contraparte benigna del mismo tejido y fundamentar qué la hace maligna',
+                        'Relacionar el grado histológico y los hallazgos moleculares con el pronóstico y con las decisiones terapéuticas del paciente'
                     ]
                 }
             },
+            // 3 - Benigna vs maligna
             {
                 type: 'comparison',
                 content: {
-                    title: 'Neoplasias Benignas vs Malignas',
-                    subtitle: 'Diferencias Fundamentales',
+                    title: 'Neoplasias Benignas vs. Malignas',
+                    subtitle: 'La diferencia decisiva no es el aspecto de la célula, sino lo que el tumor hace',
                     comparison: {
-                        headers: ['Característica', 'N. Benigna', 'N. Maligna'],
+                        headers: ['Característica', 'Benigna', 'Maligna'],
                         rows: [
-                            ['Diferenciación', 'Bien conservada', 'Tendiente a la anaplasia'],
-                            ['Velocidad', 'Crecimiento lento', 'Inicialmente lento, luego rápido'],
-                            ['Comportamiento local', 'Empuja tejido adyacente', 'Invade y destruye'],
-                            ['Metástasis', 'Ausente', 'Frecuente'],
-                            ['Pronóstico', 'Bueno', 'Malo'],
+                            ['Diferenciación', 'Conservada: se reconoce el tejido de origen', 'Variable, hasta la anaplasia'],
+                            ['Ritmo de crecimiento', 'Lento, con mitosis escasas y normales', 'Más rápido, con mitosis frecuentes y atípicas'],
+                            ['Borde', 'Expansivo: empuja y comprime', 'Infiltrativo: atraviesa la membrana basal y destruye'],
+                            ['Metástasis', 'Nunca', 'Frecuente, por vía linfática, hematógena o por cavidades'],
+                            ['Necrosis y hemorragia', 'Infrecuentes', 'Habituales, porque el tumor crece más que su irrigación'],
+                            ['Consecuencia clínica', 'Local: efecto de masa', 'Local y sistémica: caquexia, síndromes paraneoplásicos, muerte']
                         ]
                     }
                 }
             },
-            {
-                type: 'content', 
-                content: {
-                    title: 'Criterios Histológicos de Malignidad',
-                    items: [
-                        '🔬 <strong>Atipia celular:</strong> Células con características anormales, pérdida de diferenciación y desviación del fenotipo normal del tejido',
-                        '🧬 <strong>Pleomorfismo nuclear:</strong> Variación marcada en tamaño y forma de los núcleos (anisocariosis) con contornos irregulares',
-                        '🎨 <strong>Hipercromasia:</strong> Núcleos intensamente teñidos por aumento del contenido de cromatina, con distribución irregular',
-                        '📊 <strong>Relación núcleo/citoplasma aumentada:</strong> Núcleos desproporcionadamente grandes en relación al citoplasma celular',
-                        '⚡ <strong>Mitosis atípicas y frecuentes:</strong> Figuras mitóticas anormales (multipolares, asimétricas) y en número elevado',
-                        '🔴 <strong>Nucleolos prominentes:</strong> Nucléolos aumentados de tamaño, múltiples y evidentes',
-                        '🌊 <strong>Invasión tisular:</strong> Ruptura de membranas basales y penetración destructiva en tejidos adyacentes',
-                        '🩸 <strong>Invasión vascular y linfática:</strong> Presencia de células tumorales dentro de vasos sanguíneos o linfáticos',
-                        '💀 <strong>Necrosis tumoral:</strong> Áreas de muerte celular debido a crecimiento rápido que supera el aporte vascular'
-                    ]
-                }
-            },    
-            {
-                type: 'content', 
-                content: {
-                    title: 'Evolución y Complicaciones de Neoplasias Malignas',
-                    items: [
-                        '🌊 <strong>Invasión local:</strong> Destrucción de tejidos adyacentes y órganos vecinos → Pérdida de función y dolor',
-                        '🔀 <strong>Metástasis:</strong> Diseminación a distancia por vía linfática, hematógena o por cavidades corporales',
-                        '⚡ <strong>Caquexia:</strong> Síndrome de desgaste progresivo con pérdida de peso, anorexia y debilidad extrema',
-                        '🩸 <strong>Complicaciones hemorrágicas:</strong> Ulceración, necrosis y hemorragias por invasión vascular',
-                        '🔥 <strong>Síndromes paraneoplásicos:</strong> Manifestaciones sistémicas no relacionadas con invasión directa (ej: hipercalcemia, trombosis)',
-                        '🛡️ <strong>Inmunosupresión:</strong> Mayor susceptibilidad a infecciones por compromiso del sistema inmune'
-                    ]
-                }
-            }, 
+            // 4 - Criterios de malignidad
             {
                 type: 'content',
                 content: {
-                    title: 'Nomenclatura de Neoplasias Malignas',
+                    title: 'Criterios Histológicos de Malignidad',
+                    subtitle: 'Qué buscar en la lámina, del bajo al alto aumento',
                     items: [
-                        '🎯 <strong>Principio:</strong> Denominación según tipo celular de origen',
-                        '🏗️ <strong>Origen mesenquimal:</strong> Sufijo "-sarcoma" (ej: liposarcoma, condrosarcoma, leiomiosarcoma)',
-                        '🧱 <strong>Origen epitelial:</strong> Sufijo "-carcinoma" + morfología (ej: adenocarcinoma, carcinoma papilar, carcinoma folicular)',
-                    ]
-                }
-            },                      
-            {
-                type: 'platform',
-                content: {
-                    title: 'Plataformas Digitales',
-                    platforms: [
-                        {
-                            name: 'Virtual Pathology Leeds',
-                            url: 'virtualpathology.leeds.ac.uk',
-                            description: [
-                                'Sitio web del equipo de Patología Virtual de la Universidad de Leeds',
-                                'Contiene escaneos completos de miles de láminas histológicas de diversas patologías',
-                                'Cada lámina será acompañada de un breve contexto clínico'                                
-                            ],
-                            icon: 'microscope'
-                        },
-                        {
-                            name: 'Histology Guide',
-                            url: 'www.histologyguide.com/slidebox/slidebox.html',
-                            description: [
-                                'Sitio web creado por R. Sorenson y C. Brelje, de la Universidad de Minessota',
-                                'Contiene escaneos completos de láminas representativas de la histología normal',
-                                'Permitirá tener una referencia del contexto histológico normal de cada tejido'                             
-                            ],
-                            icon: 'book-open'
-                        },
-                        {
-                            name: 'MSD Manual',
-                            url: 'www.msdmanuals.com/professional',
-                            description: [
-                                'Sitio web de Merck Sharp & Dohme (MSD)',
-                                'Contiene información clínica detallada y revisada por expertos sobre enfermedades, diagnósticos y tratamientos para profesionales de la salud'
-                            ],
-                            icon: 'stethoscope'
-                        },
-                        {
-                            name: 'Medline Plus',
-                            url: 'medlineplus.gov',
-                            description: [
-                                'Sitio web de la Biblioteca Nacional de Medicina de EE. UU. (NLM)',
-                                'Contiene información general sobre enfermedades, medicamentos y condiciones de salud, orientada al público general'
-                            ],
-                            icon: 'heart'
-                        }
+                        '🌊 <strong>Invasión:</strong> el criterio decisivo. Ruptura de la membrana basal y penetración destructiva del estroma, del músculo o de los vasos',
+                        '🧬 <strong>Pleomorfismo y atipia:</strong> variación marcada de tamaño y forma de células y núcleos, con contornos irregulares',
+                        '📊 <strong>Relación núcleo/citoplasma aumentada:</strong> núcleos grandes e hipercromáticos, con nucléolos prominentes',
+                        '⚡ <strong>Mitosis atípicas y numerosas:</strong> figuras multipolares o asimétricas; su recuento define el grado histológico',
+                        '💀 <strong>Necrosis tumoral:</strong> el tumor crece más rápido que su propia irrigación y su centro muere',
+                        '🩸 <strong>Invasión vascular y linfática:</strong> células tumorales dentro de la luz de un vaso, la antesala de la metástasis'
                     ]
                 }
             },
+            // 5 - Evolución y complicaciones
+            {
+                type: 'content',
+                content: {
+                    title: 'Evolución y Complicaciones',
+                    subtitle: 'Cómo un tumor maligno enferma al paciente',
+                    items: [
+                        '🌊 <strong>Invasión local:</strong> destruye el tejido vecino, obstruye estructuras y produce dolor y pérdida de función',
+                        '🔀 <strong>Metástasis:</strong> diseminación a distancia por vía linfática, hematógena o por cavidades. Es la principal causa de muerte',
+                        '⚡ <strong>Caquexia:</strong> desgaste progresivo con baja de peso, anorexia y debilidad, mediado por citoquinas y no solo por la ingesta',
+                        '🔥 <strong>Síndromes paraneoplásicos:</strong> manifestaciones sistémicas por sustancias que produce el tumor, como hipercalcemia o trombosis',
+                        '🩸 <strong>Hemorragia y ulceración:</strong> por invasión vascular y necrosis de la superficie tumoral',
+                        '🛡️ <strong>Inmunosupresión:</strong> mayor susceptibilidad a infecciones, agravada por el tratamiento'
+                    ]
+                }
+            },
+            // 6 - Nomenclatura
+            {
+                type: 'content',
+                content: {
+                    title: 'Nomenclatura',
+                    subtitle: 'El sufijo indica el origen y, al mismo tiempo, la malignidad',
+                    items: [
+                        '🧱 <strong>Origen epitelial:</strong> carcinoma. Se precisa con el patrón: adenocarcinoma, carcinoma escamoso, carcinoma papilar',
+                        '🏗️ <strong>Origen mesenquimal:</strong> sarcoma. Liposarcoma, condrosarcoma, osteosarcoma, leiomiosarcoma',
+                        '🩸 <strong>Origen hematolinfoide:</strong> leucemias y linfomas, que no siguen la regla del sufijo',
+                        '⚠️ <strong>Trampas frecuentes:</strong> melanoma, seminoma y mesotelioma son malignos pese a terminar en "-oma"'
+                    ]
+                }
+            },
+            // 7 - Metodología
             {
                 type: 'activity',
                 content: {
                     title: 'Metodología de Trabajo',
-                    subtitle: 'Análisis Autónomo - 40 minutos',
+                    subtitle: 'Análisis autónomo en grupo · 2 casos · 40 minutos',
                     instructions: [
-                        '👥 Trabajarán en grupos pequeños (2 a 4 estudiantes)',
-                        '⏱️ 10 minutos por lámina para análisis y discusión',
-                        '🔍 Observen, investiguen, discutan y lleguen a conclusiones grupales',
-                        '📝 Tomen notas y capturas de sus hallazgos principales',
-                        '❓ El docente circulará para orientación puntual'
+                        '👥 Trabajen en los grupos ya conformados, de 2 a 4 estudiantes',
+                        '⏱️ Aproximadamente 15 minutos por lámina: observar, investigar, discutir y concluir',
+                        '🔬 Comparen cada caso con la lámina benigna del mismo tejido vista en el práctico anterior',
+                        '🔍 Los enlaces de apoyo de cada caso están al pie de la lámina: úsenlos durante la sesión',
+                        '📝 Registren los hallazgos y capturas del grupo: son su material de estudio para la prueba práctica',
+                        '❓ El docente circula orientando; al cierre se hace la puesta en común'
                     ]
                 }
             },
+            // 8 - Caso 1
             {
                 type: 'case',
                 content: {
-                    title: 'Adenocarcinoma de colon',
+                    title: 'Caso 1: Adenocarcinoma de Colon',
                     clinical: {
-                        patient: 'Hombre de 60 años',
-                        symptoms: 'Presenta dolor abdominal persistente, acompañado de cambios en el hábito intestinal en los últimos meses, con predominio de estreñimiento. Ha experimentado una pérdida de peso de 5 kg en los últimos 4 meses sin modificaciones en su dieta.',
-                        labs: 'Colonoscopía: lesión infiltrativa. Análisis genético: Mutación G12D en KRAS'
+                        patient: 'Varón de 60 años',
+                        sample: 'Biopsia endoscópica de colon',
+                        symptoms: 'Dolor abdominal persistente y estreñimiento progresivo, con baja de 5 kg en 4 meses sin cambios en la dieta',
+                        labs: 'Colonoscopía: lesión infiltrativa · Estudio molecular: mutación G12D en KRAS'
                     },
                     questions: [
-                        'Describa las características histológicas de esta muestra ¿Qué características de malignidad logra observar?',
-                        'Compare con la lámina del pólipo adenomatoso, que diferencias relevantes observa',
-                        'Investigue la función de KRAS y explique la importancia de su estudio en el cancer de colon',
+                        '¿Cómo son las glándulas de la lesión y hasta qué capa de la pared llegan?',
+                        '¿Qué criterios de malignidad reconoce en los núcleos y en las mitosis?',
+                        'Compare con la lámina del pólipo adenomatoso del práctico anterior: ¿cuál es la diferencia decisiva?',
+                        'Investigue la función de KRAS y por qué su estudio cambia el tratamiento de este paciente'
                     ],
                     concept: 'NEOPLASIA MALIGNA EPITELIAL',
+                    linkLabels: { msd: 'RAS y terapias dirigidas' },
+                    linkNotes: {
+                        histologia: 'Colon normal: criptas rectas y regulares, el punto de partida para medir la desorganización',
+                        medline: 'Qué detecta el test de sangre oculta en heces y su papel en el tamizaje',
+                        msd: 'Qué hace la vía RAS y por qué una mutación KRAS predice resistencia a terapia anti-EGFR'
+                    },
                     links: {
                         caso: 'https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FUndergraduate%2F1485.svs',
                         histologia: 'https://histologyguide.com/slideview/MH-123-colon/14-slide-1.html?x=32225&y=8989&z=3.30',
                         medline: 'https://medlineplus.gov/lab-tests/fecal-occult-blood-test-fobt/',
                         msd: 'https://bpsbioscience.com/research-areas/ras'
-                    }                         
+                    }
                 }
             },
+            // 9 - Caso 2
             {
                 type: 'case',
                 content: {
-                    title: 'Leiomiosarcoma cutáneo grado 1',
+                    title: 'Caso 2: Leiomiosarcoma Cutáneo Grado 1',
                     clinical: {
-                        patient: 'Hombre de 39 años.',
-                        symptoms: 'Biopsia excisional de masa sospechosa, no móvil, localizada en hombro izquierdo',
-                        labs: 'Se solicita estudio de inmunohistoquímica (IHQ)'
+                        patient: 'Varón de 39 años',
+                        sample: 'Biopsia excisional de masa en hombro izquierdo',
+                        symptoms: 'Masa no móvil, adherida a planos profundos, de crecimiento progresivo',
+                        labs: 'Estudio de inmunohistoquímica solicitado para precisar el origen del tumor'
                     },
                     questions: [
-                        'Describa las características histológicas de esta muestra ¿Qué características de malignidad logra observar?',
-                        'Compare con la lámina del leiomioma, que diferencias relevantes observa',
-                        '¿Qué significa que este tumor sea de grado histológico 1?',
-                        '¿Cuál es el origen histológico de este tumor? Indique un marcador de IHQ que permita demostrarlo'
+                        '¿Qué tipo celular forma el tumor y cómo se disponen las células?',
+                        '¿Qué criterios de malignidad reconoce en los núcleos, las mitosis y el borde de la lesión?',
+                        'Compare con la lámina del leiomioma del práctico anterior: ¿qué cambió y qué se mantiene?',
+                        '¿Qué significa que sea de grado histológico 1 y qué marcador de inmunohistoquímica demostraría su origen?'
                     ],
                     concept: 'NEOPLASIA MALIGNA DE MÚSCULO LISO',
-                    links: [
-                        { label: 'Caso Clínico', url: 'https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FSlide_Library%2FSara_Edward%2FSet_6%2F122820.svs' },
-                        { label: 'Histología Referencia', url: 'https://histologyguide.com/slideview/MH-090-thin-skin/11-slide-1.html?x=13296&y=4184&z=29.80' },
-                        { label: 'PathologyOutlines', url: 'https://www.pathologyoutlines.com/topic/softtissuesmoothmuscle.html' },
-                        { label: 'National Cancer Institute', url: 'https://www.cancer.gov/about-cancer/diagnosis-staging/diagnosis/tumor-grade' }
-                    ]
+                    linkLabels: { medline: 'PathologyOutlines', msd: 'National Cancer Institute' },
+                    linkNotes: {
+                        histologia: 'Piel normal: dermis y músculo erector del pelo, el tejido del que deriva este tumor',
+                        medline: 'Tumores de músculo liso de partes blandas: criterios diagnósticos e inmunohistoquímica',
+                        msd: 'Qué es el grado histológico de un tumor y cómo se relaciona con el pronóstico'
+                    },
+                    links: {
+                        caso: 'https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FSlide_Library%2FSara_Edward%2FSet_6%2F122820.svs',
+                        histologia: 'https://histologyguide.com/slideview/MH-090-thin-skin/11-slide-1.html?x=13296&y=4184&z=29.80',
+                        medline: 'https://www.pathologyoutlines.com/topic/softtissuesmoothmuscle.html',
+                        msd: 'https://www.cancer.gov/about-cancer/diagnosis-staging/diagnosis/tumor-grade'
+                    }
                 }
-            },          
+            },
+            // 10 - Síntesis integradora
+            {
+                type: 'table',
+                content: {
+                    title: 'Síntesis Integradora',
+                    subtitle: 'Dos malignidades frente a su contraparte benigna del mismo tejido',
+                    headers: ['Caso', 'Tejido de origen', 'Qué lo hace maligno', 'Hallazgo morfológico clave', 'Qué define el pronóstico'],
+                    rows: [
+                        {
+                            name: 'Adenocarcinoma de colon',
+                            icon: 'git-merge',
+                            color: 'purple',
+                            cells: [
+                                'Epitelio glandular del colon; surge en la mayoría de los casos de un adenoma previo',
+                                'Atraviesa la membrana basal e infiltra la pared, con capacidad de metastatizar',
+                                'Glándulas irregulares y desordenadas que invaden el estroma, con atipia y mitosis atípicas',
+                                'Profundidad de invasión, ganglios comprometidos y perfil molecular (KRAS)'
+                            ]
+                        },
+                        {
+                            name: 'Leiomiosarcoma cutáneo',
+                            icon: 'align-justify',
+                            color: 'amber',
+                            cells: [
+                                'Músculo liso de la dermis, el mismo del leiomioma del práctico anterior',
+                                'Atipia nuclear, mitosis aumentadas y crecimiento infiltrativo sin límite neto',
+                                'Fascículos de células fusiformes con núcleos pleomórficos e hipercromáticos',
+                                'Grado histológico, tamaño, profundidad y estado de los márgenes quirúrgicos'
+                            ]
+                        }
+                    ],
+                    note: 'Benigno y maligno del mismo tejido comparten el aspecto general: lo que los separa es la relación del tumor con lo que tiene alrededor. Por eso el borde de la lesión, a bajo aumento, suele ser más informativo que el detalle celular.'
+                }
+            },
+            // 11 - Mensajes clave
             {
                 type: 'content',
                 content: {
-                    title: 'Adenocarcinoma de Colon: Puntos de Integración',
+                    title: 'Mensajes Clave',
                     items: [
-                        '🏗️ <strong>Definición:</strong> Neoplasia maligna derivada del epitelio glandular colónico',
-                        '📊 <strong>Epidemiología:</strong> 3ª causa de muerte por cáncer, incidencia aumenta >50 años',
-                        '🔬 <strong>Histología:</strong> Glándulas irregulares infiltrantes con atipia severa, mitosis atípicas y pérdida de arquitectura',
-                        '🧬 <strong>KRAS:</strong> Oncogén mutado en 40% de casos, predice resistencia a terapia anti-EGFR',
-                        '⚠️ <strong>Secuencia adenoma-carcinoma:</strong> La mayoría surge de pólipos adenomatosos preexistentes',
-                        '🎯 <strong>Screening:</strong> Colonoscopía cada 10 años desde los 45-50 años, sangre oculta en heces'
+                        '🌊 <strong>Invadir es el criterio decisivo:</strong> una célula muy atípica que no invade no basta; una célula bien diferenciada que invade, sí',
+                        '🔍 <strong>Mirar el borde antes que la célula:</strong> a bajo aumento se ve si el tumor empuja o si se mete entre los tejidos',
+                        '⚖️ <strong>Grado y estadio no son lo mismo:</strong> el grado describe cuánto se parece al tejido normal; el estadio, hasta dónde llegó',
+                        '🧬 <strong>La molécula entró al informe:</strong> mutaciones como KRAS ya no son un dato accesorio, definen el tratamiento',
+                        '🧪 <strong>La inmunohistoquímica responde de dónde viene:</strong> cuando la morfología no alcanza, el marcador identifica el linaje',
+                        '🏥 <strong>Detrás de cada lámina hay un paciente:</strong> lo que se escribe en el informe define cirugía, terapia y expectativa de vida'
                     ]
                 }
             },
-            {
-                type: 'content',
-                content: {
-                    title: 'Leiomiosarcoma Cutáneo: Puntos de Integración',
-                    items: [
-                        '🏗️ <strong>Definición:</strong> Neoplasia maligna derivada del músculo liso cutáneo (músculos erectores del pelo)',
-                        '📊 <strong>Epidemiología:</strong> Sarcoma cutáneo raro, más frecuente en extremidades y tronco',
-                        '🔬 <strong>Histología:</strong> Fascículos de células fusiformes con atipia nuclear marcada, mitosis aumentadas y necrosis',
-                        '🔢 <strong>Grado histológico:</strong> Grado 1 = bajo grado (pocas mitosis, mínima atipia), mejor pronóstico',
-                        '🧪 <strong>IHQ:</strong> Positivo para actina de músculo liso, desmina y h-caldesmón',
-                        '⚠️ <strong>Diferencia con leiomioma:</strong> Presenta invasión, >2 mitosis/10 campos, atipia nuclear severa',
-                        '🎯 <strong>Tratamiento:</strong> Resección quirúrgica amplia con márgenes negativos, seguimiento estricto'
-                    ]
-                }
-            },
+            // 12 - Recursos y bibliografía
             {
                 type: 'resources',
                 content: {
-                    title: 'Recursos de Estudio',
-                    platforms: [
-                        {
-                            name: 'Virtual Pathology Leeds',
-                            url: 'www.virtualpathology.leeds.ac.uk',
-                            description: 'Contiene escaneos completos de miles de láminas histológicas de diversas patologías'
-                        },
-                        {
-                            name: 'Histology Guide',
-                            url: 'histologyguide.com/slidebox',
-                            description: 'Contiene escaneos completos de láminas representativas de la histología normal'
-                        }
-                    ],
+                    title: 'Recursos y Bibliografía',
                     bibliography: [
                         {
-                            title: 'Robbins & Cotran Patología Estructural y Funcional, 8va edición',
+                            title: 'Robbins & Cotran. Patología Estructural y Funcional, 8ª edición',
                             url: 'https://archive.org/details/Robbins.Cotran.Patologia.Estructural.y.Funcional.8a.EdBooksmedicos.org/page/n272/mode/2up',
                             chapter: 'Capítulo 7: Neoplasias',
-                            icon: 'microscope',
-                            color: 'blue'
+                            color: 'purple'
                         },
                         {
-                            title: 'Patología. Un estudio de caso moderno, 2e',
+                            title: 'Reisner H. Patología. Un estudio de caso moderno, 2ª edición',
                             url: 'https://accessmedicina.mhmedical.com/content.aspx?bookid=3096&sectionid=258855827',
-                            chapter: 'Capítulo 1: Cáncer y Genoma',
-                            icon: 'stethoscope',
+                            chapter: 'Capítulo 1: Cáncer y genoma',
                             color: 'green'
                         }
                     ],
+                    platforms: [
+                        { name: 'Virtual Pathology, University of Leeds', url: 'virtualpathology.leeds.ac.uk/slides/library', purpose: 'Fuente de las láminas virtuales de los dos casos de hoy' },
+                        { name: 'Histology Guide (Sorenson y Brelje, University of Minnesota)', url: 'histologyguide.com/slidebox', purpose: 'Histología normal de colon y piel usada como referencia' },
+                        { name: 'PathologyOutlines', url: 'pathologyoutlines.com', purpose: 'Criterios diagnósticos e inmunohistoquímica de tumores de partes blandas' },
+                        { name: 'National Cancer Institute', url: 'cancer.gov', purpose: 'Definiciones de grado y estadio tumoral y su significado pronóstico' },
+                        { name: 'MedlinePlus (NLM)', url: 'medlineplus.gov', purpose: 'Descripción de exámenes de tamizaje, en lenguaje accesible' }
+                    ]
                 }
             },
+            // 13 - Preguntas
             {
                 type: 'qa',
                 content: {
@@ -564,10 +575,36 @@
                         instructor: 'TM. Fernanda López M., PhD',
                         email: 'fernanda.lopez@uach.cl',
                         office: 'Laboratorio TecmedHUB Ed.500, 3er Piso',
-                        hours: 'Martes 14:50-16:20 hrs'
-                    },                
+                        hours: 'Lunes 14:50-16:20 hrs'
+                    }
                 }
-            },    
+            },
+            // 14 - Próximos pasos
+            {
+                type: 'closing',
+                content: {
+                    title: 'Próximos Pasos',
+                    subtitle: 'Con las neoplasias cerramos la unidad. El último práctico vuelve al vaso sanguíneo y a lo que ocurre cuando se obstruye.',
+                    next: {
+                        label: 'Próximo práctico',
+                        title: 'Práctico VIII: "Trombosis e Infarto"',
+                        date: 'Semana del 2 de noviembre'
+                    },
+                    items: [
+                        '<strong>Completar el registro de los dos casos</strong> y compararlos con los del práctico anterior',
+                        '<strong>Consultar dudas antes de la próxima sesión</strong> — lunes 14:50-16:20, Lab. TecmedHUB',
+                        '<strong>Revisar</strong> los mecanismos de trombosis, embolia e infarto',
+                        '<strong>Repasar</strong> histología normal de arteria, pulmón y encéfalo'
+                    ],
+                    alert: {
+                        title: 'Ojo con las fechas',
+                        items: [
+                            '<strong>Segunda Prueba Práctica: semana del 9 de noviembre</strong>',
+                            'Entra el contenido de los prácticos V al VIII. El contenido se acumula: ponerse al día clase a clase es lo que hace manejable la prueba.'
+                        ]
+                    }
+                }
+            }
         ];
         let currentSlide = 0;
         let touchStartX = 0;
@@ -748,59 +785,11 @@
                                     <h1 class="desktop-main-title font-bold text-gray-800">${slide.content.title}</h1>
                                 </div>
                                 ${slide.content.subtitle ? `<p class="text-center text-gray-600 mb-6">${slide.content.subtitle}</p>` : ''}
-                                <div class="space-y-4 max-w-4xl mx-auto">
+                                <div class="grid grid-cols-2 gap-4 max-w-5xl mx-auto">
                                     ${slide.content.items.map(item => `
                                         <div class="bg-gray-50 p-4 rounded-xl border-l-4 border-purple-500">
                                             <div class="text-gray-700 leading-relaxed">${item}</div>
                                         </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        </div>`;
-                case 'platform':
-                    return `
-                        <div class="h-full bg-gradient-to-br from-purple-50 to-pink-50 md:overflow-y-hidden">
-                            <div class="mobile-content md:hidden">
-                                <div class="text-center mb-6">
-                                    <i data-lucide="globe" class="w-16 h-16 mx-auto mb-4 text-yellow-400"></i>
-                                    <h1 class="mobile-title font-bold text-gray-800 mb-3">${slide.content.title}</h1>
-                                </div>
-                                <div class="space-y-4">
-                                    ${slide.content.platforms.map(platform => `
-                                        <div class="bg-white p-4 rounded-xl shadow-lg border">
-                                            <div class="flex items-center mb-3">
-                                                <i data-lucide="${platform.icon}" class="w-8 h-8 mr-3 text-yellow-400"></i>
-                                                <a href="https://${platform.url}" target="_blank" class="mobile-subtitle font-bold text-purple-700 hover:text-purple-900 hover:underline transition-colors">${platform.name}</a>
-                                            </div>
-                                            <ul class="text-gray-600 mobile-small space-y-2">
-                                                ${Array.isArray(platform.description) ? 
-                                                platform.description.map(desc => `<li class="flex items-start"><i data-lucide="circle" class="w-2 h-2 mt-2 mr-2 text-purple-500 flex-shrink-0"></i><span class="leading-relaxed">${desc}</span></li>`).join('') : 
-                                                `<li class="flex items-start"><i data-lucide="circle" class="w-2 h-2 mt-2 mr-2 text-purple-500 flex-shrink-0"></i><span class="leading-relaxed">${platform.description}</span></li>`
-                                                }
-                                            </ul>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                            <div class="hidden md:block desktop-fit desktop-compact bg-gradient-to-br from-purple-50 to-pink-50">
-                                <div class="desktop-title-with-icon">
-                                    <i data-lucide="globe" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
-                                    <h1 class="desktop-main-title font-bold text-gray-800">${slide.content.title}</h1>
-                                </div>
-                                <div class="platforms-desktop-grid">
-                                    ${slide.content.platforms.map(platform => `
-                                        <a href="https://${platform.url}" target="_blank" class="link-card platforms-desktop-card bg-white rounded-xl shadow-lg border transition-smooth">
-                                            <div class="platforms-desktop-icon-title flex items-center mb-2">
-                                                <i data-lucide="${platform.icon}" class="w-6 h-6 mr-2 text-yellow-400"></i>
-                                                <h3 class="font-bold text-gray-800 hover:text-purple-700 transition-colors">${platform.name}</h3>
-                                            </div>
-                                            <ul class="text-gray-600 platforms-desktop-description space-y-1 flex-grow">
-                                                ${Array.isArray(platform.description) ? 
-                                                platform.description.map(desc => `<li class="flex items-start"><i data-lucide="circle" class="w-2 h-2 mt-1.5 mr-2 text-purple-500 flex-shrink-0"></i><span class="leading-relaxed">${desc}</span></li>`).join('') : 
-                                                `<li class="flex items-start"><i data-lucide="circle" class="w-2 h-2 mt-1.5 mr-2 text-purple-500 flex-shrink-0"></i><span class="leading-relaxed">${platform.description}</span></li>`
-                                                }
-                                            </ul>
-                                        </a>
                                     `).join('')}
                                 </div>
                             </div>
@@ -831,7 +820,7 @@
                                     <h1 class="desktop-main-title font-bold text-gray-800">${slide.content.title}</h1>
                                 </div>
                                 <p class="text-center text-gray-600 mb-6">${slide.content.subtitle}</p>
-                                <div class="space-y-4 max-w-4xl mx-auto">
+                                <div class="grid grid-cols-2 gap-4 max-w-5xl mx-auto">
                                     ${slide.content.instructions.map(instruction => `
                                         <div class="bg-white p-4 rounded-xl shadow-lg border">
                                             <div class="flex items-start gap-3">
@@ -845,146 +834,177 @@
                         </div>`;
                 case 'case':
                     return `
-                        <div class="h-full md:overflow-y-hidden">
+                        <div class="h-full bg-gradient-to-br from-purple-50 to-indigo-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
                             <div class="mobile-content md:hidden">
                                 <div class="text-center mb-4">
-                                    <div class="inline-flex items-center justify-center bg-purple-100 px-4 py-2 rounded-full mb-4">
-                                        <i data-lucide="microscope" class="w-5 h-5 text-red-600 mr-2"></i>
-                                        <span class="text-purple-800 font-bold mobile-small">${slide.content.concept}</span>
+                                    <div class="inline-flex items-center justify-center bg-purple-100 px-4 py-1.5 rounded-full mb-2">
+                                        <i data-lucide="microscope" class="w-4 h-4 text-yellow-500 mr-2"></i>
+                                        <span class="text-purple-800 font-bold mobile-small tracking-wide">${slide.content.concept}</span>
                                     </div>
-                                    <h1 class="mobile-title font-bold text-gray-800 mb-4">${slide.content.title}</h1>
-                                <a href="${slide.content.links.caso}" target="_blank" class="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-300 text-purple-900 font-bold px-5 py-2.5 rounded-full shadow-md mobile-text mt-1">
-                                    <i data-lucide="microscope" class="w-5 h-5"></i> Ver Lámina
-                                </a>
+                                    <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
                                 </div>
-                                <div class="mb-6">
-                                    <div class="bg-yellow-50 p-4 rounded-xl border-l-4 border-yellow-500">
-                                        <h3 class="mobile-text font-bold text-yellow-800 mb-4 flex items-center">
-                                            <i data-lucide="link" class="w-5 h-5 mr-2"></i>
-                                            Enlaces de apoyo
-                                        </h3>
-                                        <div class="grid grid-cols-1 gap-3">
-                                            <a href="${slide.content.links.histologia}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="book-open" class="w-5 h-5 text-purple-600 mr-3 flex-shrink-0"></i>
-                                                    <span class="mobile-text font-medium text-purple-600">Histología Referencia</span>
-                                                </div>
-                                            </a>
-                                            <a href="${slide.content.links.medline}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="activity" class="w-5 h-5 text-green-600 mr-3 flex-shrink-0"></i>
-                                                    <span class="mobile-text font-medium text-green-600">MedlinePlus / Otras fuentes</span>
-                                                </div>
-                                            </a>
-                                            <a href="${slide.content.links.msd}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="clipboard-plus" class="w-5 h-5 text-green-600 mr-3 flex-shrink-0"></i>
-                                                    <span class="mobile-text font-medium text-green-600">MSD Manuals / Otras fuentes</span>
-                                                </div>
-                                            </a>                                        
+                                <div class="bg-white rounded-xl shadow-lg border-l-4 border-purple-600 p-4 mb-4">
+                                    <h3 class="mobile-text font-bold text-purple-800 mb-3 flex items-center">
+                                        <i data-lucide="user" class="w-5 h-5 mr-2"></i>
+                                        Datos clínicos
+                                    </h3>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-wide text-purple-500">Paciente</p>
+                                            <p class="mobile-text text-gray-800">${slide.content.clinical.patient}</p>
+                                        </div>
+                                        ${slide.content.clinical.sample ? `
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-wide text-purple-500">Muestra</p>
+                                            <p class="mobile-text text-gray-800">${slide.content.clinical.sample}</p>
+                                        </div>` : ''}
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-wide text-purple-500">Cuadro clínico</p>
+                                            <p class="mobile-text text-gray-800">${slide.content.clinical.symptoms}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-wide text-purple-500">Exámenes</p>
+                                            <p class="mobile-text text-gray-800">${slide.content.clinical.labs}</p>
                                         </div>
                                     </div>
+                                    <a href="${slide.content.links.caso}" target="_blank" class="mt-4 w-full flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-300 text-purple-900 font-bold px-5 py-3 rounded-xl shadow-md mobile-text">
+                                        <i data-lucide="microscope" class="w-5 h-5"></i> Ver lámina virtual
+                                    </a>
                                 </div>
-                                <div class="space-y-4">
-                                    <div class="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-500">
-                                        <h3 class="mobile-text font-bold text-blue-800 mb-3 flex items-center">
-                                            <i data-lucide="user" class="w-5 h-5 mr-2"></i>
-                                            Información Clínica
-                                        </h3>
-                                        <div class="space-y-2">
-                                            <p class="mobile-small"><strong>Paciente:</strong> ${slide.content.clinical.patient}</p>
-                                            <p class="mobile-small"><strong>Historial:</strong> ${slide.content.clinical.symptoms}</p>
-                                            <p class="mobile-small"><strong>Exámenes:</strong> ${slide.content.clinical.labs}</p>
-                                        </div>
-                                    </div>
-                                    <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500">
-                                        <h3 class="mobile-text font-bold text-green-800 mb-3 flex items-center">
-                                            <i data-lucide="help-circle" class="w-5 h-5 mr-2"></i>
-                                            Preguntas de Análisis
-                                        </h3>
-                                        <ol class="space-y-2">
-                                            ${slide.content.questions.map((q, i) => `
-                                                <li class="flex items-start gap-3">
-                                                    <span class="bg-green-200 text-green-800 rounded-full w-6 h-6 flex items-center justify-center mobile-small font-bold flex-shrink-0 mt-0.5">${i+1}</span>
-                                                    <span class="mobile-small text-gray-700 leading-relaxed">${q}</span>
-                                                </li>
-                                            `).join('')}
-                                        </ol>
-                                    </div>
+                                <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500 mb-4">
+                                    <h3 class="mobile-text font-bold text-green-800 mb-3 flex items-center">
+                                        <i data-lucide="help-circle" class="w-5 h-5 mr-2"></i>
+                                        Preguntas de análisis
+                                    </h3>
+                                    <ol class="space-y-2">
+                                        ${slide.content.questions.map((q, i) => `
+                                            <li class="flex items-start gap-3">
+                                                <span class="bg-green-200 text-green-800 rounded-full w-6 h-6 flex items-center justify-center mobile-small font-bold flex-shrink-0 mt-0.5">${i+1}</span>
+                                                <span class="mobile-small text-gray-700 leading-relaxed">${q}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ol>
                                 </div>
-                            </div>
-                            <div class="hidden md:block desktop-fit desktop-compact">
-                                <div class="flex flex-wrap items-center justify-between mb-4">
-                                    <h1 class="font-bold text-gray-800 text-xl md:text-2xl lg:text-3xl mb-2 md:mb-0">${slide.content.title}</h1>
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex items-center bg-purple-100 px-3 py-1 rounded-full">
-                                            <i data-lucide="microscope" class="w-5 h-5 text-red-600 mr-2"></i>
-                                            <span class="text-purple-800 font-bold text-sm md:text-base">${slide.content.concept}</span>
-                                        </div>
-                                        <a href="${slide.content.links.caso}" target="_blank" class="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-300 text-purple-900 font-bold text-sm md:text-base px-4 py-1.5 rounded-full shadow-md hover:shadow-lg transition-shadow">
-                                            <i data-lucide="microscope" class="w-4 h-4"></i>  Ver Lámina
+                                <div class="border-t border-purple-200 pt-3">
+                                    <p class="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2 flex items-center">
+                                        <i data-lucide="link" class="w-4 h-4 mr-1.5"></i>
+                                        Apoyo para investigar
+                                    </p>
+                                    <div class="grid grid-cols-1 gap-2">
+                                        <a href="${slide.content.links.histologia}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
+                                            <div class="flex items-center mb-1">
+                                                <i data-lucide="book-open" class="w-4 h-4 text-purple-600 mr-2 flex-shrink-0"></i>
+                                                <span class="text-sm font-semibold text-purple-600">Histología normal de referencia</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 leading-snug">${(slide.content.linkNotes || {}).histologia || ''}</p>
+                                        </a>
+                                        <a href="${slide.content.links.medline}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
+                                            <div class="flex items-center mb-1">
+                                                <i data-lucide="activity" class="w-4 h-4 text-green-600 mr-2 flex-shrink-0"></i>
+                                                <span class="text-sm font-semibold text-green-600">${(slide.content.linkLabels || {}).medline || 'MedlinePlus'}</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 leading-snug">${(slide.content.linkNotes || {}).medline || ''}</p>
+                                        </a>
+                                        <a href="${slide.content.links.msd}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
+                                            <div class="flex items-center mb-1">
+                                                <i data-lucide="clipboard-plus" class="w-4 h-4 text-green-600 mr-2 flex-shrink-0"></i>
+                                                <span class="text-sm font-semibold text-green-600">${(slide.content.linkLabels || {}).msd || 'MSD Manual Professional'}</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 leading-snug">${(slide.content.linkNotes || {}).msd || ''}</p>
                                         </a>
                                     </div>
                                 </div>
-                                <div class="mb-4">
-                                    <div class="bg-yellow-50 p-4 rounded-xl border-l-4 border-yellow-500">
-                                        <h3 class="font-bold text-yellow-800 mb-3 flex items-center">
-                                            <i data-lucide="link" class="w-5 h-5 mr-2"></i>
-                                            Enlaces de apoyo
-                                        </h3>
-                                        <div class="grid grid-cols-2 gap-3">
-                                            <a href="${slide.content.links.histologia}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="microscope" class="w-4 h-4 text-purple-600 mr-2 flex-shrink-0"></i>
-                                                    <span class="text-sm font-medium text-purple-600">Histología Referencia</span>
-                                                </div>
-                                            </a>
-                                            <a href="${slide.content.links.medline}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="activity" class="w-4 h-4 text-green-600 mr-2 flex-shrink-0"></i>
-                                                    <span class="text-sm font-medium text-green-600">MedlinePlus / Otras fuentes </span>
-                                                </div>
-                                            </a>
-                                            <a href="${slide.content.links.msd}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="clipboard-plus" class="w-4 h-4 text-green-600 mr-2 flex-shrink-0"></i>
-                                                    <span class="text-sm font-medium text-green-600">MSD Manuals / Otras fuentes v</span>
-                                                </div>
-                                            </a>                                        
-                                        </div>
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit">
+                                <div class="flex flex-wrap items-center gap-3 mb-3">
+                                    <h1 class="font-bold text-gray-800 text-xl md:text-2xl lg:text-3xl">${slide.content.title}</h1>
+                                    <div class="flex items-center bg-purple-100 px-3 py-1 rounded-full">
+                                        <i data-lucide="microscope" class="w-4 h-4 text-yellow-500 mr-2"></i>
+                                        <span class="text-purple-800 font-bold text-sm tracking-wide">${slide.content.concept}</span>
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                    <div class="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-500">
-                                        <h3 class="font-bold text-blue-800 mb-3 flex items-center">
-                                            <i data-lucide="user" class="w-5 h-5 mr-2"></i>
-                                            Información Clínica
-                                        </h3>
-                                        <div class="space-y-2">
-                                            <p class="text-sm"><strong>Paciente:</strong> ${slide.content.clinical.patient}</p>
-                                            <p class="text-sm"><strong>Historial:</strong> ${slide.content.clinical.symptoms}</p>
-                                            <p class="text-sm"><strong>Exámenes:</strong> ${slide.content.clinical.labs}</p>
+                                <div class="bg-white rounded-xl shadow-lg border-l-4 border-purple-600 p-4 mb-2">
+                                    <div class="flex items-start gap-6">
+                                        <div class="flex-1">
+                                            <h3 class="font-bold text-purple-800 mb-3 flex items-center text-lg">
+                                                <i data-lucide="user" class="w-5 h-5 mr-2"></i>
+                                                Datos clínicos
+                                            </h3>
+                                            <div class="grid grid-cols-2 gap-x-6 gap-y-3">
+                                                <div>
+                                                    <p class="text-xs font-bold uppercase tracking-wide text-purple-500 mb-0.5">Paciente</p>
+                                                    <p class="text-base text-gray-800 leading-snug">${slide.content.clinical.patient}</p>
+                                                </div>
+                                                ${slide.content.clinical.sample ? `
+                                                <div>
+                                                    <p class="text-xs font-bold uppercase tracking-wide text-purple-500 mb-0.5">Muestra</p>
+                                                    <p class="text-base text-gray-800 leading-snug">${slide.content.clinical.sample}</p>
+                                                </div>` : ''}
+                                                <div>
+                                                    <p class="text-xs font-bold uppercase tracking-wide text-purple-500 mb-0.5">Cuadro clínico</p>
+                                                    <p class="text-base text-gray-800 leading-snug">${slide.content.clinical.symptoms}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs font-bold uppercase tracking-wide text-purple-500 mb-0.5">Exámenes</p>
+                                                    <p class="text-base text-gray-800 leading-snug">${slide.content.clinical.labs}</p>
+                                                </div>
+                                            </div>
                                         </div>
+                                        <a href="${slide.content.links.caso}" target="_blank" class="flex flex-col items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-300 text-purple-900 font-bold px-6 py-5 rounded-xl shadow-md hover:shadow-xl transition-shadow flex-shrink-0 w-44 text-center">
+                                            <i data-lucide="microscope" class="w-8 h-8"></i>
+                                            <span class="text-base leading-tight">Ver lámina virtual</span>
+                                        </a>
                                     </div>
-                                    <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500">
-                                        <h3 class="font-bold text-green-800 mb-3 flex items-center">
-                                            <i data-lucide="help-circle" class="w-5 h-5 mr-2"></i>
-                                            Preguntas de Análisis
-                                        </h3>
-                                        <ol class="space-y-2">
-                                            ${slide.content.questions.map((q, i) => `
-                                                <li class="flex items-start gap-2">
-                                                    <span class="bg-green-200 text-green-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">${i+1}</span>
-                                                    <span class="text-sm text-gray-700 leading-relaxed">${q}</span>
-                                                </li>
-                                            `).join('')}
-                                        </ol>
+                                </div>
+                                <div class="bg-green-50 p-3 rounded-xl border-l-4 border-green-500 mb-2">
+                                    <h3 class="font-bold text-green-800 mb-2 flex items-center text-lg">
+                                        <i data-lucide="help-circle" class="w-5 h-5 mr-2"></i>
+                                        Preguntas de análisis
+                                    </h3>
+                                    <ol class="grid grid-cols-2 gap-x-6 gap-y-2">
+                                        ${slide.content.questions.map((q, i) => `
+                                            <li class="flex items-start gap-2">
+                                                <span class="bg-green-200 text-green-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">${i+1}</span>
+                                                <span class="text-sm text-gray-700 leading-relaxed">${q}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ol>
+                                </div>
+                                <div class="border-t border-purple-200 pt-2">
+                                    <p class="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2 flex items-center">
+                                        <i data-lucide="link" class="w-4 h-4 mr-1.5"></i>
+                                        Apoyo para investigar
+                                    </p>
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <a href="${slide.content.links.histologia}" target="_blank" class="link-card bg-white p-2.5 rounded-lg border block">
+                                            <div class="flex items-center gap-2 mb-0.5">
+                                                <i data-lucide="book-open" class="w-4 h-4 text-purple-600 flex-shrink-0"></i>
+                                                <span class="text-sm font-semibold text-purple-600">Histología normal</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 leading-snug">${(slide.content.linkNotes || {}).histologia || ''}</p>
+                                        </a>
+                                        <a href="${slide.content.links.medline}" target="_blank" class="link-card bg-white p-2.5 rounded-lg border block">
+                                            <div class="flex items-center gap-2 mb-0.5">
+                                                <i data-lucide="activity" class="w-4 h-4 text-green-600 flex-shrink-0"></i>
+                                                <span class="text-sm font-semibold text-green-600">${(slide.content.linkLabels || {}).medline || 'MedlinePlus'}</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 leading-snug">${(slide.content.linkNotes || {}).medline || ''}</p>
+                                        </a>
+                                        <a href="${slide.content.links.msd}" target="_blank" class="link-card bg-white p-2.5 rounded-lg border block">
+                                            <div class="flex items-center gap-2 mb-0.5">
+                                                <i data-lucide="clipboard-plus" class="w-4 h-4 text-green-600 flex-shrink-0"></i>
+                                                <span class="text-sm font-semibold text-green-600">${(slide.content.linkLabels || {}).msd || 'MSD Manual'}</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 leading-snug">${(slide.content.linkNotes || {}).msd || ''}</p>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                         </div>`;
-                        break;
-                                case 'comparison':
+
+                case 'comparison':
                     return `
                         <div class="h-full md:overflow-y-hidden">
                             <div class="mobile-content md:hidden">
@@ -1046,62 +1066,239 @@
                         </div>`;
                 case 'resources':
                     return `
-                        <div class="h-full md:overflow-y-hidden">
+                        <div class="h-full bg-gradient-to-br from-indigo-50 to-purple-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
                             <div class="mobile-content md:hidden">
-                                <div class="text-center mb-6">
-                                    <i data-lucide="library" class="w-16 h-16 mx-auto mb-4 text-yellow-400"></i>
-                                    <h1 class="mobile-title font-bold text-gray-800 mb-3">${slide.content.title}</h1>
+                                <div class="text-center mb-5">
+                                    <i data-lucide="library" class="w-14 h-14 mx-auto mb-3 text-yellow-400"></i>
+                                    <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
                                 </div>
-                                <div class="space-y-6">
-                                    <div class="bg-white p-4 rounded-xl shadow-lg">
-                                        <div class="flex items-center mb-4">
-                                            <i data-lucide="microscope" class="w-8 h-8 mr-3 text-yellow-400"></i>
-                                            <h3 class="mobile-subtitle font-bold text-gray-800">Bibliografía Recomendada</h3>
+                                <div class="space-y-5">
+                                    <div>
+                                        <h3 class="font-bold text-purple-800 mb-2 flex items-center">
+                                            <i data-lucide="book-marked" class="w-5 h-5 mr-2 text-yellow-500"></i>
+                                            Bibliografía
+                                        </h3>
+                                        <div class="space-y-3">
+                                            ${slide.content.bibliography.map(book => `
+                                                <a href="${book.url}" target="_blank" class="link-card block bg-white p-3 rounded-lg shadow-sm border-l-4 border-${book.color}-500">
+                                                    <span class="mobile-text font-semibold text-${book.color}-700 block mb-1">${book.title}</span>
+                                                    <p class="mobile-small text-gray-600">${book.chapter}</p>
+                                                </a>
+                                            `).join('')}
                                         </div>
-                                        <div class="space-y-4">
-                                            <div>
-                                                <a href="https://archive.org/details/Robbins.Cotran.Patologia.Estructural.y.Funcional.8a.EdBooksmedicos.org/page/n272/mode/2up">
-                                                    Robbins & Cotran Patología Estructural y Funcional, 8va edición
-                                                </a>
-                                                <p class="mobile-small text-gray-600">Capítulo 7: Neoplasias</p>
-                                            </div>
-                                            <div>
-                                                <a href="https://accessmedicina.mhmedical.com/content.aspx?bookid=3096&sectionid=258855827" target="_blank" class="mobile-text font-semibold text-green-700 hover:text-green-900 hover:underline block mb-2 transition-smooth">
-                                                    Patología. Un estudio de caso moderno, 2e
-                                                </a>
-                                                <p class="mobile-small text-gray-600">Capítulo 1: Cáncer y Genoma</p>
-                                            </div>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-purple-800 mb-2 flex items-center">
+                                            <i data-lucide="globe" class="w-5 h-5 mr-2 text-yellow-500"></i>
+                                            Plataformas utilizadas en esta sesión
+                                        </h3>
+                                        <div class="space-y-2">
+                                            ${slide.content.platforms.map(p => `
+                                                <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-purple-400">
+                                                    <h4 class="text-sm font-semibold text-gray-800">${p.name}</h4>
+                                                    <p class="text-xs text-purple-600 break-words">🌐 ${p.url}</p>
+                                                    <p class="text-xs text-gray-600 leading-snug mt-0.5">${p.purpose}</p>
+                                                </div>
+                                            `).join('')}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="hidden md:block desktop-fit desktop-compact">
-                                <div class="desktop-title-with-icon">
-                                    <i data-lucide="library" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
-                                    <h1 class="desktop-main-title font-bold text-gray-800">${slide.content.title}</h1>
-                                </div>
-                                <div class="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-xl border border-purple-200 max-w-4xl mx-auto">
-                                    <div class="flex items-center mb-6">
-                                        <i data-lucide="microscope" class="w-8 h-8 mr-4 text-yellow-400"></i>
-                                        <h3 class="font-bold text-purple-800">Bibliografía Recomendada</h3>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit">
+                                <div class="max-w-6xl mx-auto w-full">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <i data-lucide="library" class="w-9 h-9 text-yellow-400 flex-shrink-0"></i>
+                                        <h1 class="text-3xl font-bold text-gray-800">${slide.content.title}</h1>
                                     </div>
-                                    <div class="space-y-6">
-                                        <a href="https://archive.org/details/Robbins.Cotran.Patologia.Estructural.y.Funcional.8a.EdBooksmedicos.org/page/n272/mode/2up" target="_blank" class="link-card bg-white p-5 rounded-lg shadow-sm border-l-4 border-purple-500 block">
-                                            <div class="text-xl font-semibold text-purple-700 hover:text-purple-900 hover:underline block mb-2 transition-smooth">
-                                                Robbins & Cotran Patología Estructural y Funcional, 8va edición
+                                    <div class="space-y-3">
+                                        <div>
+                                            <h3 class="text-base font-bold text-purple-800 mb-2 flex items-center">
+                                                <i data-lucide="book-marked" class="w-4 h-4 mr-2 text-yellow-500"></i>
+                                                Bibliografía
+                                            </h3>
+                                            <div class="grid grid-cols-2 gap-2.5">
+                                                ${slide.content.bibliography.map(book => `
+                                                    <a href="${book.url}" target="_blank" class="link-card bg-white p-2.5 rounded-lg shadow-sm border-l-4 border-${book.color}-500 block">
+                                                        <div class="text-sm font-semibold text-${book.color}-700 hover:underline leading-snug">${book.title}</div>
+                                                        <p class="text-xs text-gray-600 leading-snug mt-0.5">${book.chapter}</p>
+                                                    </a>
+                                                `).join('')}
                                             </div>
-                                            <p class="text-gray-600">Capítulo 7: Neoplasias</p>
-                                        </a>
-                                        <a href="https://accessmedicina.mhmedical.com/content.aspx?bookid=3096&sectionid=258855827" target="_blank" class="link-card bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500 block">
-                                            <div class="text-xl font-semibold text-green-700 hover:text-green-900 hover:underline block mb-2 transition-smooth">
-                                                Patología. Un estudio de caso moderno, 2e
+                                        </div>
+                                        <div>
+                                            <h3 class="text-base font-bold text-purple-800 mb-2 flex items-center">
+                                                <i data-lucide="globe" class="w-4 h-4 mr-2 text-yellow-500"></i>
+                                                Plataformas utilizadas en esta sesión
+                                            </h3>
+                                            <div class="grid grid-cols-2 gap-2.5">
+                                                ${slide.content.platforms.map(p => `
+                                                    <div class="bg-white p-2.5 rounded-lg shadow-sm border-l-4 border-purple-400">
+                                                        <h4 class="text-sm font-semibold text-gray-800 leading-snug">${p.name}</h4>
+                                                        <p class="text-xs text-purple-600 break-words">🌐 ${p.url}</p>
+                                                        <p class="text-xs text-gray-600 leading-snug mt-0.5">${p.purpose}</p>
+                                                    </div>
+                                                `).join('')}
                                             </div>
-                                            <p class="text-gray-600">Capítulo 1: Cáncer y Genoma</p>
-                                        </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>`;
+
+                case 'table':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-indigo-50 to-purple-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="text-center mb-4">
+                                    <i data-lucide="table-2" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                                    <h1 class="mobile-title font-bold text-gray-800 mb-2">${slide.content.title}</h1>
+                                    ${slide.content.subtitle ? `<p class="mobile-small text-gray-600">${slide.content.subtitle}</p>` : ''}
+                                </div>
+                                <div class="space-y-3">
+                                    ${slide.content.rows.map(row => `
+                                        <div class="bg-white rounded-xl shadow-sm border-l-4 border-${row.color}-500 p-4">
+                                            <div class="flex items-center mb-3">
+                                                <i data-lucide="${row.icon}" class="w-5 h-5 text-${row.color}-500 mr-2"></i>
+                                                <h3 class="font-bold text-gray-800">${row.name}</h3>
+                                            </div>
+                                            <div class="space-y-2">
+                                                ${row.cells.map((cell, i) => `
+                                                    <div>
+                                                        <p class="text-xs font-bold uppercase tracking-wide text-${row.color}-600">${slide.content.headers[i+1]}</p>
+                                                        <p class="text-sm text-gray-700 leading-snug">${cell}</p>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                ${slide.content.note ? `
+                                    <div class="mt-4 bg-amber-50 border-2 border-amber-300 rounded-lg p-4">
+                                        <div class="flex items-start space-x-3">
+                                            <i data-lucide="lightbulb" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                                            <p class="text-sm text-amber-900 leading-snug">${slide.content.note}</p>
+                                        </div>
+                                    </div>` : ''}
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit">
+                                <div class="max-w-7xl mx-auto w-full mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="table-2" class="w-9 h-9 text-yellow-400 flex-shrink-0"></i>
+                                        <h1 class="text-3xl font-bold text-gray-800">${slide.content.title}</h1>
+                                    </div>
+                                    ${slide.content.subtitle ? `<p class="text-sm text-purple-600 mt-1">${slide.content.subtitle}</p>` : ''}
+                                </div>
+                                <div class="max-w-7xl mx-auto w-full overflow-hidden rounded-xl shadow-sm border border-purple-200">
+                                    <table class="w-full bg-white table-fixed">
+                                        <thead>
+                                            <tr class="bg-purple-900 text-white">
+                                                ${slide.content.headers.map((h, i) => `
+                                                    <th class="text-left text-xs xl:text-sm font-semibold px-2.5 py-2 ${i === 0 ? 'w-40' : ''}">${h}</th>
+                                                `).join('')}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${slide.content.rows.map((row, r) => `
+                                                <tr class="${r % 2 === 0 ? 'bg-white' : 'bg-purple-50'} align-top border-t border-purple-100">
+                                                    <td class="px-2.5 py-2 border-l-4 border-${row.color}-500">
+                                                        <div class="flex items-start gap-1.5">
+                                                            <i data-lucide="${row.icon}" class="w-4 h-4 text-${row.color}-500 flex-shrink-0 mt-0.5"></i>
+                                                            <span class="font-bold text-gray-800 text-sm leading-snug break-words min-w-0">${row.name}</span>
+                                                        </div>
+                                                    </td>
+                                                    ${row.cells.map(cell => `
+                                                        <td class="px-2.5 py-2 text-xs xl:text-sm text-gray-700 leading-snug">${cell}</td>
+                                                    `).join('')}
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                ${slide.content.note ? `
+                                    <div class="max-w-7xl mx-auto w-full mt-3 bg-amber-50 border-2 border-amber-300 rounded-lg p-2.5">
+                                        <div class="flex items-start space-x-2">
+                                            <i data-lucide="lightbulb" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                                            <p class="text-xs xl:text-sm text-amber-900 leading-snug">${slide.content.note}</p>
+                                        </div>
+                                    </div>` : ''}
+                            </div>
+                        </div>`;
+
+                case 'closing':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-slate-50 to-white md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="flex items-center gap-3 mb-1">
+                                    <i data-lucide="footprints" class="w-7 h-7 text-yellow-400 flex-shrink-0"></i>
+                                    <h1 class="mobile-title font-bold text-gray-900">${slide.content.title}</h1>
+                                </div>
+                                ${slide.content.subtitle ? `<p class="text-sm text-gray-500 leading-snug mb-4">${slide.content.subtitle}</p>` : '<div class="mb-4"></div>'}
+                                ${slide.content.next ? `
+                                <div class="bg-white border-l-4 border-amber-400 rounded-r-lg shadow-sm px-4 py-3 mb-3">
+                                    <p class="text-[11px] font-semibold uppercase tracking-widest text-amber-600 mb-1.5"><span class="text-sm align-middle mr-1.5">📅</span>${slide.content.next.label || 'Próximo práctico'}</p>
+                                    <p class="text-lg font-semibold text-gray-900 leading-snug">${slide.content.next.title}</p>
+                                    <p class="text-sm font-semibold text-gray-700">${slide.content.next.date}</p>
+                                    ${slide.content.next.note ? `<p class="text-xs text-gray-500 mt-1 leading-snug">${slide.content.next.note}</p>` : ''}
+                                </div>` : ''}
+                                <div class="bg-white border-l-4 border-purple-400 rounded-r-lg shadow-sm px-4 py-3 mb-3">
+                                    <p class="text-[11px] font-semibold uppercase tracking-widest text-purple-600 mb-2"><span class="text-sm align-middle mr-1.5">📝</span>${slide.content.itemsLabel || 'Para la próxima sesión'}</p>
+                                    <ul class="space-y-2">
+                                        ${slide.content.items.map(item => `
+                                            <li class="flex gap-2.5">
+                                                <span class="mt-2 w-1.5 h-1.5 rounded-full bg-purple-300 flex-shrink-0"></span>
+                                                <span class="text-sm text-gray-700 leading-snug">${item}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                                ${slide.content.alert ? `
+                                <div class="bg-white border-l-4 border-red-400 rounded-r-lg shadow-sm px-4 py-3">
+                                    <p class="text-[11px] font-semibold uppercase tracking-widest text-red-600 mb-1.5"><span class="text-sm align-middle mr-1.5">⚠️</span>${slide.content.alert.title}</p>
+                                    ${slide.content.alert.items.map((a, i) => `<p class="text-sm ${i === 0 ? 'text-gray-900 font-medium' : 'text-gray-600 mt-1'} leading-snug">${a}</p>`).join('')}
+                                </div>` : ''}
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit">
+                                <div class="max-w-5xl mx-auto w-full">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="footprints" class="w-8 h-8 text-yellow-400 flex-shrink-0"></i>
+                                        <h1 class="text-3xl font-bold text-gray-900">${slide.content.title}</h1>
+                                    </div>
+                                    ${slide.content.subtitle ? `<p class="text-sm text-gray-500 mt-1 mb-4">${slide.content.subtitle}</p>` : '<div class="mb-4"></div>'}
+                                    ${slide.content.next ? `
+                                    <div class="bg-white border-l-4 border-amber-400 rounded-r-lg shadow-sm px-5 py-3 mb-3 flex items-center justify-between gap-6">
+                                        <div class="min-w-0">
+                                            <p class="text-[11px] font-semibold uppercase tracking-widest text-amber-600 mb-1"><span class="text-sm align-middle mr-1.5">📅</span>${slide.content.next.label || 'Próximo práctico'}</p>
+                                            <p class="text-xl font-semibold text-gray-900 leading-snug">${slide.content.next.title}</p>
+                                            ${slide.content.next.note ? `<p class="text-xs text-gray-500 mt-0.5">${slide.content.next.note}</p>` : ''}
+                                        </div>
+                                        <p class="text-base font-semibold text-gray-700 flex-shrink-0">${slide.content.next.date}</p>
+                                    </div>` : ''}
+                                    <div class="bg-white border-l-4 border-purple-400 rounded-r-lg shadow-sm px-5 py-3 mb-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-widest text-purple-600 mb-2"><span class="text-sm align-middle mr-1.5">📝</span>${slide.content.itemsLabel || 'Para la próxima sesión'}</p>
+                                        <ul class="grid grid-cols-2 gap-x-8 gap-y-2">
+                                            ${slide.content.items.map(item => `
+                                                <li class="flex gap-2.5">
+                                                    <span class="mt-2 w-1.5 h-1.5 rounded-full bg-purple-300 flex-shrink-0"></span>
+                                                    <span class="text-sm text-gray-700 leading-snug">${item}</span>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                    ${slide.content.alert ? `
+                                    <div class="bg-white border-l-4 border-red-400 rounded-r-lg shadow-sm px-5 py-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-widest text-red-600 mb-1"><span class="text-sm align-middle mr-1.5">⚠️</span>${slide.content.alert.title}</p>
+                                        ${slide.content.alert.items.map((a, i) => `<p class="text-sm ${i === 0 ? 'text-gray-900 font-medium' : 'text-gray-600 mt-1'} leading-snug">${a}</p>`).join('')}
+                                    </div>` : ''}
+                                </div>
+                            </div>
+                        </div>`;
+
                 case 'qa':
                     return `
                         <div class="h-full bg-gradient-to-br from-indigo-50 to-purple-50 md:overflow-y-hidden">
@@ -1228,6 +1425,34 @@
                 goToSlide(slides.length - 1);
             }
         });
-    </script>
+    
+        // Pantalla completa: boton del header y tecla F
+        (function () {
+            const fsBtn = document.getElementById('fullscreenBtn');
+            if (!fsBtn) return;
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            fsBtn.addEventListener('click', toggleFullscreen);
+            document.addEventListener('fullscreenchange', () => {
+                const icon = document.fullscreenElement ? 'minimize' : 'maximize';
+                fsBtn.innerHTML = '<i data-lucide="' + icon + '" class="w-5 h-5 text-yellow-400"></i>';
+                fsBtn.title = document.fullscreenElement ? 'Salir de pantalla completa (F)' : 'Pantalla completa (F)';
+                if (window.lucide) lucide.createIcons();
+            });
+            document.addEventListener('keydown', (e) => {
+                if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                    const t = e.target.tagName;
+                    if (t === 'INPUT' || t === 'TEXTAREA' || e.target.isContentEditable) return;
+                    e.preventDefault();
+                    toggleFullscreen();
+                }
+            });
+        })();
+</script>
 </body>
 </html>

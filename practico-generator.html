@@ -3593,6 +3593,9 @@ function generateFullHTML() {
                 <span class="text-sm md:text-base lg:text-lg font-semibold truncate">${courseLabel}</span>
             </div>
             <div class="flex items-center space-x-4">
+                <button id="fullscreenBtn" class="nav-button p-2 rounded-lg hover:bg-purple-800 transition-colors flex items-center justify-center" title="Pantalla completa (F)">
+                    <i data-lucide="maximize" class="w-5 h-5 text-yellow-400"></i>
+                </button>
                 <span id="slide-counter" class="text-sm md:text-base font-mono">1 / ${state.slides.length}</span>
             </div>
         </div>
@@ -4202,6 +4205,34 @@ document.body.insertAdjacentHTML('beforeend', '<datalist id="biopsyTypeSuggestio
 draftWasRestored = loadDraft();
 loadQuickDraft();
 render();
+
+        // Pantalla completa: boton del header y tecla F
+        (function () {
+            const fsBtn = document.getElementById('fullscreenBtn');
+            if (!fsBtn) return;
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            fsBtn.addEventListener('click', toggleFullscreen);
+            document.addEventListener('fullscreenchange', () => {
+                const icon = document.fullscreenElement ? 'minimize' : 'maximize';
+                fsBtn.innerHTML = '<i data-lucide="' + icon + '" class="w-5 h-5 text-yellow-400"></i>';
+                fsBtn.title = document.fullscreenElement ? 'Salir de pantalla completa (F)' : 'Pantalla completa (F)';
+                if (window.lucide) lucide.createIcons();
+            });
+            document.addEventListener('keydown', (e) => {
+                if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                    const t = e.target.tagName;
+                    if (t === 'INPUT' || t === 'TEXTAREA' || e.target.isContentEditable) return;
+                    e.preventDefault();
+                    toggleFullscreen();
+                }
+            });
+        })();
 </script>
 </body>
 </html>

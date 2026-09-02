@@ -41,6 +41,12 @@
             background: white;
         }
         @media (max-width: 768px) {
+            /* permite el scroll vertical de la pagina cuando la lamina es mas alta que la pantalla */
+            body, html {
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto;
+            }
             .slide-container {
                 min-height: 100vh;
                 height: auto;
@@ -72,9 +78,14 @@
             }
         }
         .nav-button {
-            min-height: 44px;
-            min-width: 44px;
             touch-action: manipulation;
+        }
+        /* area tactil de 44px solo donde hace falta: pantallas tactiles / movil */
+        @media (max-width: 768px) {
+            .nav-button {
+                min-height: 44px;
+                min-width: 44px;
+            }
         }
         .transition-smooth {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -227,7 +238,7 @@
             .desktop-dropdown-trigger {
                 display: flex;
                 align-items: center;
-                padding: 0.5rem 1rem;
+                padding: 0.375rem 0.875rem;
                 background-color: #4b154a;
                 border-radius: 0.5rem;
                 font-weight: 500;
@@ -245,8 +256,8 @@
 </head>
 <body>
     <div class="slide-container">
-        <div class="bg-purple-900 text-white p-3 md:p-4 flex justify-between items-center relative z-10 shadow-lg">
-            <div class="flex items-center space-x-2 md:space-x-4">
+        <div class="bg-purple-900 text-white px-3 py-2 md:px-4 md:py-2 flex justify-between items-center relative z-10 shadow-lg">
+            <div class="flex items-center space-x-2 md:space-x-4 min-w-0 flex-1">
                 <a href="practicos.html" class="flex items-center gap-1 text-yellow-400 hover:text-yellow-200 transition-smooth flex-shrink-0" title="Volver a Prácticos">
                     <i data-lucide="arrow-left" class="w-5 h-5 md:w-6 md:h-6"></i>
                     <span class="hidden lg:inline text-sm">Prácticos</span>
@@ -254,10 +265,13 @@
                 <i data-lucide="microscope" class="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 text-yellow-400"></i>
                 <span class="text-sm md:text-base lg:text-lg font-semibold truncate">Patología Básica - UACh</span>
             </div>
-            <div class="flex items-center space-x-4">
-                <span id="slide-counter" class="text-sm md:text-base font-mono">1 / 14</span>
+            <div class="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
+                <button id="fullscreenBtn" class="nav-button hidden md:flex p-1.5 rounded-lg hover:bg-purple-800 transition-colors flex items-center justify-center" title="Pantalla completa (F)">
+                    <i data-lucide="maximize" class="w-5 h-5 text-yellow-400"></i>
+                </button>
+                <span id="slide-counter" class="text-sm md:text-base font-mono whitespace-nowrap">1 / 14</span>
                 <div class="relative">
-                    <button id="mobile-menu" class="md:hidden nav-button p-2 rounded-lg hover:bg-purple-800 transition-colors flex items-center justify-center">
+                    <button id="mobile-menu" class="md:hidden nav-button p-1.5 rounded-lg hover:bg-purple-800 transition-colors flex items-center justify-center">
                         <i data-lucide="menu" class="w-5 h-5 text-yellow-400"></i>
                     </button>
                     <button id="desktop-menu" class="hidden md:flex desktop-dropdown-trigger">
@@ -265,15 +279,15 @@
                         <i data-lucide="chevron-down" class="w-4 h-4 text-yellow-200"></i>
                     </button>
                     <div id="dropdownMenu" class="dropdown-menu">
-                        <button class="dropdown-item" data-slide="8">Biopsia de Cerebro</button>
-                        <button class="dropdown-item" data-slide="9">Biopsia de Aorta abdominal</button>
+                        <button class="dropdown-item" data-slide="5">Caso 1: Infarto Cerebral</button>
+                        <button class="dropdown-item" data-slide="6">Caso 2: Ateroma de Aorta</button>
                     </div>
                 </div>
             </div>
         </div>
         <div id="slideContent" class="content-area animate-fade-in"></div>
         <div class="bg-purple-900 text-white relative z-10 shadow-lg">
-            <div class="hidden md:flex px-6 py-3 justify-between items-center">
+            <div class="hidden md:flex px-6 py-1.5 justify-between items-center">
                 <button id="prevBtn" class="nav-button flex items-center hover:text-yellow-200 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
                     <i data-lucide="chevron-left" class="w-5 h-5 mr-1 text-yellow-400"></i>
                     <span class="text-sm">Anterior</span>
@@ -284,12 +298,12 @@
                     <i data-lucide="chevron-right" class="w-5 h-5 ml-1 text-yellow-400"></i>
                 </button>
             </div>
-            <div class="md:hidden flex items-center justify-between p-4">
-                <button id="prevBtnMobile" class="nav-button flex items-center justify-center w-12 h-12 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+            <div class="md:hidden flex items-center justify-between px-4 py-2">
+                <button id="prevBtnMobile" class="nav-button flex items-center justify-center w-10 h-10 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
                     <i data-lucide="chevron-left" class="w-6 h-6 text-yellow-400"></i>
                 </button>
                 <div id="paginationMobile" class="flex space-x-1 overflow-x-auto px-2"></div>
-                <button id="nextBtnMobile" class="nav-button flex items-center justify-center w-12 h-12 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
+                <button id="nextBtnMobile" class="nav-button flex items-center justify-center w-10 h-10 rounded-full bg-purple-800 hover:bg-purple-700 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed">
                     <i data-lucide="chevron-right" class="w-6 h-6 text-yellow-400"></i>
                 </button>
             </div>
@@ -306,182 +320,259 @@
     </div>
     <script>
         const slides = [
+            // 1 - Portada
             {
                 type: 'title',
                 content: {
                     title: 'Trombosis e Infarto',
-                    subtitle: 'Patología Básica ETMP148',
-                    info: 'Miércoles 08 de Octubre, 2025',
-                    instructor: 'TM. Marcelo Marin, MSc.',
+                    subtitle: 'PATOLOGÍA BÁSICA - TECNOLOGÍA MÉDICA 2026',
+                    info: 'Práctico VIII · Semana del 2 de Noviembre, 2026',
+                    instructor: 'TM. Marcelo Marín C., MSc.',
                     email: 'marcelo.marin@uach.cl'
                 }
             },
+            // 2 - Objetivos
             {
                 type: 'objectives',
                 content: {
-                    title: 'Objetivos de Aprendizaje',
-                    subtitle: 'Al finalizar esta actividad práctica, serás capaz de:',
+                    title: 'Objetivos del Práctico',
+                    subtitle: 'Al finalizar esta sesión, serás capaz de:',
                     objectives: [
-                        'Reconocer y describir las características histopatológicas propias de los procesos de trombosis e infarto, distinguiendo sus manifestaciones en diferentes tejidos.',
-                        'Analizar los factores etiológicos y fisiopatológicos que originan las lesiones trombóticas e isquémicas, considerando el contexto clínico del paciente.',
-                        'Relacionar los mecanismos de daño y reparación tisular con la evolución morfológica observada en las láminas virtuales y estudios complementarios',
-                    ]
-                }
-            },                   
-            {
-                type: 'platform',
-                content: {
-                    title: 'Plataformas Digitales',
-                    platforms: [
-                        {
-                            name: 'Virtual Pathology Leeds',
-                            url: 'virtualpathology.leeds.ac.uk',
-                            description: [
-                                'Sitio web del equipo de Patología Virtual de la Universidad de Leeds',
-                                'Contiene escaneos completos de miles de láminas histológicas de diversas patologías',
-                                'Cada lámina será acompañada de un breve contexto clínico'                                
-                            ],
-                            icon: 'microscope'
-                        },
-                        {
-                            name: 'Histology Guide',
-                            url: 'www.histologyguide.com/slidebox/slidebox.html',
-                            description: [
-                                'Sitio web creado por R. Sorenson y C. Brelje, de la Universidad de Minessota',
-                                'Contiene escaneos completos de láminas representativas de la histología normal',
-                                'Permitirá tener una referencia del contexto histológico normal de cada tejido'                             
-                            ],
-                            icon: 'book-open'
-                        },
-                        {
-                            name: 'MSD Manual',
-                            url: 'www.msdmanuals.com/professional',
-                            description: [
-                                'Sitio web de Merck Sharp & Dohme (MSD)',
-                                'Contiene información clínica detallada y revisada por expertos sobre enfermedades, diagnósticos y tratamientos para profesionales de la salud'
-                            ],
-                            icon: 'stethoscope'
-                        },
-                        {
-                            name: 'Medline Plus',
-                            url: 'medlineplus.gov',
-                            description: [
-                                'Sitio web de la Biblioteca Nacional de Medicina de EE. UU. (NLM)',
-                                'Contiene información general sobre enfermedades, medicamentos y condiciones de salud, orientada al público general'
-                            ],
-                            icon: 'heart'
-                        }
+                        'Reconocer en láminas virtuales las características morfológicas de la placa de ateroma y del tejido infartado, comparándolas contra el tejido normal de referencia',
+                        'Explicar la secuencia que va del daño endotelial a la trombosis y de la oclusión vascular al infarto del territorio irrigado',
+                        'Relacionar los factores de riesgo del paciente con el hallazgo morfológico y con la evolución esperable de la lesión'
                     ]
                 }
             },
+            // 3 - Conceptos fundamentales
+            {
+                type: 'content',
+                content: {
+                    title: 'Conceptos Fundamentales',
+                    subtitle: 'De la pared del vaso al territorio que deja de recibir sangre',
+                    items: [
+                        '🧱 <strong>Ateroesclerosis:</strong> placa de lípidos, células espumosas y fibrosis en la íntima arterial. Estrecha la luz y, al romperse, expone material trombogénico',
+                        '🩸 <strong>Trombosis:</strong> coágulo formado dentro del vaso en vida. La tríada de Virchow reúne sus tres condiciones: daño endotelial, flujo anormal e hipercoagulabilidad',
+                        '🚀 <strong>Embolia:</strong> material que viaja por la circulación y ocluye un vaso distante. Casi siempre es un trombo desprendido',
+                        '💀 <strong>Infarto:</strong> necrosis de un territorio por interrupción del flujo. Es blanco en órganos sólidos con circulación terminal y rojo cuando el tejido tiene doble irrigación o se reperfunde'
+                    ]
+                }
+            },
+            // 4 - Comparación
+            {
+                type: 'comparison',
+                content: {
+                    title: 'Trombo Arterial vs. Trombo Venoso',
+                    subtitle: 'Dónde se forma condiciona cómo se ve y a dónde llega',
+                    comparison: {
+                        headers: ['Característica', 'Arterial', 'Venoso'],
+                        rows: [
+                            ['Mecanismo dominante', 'Daño endotelial, habitualmente sobre una placa de ateroma', 'Estasis del flujo, por inmovilidad o compresión'],
+                            ['Composición', 'Rico en plaquetas y fibrina; pálido y firme', 'Rico en eritrocitos atrapados en fibrina; rojo y friable'],
+                            ['Flujo', 'Se forma contra un flujo rápido', 'Se forma en un flujo lento o detenido'],
+                            ['Consecuencia local', 'Isquemia e infarto del territorio distal', 'Congestión y edema del territorio proximal'],
+                            ['Destino del émbolo', 'Circulación sistémica: cerebro, riñón, bazo, extremidades', 'Circulación pulmonar: tromboembolismo pulmonar'],
+                            ['Prevención habitual', 'Antiagregantes plaquetarios', 'Anticoagulantes']
+                        ]
+                    }
+                }
+            },
+            // 5 - Metodología
             {
                 type: 'activity',
                 content: {
                     title: 'Metodología de Trabajo',
-                    subtitle: 'Análisis Autónomo - 40 minutos',
+                    subtitle: 'Análisis autónomo en grupo · 2 casos · 40 minutos',
                     instructions: [
-                        '👥 Trabajarán en grupos pequeños (2 a 4 estudiantes)',
-                        '⏱️ 10 minutos por lámina para análisis y discusión',
-                        '🔍 Observen, investiguen, discutan y lleguen a conclusiones grupales',
-                        '📝 Tomen notas y capturas de sus hallazgos principales',
-                        '❓ El docente circulará para orientación puntual'
+                        '👥 Trabajen en los grupos ya conformados, de 2 a 4 estudiantes',
+                        '⏱️ Aproximadamente 15 minutos por lámina: observar, investigar, discutir y concluir',
+                        '🔬 Recorran primero a bajo aumento y comparen siempre contra la histología normal del mismo órgano',
+                        '🔍 Los enlaces de apoyo de cada caso están al pie de la lámina: úsenlos durante la sesión',
+                        '📝 Registren los hallazgos y capturas del grupo: son su material de estudio para la prueba práctica',
+                        '❓ El docente circula orientando; al cierre se hace la puesta en común'
                     ]
                 }
             },
+            // 6 - Caso 1
             {
                 type: 'case',
                 content: {
-                    title: 'Cerebro',
+                    title: 'Caso 1: Infarto Cerebral',
                     clinical: {
-                        patient: 'Mujer de 53 años de edad. Presento dolor de cabeza de comienzo suave hasta convertirse en insoportable y punzante, de acuerdo con su relato',
-                        symptoms: 'La paciente relata hipertensión arterial y dislipidemia, las que controla pobremenTe con dieta y farmacos. Su marido relata qu e se encuentra tomando haciendo dieta y tomando unas pastillas para bajar de peso, las qué resultan contener fentermina.',
-                        labs: 'AngioCT en estudio'
+                        patient: 'Mujer de 53 años, con hipertensión arterial y dislipidemia de mal control',
+                        sample: 'Tejido encefálico',
+                        symptoms: 'Cefalea progresiva hasta hacerse intensa y punzante. Su pareja refiere que toma fentermina para bajar de peso',
+                        labs: 'AngioTC en estudio'
                     },
                     questions: [
-                        'Describa la etiología de la lesión',
-                        'Carácterísticas del cuadro clínico',
-                        'Características histopatológicas de este infarto, indicando aquellas que más lo distinguen deDetalle las principales diferencias de los tipos de ateromas',
-                        'Respecto del proceso de reparación del tejido, describa el mecanismo más relevante y su resultado'
+                        '¿Qué le ocurrió al tejido en la zona afectada y cómo se distingue del parénquima conservado?',
+                        '¿Qué células predominan en la zona lesionada y qué indican sobre el tiempo transcurrido?',
+                        'Relacione los factores de riesgo del relato con el mecanismo de la lesión',
+                        '¿Cómo repara el sistema nervioso central esta lesión y con qué resultado?'
                     ],
-                    concept: 'ACV',
+                    concept: 'INFARTO CEREBRAL',
+                    linkLabels: { medline: 'Artículo de revisión (PMC)', msd: 'RadiologyInfo: AngioTC' },
+                    linkNotes: {
+                        histologia: 'Encéfalo normal: neuronas, glía y neuropilo, para dimensionar qué se perdió',
+                        medline: 'Revisión sobre la fisiopatología del infarto cerebral y su evolución en el tiempo',
+                        msd: 'En qué consiste la angiotomografía y qué permite ver de la circulación cerebral'
+                    },
                     links: {
                         caso: 'https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FTeaching%2FNeuropathology%2FVascular_diseases%2F438110.svs',
                         histologia: 'https://histologyguide.com/slideview/MHS-283-brain/06-slide-1.html?x=31289&y=7644&z=25.0',
                         medline: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC4011567/',
                         msd: 'https://www.radiologyinfo.org/es/info/angioct'
-                    }                         
+                    }
                 }
             },
+            // 7 - Caso 2
             {
                 type: 'case',
                 content: {
-                    title: 'Aorta Abdominal',
+                    title: 'Caso 2: Ateroma de Aorta Abdominal',
                     clinical: {
-                        patient: 'Hombre de 61 años de edad. Presenta vértigo acompañado de náuseas y vómitos.',
-                        symptoms: 'El dolor inicio aproximadamente 6 horas de forma repentina e intensa que varía entre la zona abdominal y costados.',
-                        labs: 'Resonancia magnética: Trombosis por placa ateromatosa de aorta abdominal'
+                        patient: 'Varón de 61 años',
+                        sample: 'Segmento de aorta abdominal',
+                        symptoms: 'Dolor abdominal de inicio brusco e intenso, migratorio hacia los flancos, de 6 horas de evolución, con náuseas y vómitos',
+                        labs: 'Resonancia magnética: trombosis sobre placa ateromatosa de aorta abdominal'
                     },
                     questions: [
-                        'Describa la etiología de la lesión',
-                        'Mencione las características histopatológica del cuadro clínico',
-                        'Detalle las principales diferencias de los tipos de ateromas',
-                        'Mencione cronológicamente los mecanismos de reparación de la lesión'
+                        '¿Qué capas de la pared arterial reconoce y cuál está engrosada?',
+                        '¿Qué compone la placa: núcleo lipídico, células espumosas, cubierta fibrosa, calcificación?',
+                        'Relacione la formación del trombo con el estado de la superficie de la placa',
+                        '¿Qué diferencia hay entre una placa estable y una vulnerable, y por qué importa clínicamente?'
                     ],
-                    concept: 'ATEROMA',
+                    concept: 'ATEROESCLEROSIS Y TROMBOSIS',
+                    linkLabels: { medline: 'MSD: Resonancia magnética' },
+                    linkNotes: {
+                        histologia: 'Aorta normal: íntima, media elástica y adventicia, como patrón de comparación',
+                        medline: 'Qué muestra la resonancia magnética y por qué se usó en este paciente',
+                        msd: 'Aterosclerosis: formación de la placa, factores de riesgo y complicaciones trombóticas'
+                    },
                     links: {
                         caso: 'https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FTeaching%2FEducation%2FTeaching%2FNeuropathology%2FVascular_diseases%2F438085.svs',
                         histologia: 'https://histologyguide.com/slideview/MH-065-066-aorta-and-vena-cava/09-slide-1.html?x=46073&y=50180&z=10.0',
                         medline: 'https://www.msdmanuals.com/es/professional/temas-especiales/principios-de-estudios-por-la-imagen-radiol%C3%B3gicas/resonancia-magn%C3%A9tica',
                         msd: 'https://www.msdmanuals.com/es/professional/trastornos-cardiovasculares/arteriosclerosis/aterosclerosis'
-                    }                         
+                    }
                 }
-            },          
+            },
+            // 8 - Síntesis integradora
+            {
+                type: 'table',
+                content: {
+                    title: 'Síntesis Integradora',
+                    subtitle: 'Los dos extremos de una misma cadena: la lesión del vaso y el territorio que paga la cuenta',
+                    headers: ['Caso', 'Dónde está la lesión', 'Mecanismo', 'Hallazgo morfológico clave', 'Cómo repara el tejido'],
+                    rows: [
+                        {
+                            name: 'Infarto cerebral',
+                            icon: 'brain',
+                            color: 'purple',
+                            cells: [
+                                'En el parénquima, distal a la oclusión: es la consecuencia',
+                                'Interrupción del flujo por trombo o émbolo sobre un lecho arterial dañado por hipertensión',
+                                'Necrosis licuefactiva: el tejido se digiere y deja una cavidad, con macrófagos cargados de lípidos',
+                                'No regenera: gliosis astrocitaria alrededor de una cavidad quística permanente'
+                            ]
+                        },
+                        {
+                            name: 'Ateroma aórtico',
+                            icon: 'activity',
+                            color: 'amber',
+                            cells: [
+                                'En la pared del vaso: es la causa',
+                                'Daño endotelial crónico, entrada de lípidos y respuesta inflamatoria que forma la placa',
+                                'Íntima engrosada con núcleo lipídico, células espumosas, cubierta fibrosa y calcificación',
+                                'No revierte: se estabiliza con fibrosis y calcio, o se rompe y desencadena trombosis'
+                            ]
+                        }
+                    ],
+                    note: 'Las dos láminas cuentan la misma historia en momentos distintos: primero la pared del vaso se enferma durante años, después un territorio muere en minutos. Reconocer la placa es reconocer el riesgo antes del evento.'
+                }
+            },
+            // 9 - Mensajes clave
+            {
+                type: 'content',
+                content: {
+                    title: 'Mensajes Clave',
+                    items: [
+                        '🧱 <strong>El infarto empieza en la pared del vaso:</strong> la placa se construye durante años y el evento agudo solo la revela',
+                        '⚠️ <strong>No es el tamaño de la placa, es su estabilidad:</strong> una placa pequeña con cubierta fina puede matar antes que una grande y calcificada',
+                        '🗺️ <strong>La morfología del infarto depende del órgano:</strong> licuefactiva en el encéfalo, coagulativa en riñón, corazón o bazo',
+                        '⏱️ <strong>El infiltrado fecha la lesión:</strong> neutrófilos en los primeros días, macrófagos después, gliosis o cicatriz al final',
+                        '🩸 <strong>Arterial y venoso no son lo mismo:</strong> distinto mecanismo, distinta composición, distinto destino del émbolo y distinta prevención',
+                        '🏥 <strong>Detrás de cada lámina hay un paciente:</strong> los factores de riesgo del relato clínico son los que construyeron lo que se ve al microscopio'
+                    ]
+                }
+            },
+            // 10 - Recursos y bibliografía
             {
                 type: 'resources',
                 content: {
-                    title: 'Recursos de Estudio',
-                    platforms: [
-                        {
-                            name: 'Virtual Pathology Leeds',
-                            url: 'www.virtualpathology.leeds.ac.uk',
-                            description: 'Contiene escaneos completos de miles de láminas histológicas de diversas patologías'
-                        },
-                        {
-                            name: 'Histology Guide',
-                            url: 'histologyguide.com/slidebox',
-                            description: 'Contiene escaneos completos de láminas representativas de la histología normal'
-                        }
-                    ],
+                    title: 'Recursos y Bibliografía',
                     bibliography: [
                         {
-                            title: 'Robbins & Cotran Patología Estructural y Funcional, 8va edición',
-                            url: 'http://archive.org/details/Robbins.Cotran.Patologia.Estructural.y.Funcional.8a.EdBooksmedicos.org/page/n1301/mode/2up',
-                            chapter: 'Capítulo 28: Sistema Nervioso Central',
-                            icon: 'microscope',
-                            color: 'blue'
+                            title: 'Robbins & Cotran. Patología Estructural y Funcional, 8ª edición',
+                            url: 'https://archive.org/details/Robbins.Cotran.Patologia.Estructural.y.Funcional.8a.EdBooksmedicos.org',
+                            chapter: 'Capítulo 4: Trastornos hemodinámicos, enfermedad tromboembólica y shock',
+                            color: 'purple'
                         },
                         {
-                            title: 'Patología. Un estudio de caso moderno, 2e',
-                            url: 'https://accessmedicina.mhmedical.com/content.aspx?bookid=3096&sectionid=258855827',
-                            chapter: 'Capítulo 1: Cáncer y Genoma',
-                            icon: 'stethoscope',
+                            title: 'Robbins & Cotran. Patología Estructural y Funcional, 8ª edición',
+                            url: 'http://archive.org/details/Robbins.Cotran.Patologia.Estructural.y.Funcional.8a.EdBooksmedicos.org/page/n1301/mode/2up',
+                            chapter: 'Capítulo 28: Sistema nervioso central (enfermedad cerebrovascular)',
                             color: 'green'
                         }
                     ],
+                    platforms: [
+                        { name: 'Virtual Pathology, University of Leeds', url: 'virtualpathology.leeds.ac.uk/slides/library', purpose: 'Fuente de las láminas virtuales de los dos casos de hoy' },
+                        { name: 'Histology Guide (Sorenson y Brelje, University of Minnesota)', url: 'histologyguide.com/slidebox', purpose: 'Histología normal de encéfalo y aorta usada como referencia' },
+                        { name: 'MSD Manual Professional', url: 'msdmanuals.com/es/professional', purpose: 'Aterosclerosis y principios de los estudios por imagen' },
+                        { name: 'RadiologyInfo', url: 'radiologyinfo.org/es', purpose: 'En qué consisten la angiotomografía y la resonancia magnética' }
+                    ]
                 }
             },
+            // 11 - Preguntas
             {
                 type: 'qa',
                 content: {
                     title: '¿Preguntas?',
                     contact: {
-                        instructor: 'TM. Marcelo Marin C., MSc',
+                        instructor: 'TM. Marcelo Marín C., MSc.',
                         email: 'marcelo.marin@uach.cl',
-                        office: 'Labor Ed.400, 4to Piso',
-                        hours: 'Jueves 11:30-13:00 hrs'
-                    },                
+                        office: 'Oficina de Profesores Ed.400, 4to Piso',
+                        hours: 'Martes 11:30-13:00 hrs'
+                    }
                 }
-            },    
+            },
+            // 12 - Próximos pasos
+            {
+                type: 'closing',
+                content: {
+                    title: 'Próximos Pasos',
+                    subtitle: 'Con este práctico se cierran las sesiones de laboratorio del semestre.',
+                    next: {
+                        label: 'Próxima sesión',
+                        title: 'Segunda Prueba Práctica',
+                        date: 'Semana del 9 de noviembre',
+                        note: 'Entra el contenido de los prácticos V al VIII'
+                    },
+                    items: [
+                        '<strong>Completar el registro de los dos casos</strong> y ordenar los de los prácticos V al VII',
+                        '<strong>Consultar dudas antes de la evaluación</strong> — martes 11:30-13:00, Of. de Profesores Ed.400',
+                        '<strong>Practicar el reconocimiento</strong> de las láminas de los cuatro prácticos que entran en la prueba',
+                        '<strong>Repasar la lógica común</strong>: qué estímulo actuó, qué mecanismo se activó y qué quedó del tejido'
+                    ],
+                    alert: {
+                        title: 'Lo que viene después',
+                        items: [
+                            '<strong>Sesiones de ABP:</strong> 16 y 23 de noviembre, y semana del 30 de noviembre. Asistencia 100% obligatoria.',
+                            '<strong>Evaluación ABP: 9 de diciembre.</strong> Ponerse al día clase a clase es lo que hace manejable el cierre del semestre.'
+                        ]
+                    }
+                }
+            }
         ];
         let currentSlide = 0;
         let touchStartX = 0;
@@ -662,59 +753,11 @@
                                     <h1 class="desktop-main-title font-bold text-gray-800">${slide.content.title}</h1>
                                 </div>
                                 ${slide.content.subtitle ? `<p class="text-center text-gray-600 mb-6">${slide.content.subtitle}</p>` : ''}
-                                <div class="space-y-4 max-w-4xl mx-auto">
+                                <div class="grid grid-cols-2 gap-4 max-w-5xl mx-auto">
                                     ${slide.content.items.map(item => `
                                         <div class="bg-gray-50 p-4 rounded-xl border-l-4 border-purple-500">
                                             <div class="text-gray-700 leading-relaxed">${item}</div>
                                         </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        </div>`;
-                case 'platform':
-                    return `
-                        <div class="h-full bg-gradient-to-br from-purple-50 to-pink-50 md:overflow-y-hidden">
-                            <div class="mobile-content md:hidden">
-                                <div class="text-center mb-6">
-                                    <i data-lucide="globe" class="w-16 h-16 mx-auto mb-4 text-yellow-400"></i>
-                                    <h1 class="mobile-title font-bold text-gray-800 mb-3">${slide.content.title}</h1>
-                                </div>
-                                <div class="space-y-4">
-                                    ${slide.content.platforms.map(platform => `
-                                        <div class="bg-white p-4 rounded-xl shadow-lg border">
-                                            <div class="flex items-center mb-3">
-                                                <i data-lucide="${platform.icon}" class="w-8 h-8 mr-3 text-yellow-400"></i>
-                                                <a href="https://${platform.url}" target="_blank" class="mobile-subtitle font-bold text-purple-700 hover:text-purple-900 hover:underline transition-colors">${platform.name}</a>
-                                            </div>
-                                            <ul class="text-gray-600 mobile-small space-y-2">
-                                                ${Array.isArray(platform.description) ? 
-                                                platform.description.map(desc => `<li class="flex items-start"><i data-lucide="circle" class="w-2 h-2 mt-2 mr-2 text-purple-500 flex-shrink-0"></i><span class="leading-relaxed">${desc}</span></li>`).join('') : 
-                                                `<li class="flex items-start"><i data-lucide="circle" class="w-2 h-2 mt-2 mr-2 text-purple-500 flex-shrink-0"></i><span class="leading-relaxed">${platform.description}</span></li>`
-                                                }
-                                            </ul>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                            <div class="hidden md:block desktop-fit desktop-compact bg-gradient-to-br from-purple-50 to-pink-50">
-                                <div class="desktop-title-with-icon">
-                                    <i data-lucide="globe" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
-                                    <h1 class="desktop-main-title font-bold text-gray-800">${slide.content.title}</h1>
-                                </div>
-                                <div class="platforms-desktop-grid">
-                                    ${slide.content.platforms.map(platform => `
-                                        <a href="https://${platform.url}" target="_blank" class="link-card platforms-desktop-card bg-white rounded-xl shadow-lg border transition-smooth">
-                                            <div class="platforms-desktop-icon-title flex items-center mb-2">
-                                                <i data-lucide="${platform.icon}" class="w-6 h-6 mr-2 text-yellow-400"></i>
-                                                <h3 class="font-bold text-gray-800 hover:text-purple-700 transition-colors">${platform.name}</h3>
-                                            </div>
-                                            <ul class="text-gray-600 platforms-desktop-description space-y-1 flex-grow">
-                                                ${Array.isArray(platform.description) ? 
-                                                platform.description.map(desc => `<li class="flex items-start"><i data-lucide="circle" class="w-2 h-2 mt-1.5 mr-2 text-purple-500 flex-shrink-0"></i><span class="leading-relaxed">${desc}</span></li>`).join('') : 
-                                                `<li class="flex items-start"><i data-lucide="circle" class="w-2 h-2 mt-1.5 mr-2 text-purple-500 flex-shrink-0"></i><span class="leading-relaxed">${platform.description}</span></li>`
-                                                }
-                                            </ul>
-                                        </a>
                                     `).join('')}
                                 </div>
                             </div>
@@ -745,7 +788,7 @@
                                     <h1 class="desktop-main-title font-bold text-gray-800">${slide.content.title}</h1>
                                 </div>
                                 <p class="text-center text-gray-600 mb-6">${slide.content.subtitle}</p>
-                                <div class="space-y-4 max-w-4xl mx-auto">
+                                <div class="grid grid-cols-2 gap-4 max-w-5xl mx-auto">
                                     ${slide.content.instructions.map(instruction => `
                                         <div class="bg-white p-4 rounded-xl shadow-lg border">
                                             <div class="flex items-start gap-3">
@@ -759,146 +802,177 @@
                         </div>`;
                 case 'case':
                     return `
-                        <div class="h-full md:overflow-y-hidden">
+                        <div class="h-full bg-gradient-to-br from-purple-50 to-indigo-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
                             <div class="mobile-content md:hidden">
                                 <div class="text-center mb-4">
-                                    <div class="inline-flex items-center justify-center bg-purple-100 px-4 py-2 rounded-full mb-4">
-                                        <i data-lucide="microscope" class="w-5 h-5 text-red-600 mr-2"></i>
-                                        <span class="text-purple-800 font-bold mobile-small">${slide.content.concept}</span>
+                                    <div class="inline-flex items-center justify-center bg-purple-100 px-4 py-1.5 rounded-full mb-2">
+                                        <i data-lucide="microscope" class="w-4 h-4 text-yellow-500 mr-2"></i>
+                                        <span class="text-purple-800 font-bold mobile-small tracking-wide">${slide.content.concept}</span>
                                     </div>
-                                    <h1 class="mobile-title font-bold text-gray-800 mb-4">${slide.content.title}</h1>
-                                <a href="${slide.content.links.caso}" target="_blank" class="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-300 text-purple-900 font-bold px-5 py-2.5 rounded-full shadow-md mobile-text mt-1">
-                                    <i data-lucide="microscope" class="w-5 h-5"></i> Ver Lámina
-                                </a>
+                                    <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
                                 </div>
-                                <div class="mb-6">
-                                    <div class="bg-yellow-50 p-4 rounded-xl border-l-4 border-yellow-500">
-                                        <h3 class="mobile-text font-bold text-yellow-800 mb-4 flex items-center">
-                                            <i data-lucide="link" class="w-5 h-5 mr-2"></i>
-                                            Enlaces de apoyo
-                                        </h3>
-                                        <div class="grid grid-cols-1 gap-3">
-                                            <a href="${slide.content.links.histologia}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="book-open" class="w-5 h-5 text-purple-600 mr-3 flex-shrink-0"></i>
-                                                    <span class="mobile-text font-medium text-purple-600">Histología Referencia</span>
-                                                </div>
-                                            </a>
-                                            <a href="${slide.content.links.medline}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="activity" class="w-5 h-5 text-green-600 mr-3 flex-shrink-0"></i>
-                                                    <span class="mobile-text font-medium text-green-600">Información complemententaria al caso</span>
-                                                </div>
-                                            </a>
-                                            <a href="${slide.content.links.msd}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="clipboard-plus" class="w-5 h-5 text-green-600 mr-3 flex-shrink-0"></i>
-                                                    <span class="mobile-text font-medium text-green-600">Información complemententaria al caso</span>
-                                                </div>
-                                            </a>                                        
+                                <div class="bg-white rounded-xl shadow-lg border-l-4 border-purple-600 p-4 mb-4">
+                                    <h3 class="mobile-text font-bold text-purple-800 mb-3 flex items-center">
+                                        <i data-lucide="user" class="w-5 h-5 mr-2"></i>
+                                        Datos clínicos
+                                    </h3>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-wide text-purple-500">Paciente</p>
+                                            <p class="mobile-text text-gray-800">${slide.content.clinical.patient}</p>
+                                        </div>
+                                        ${slide.content.clinical.sample ? `
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-wide text-purple-500">Muestra</p>
+                                            <p class="mobile-text text-gray-800">${slide.content.clinical.sample}</p>
+                                        </div>` : ''}
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-wide text-purple-500">Cuadro clínico</p>
+                                            <p class="mobile-text text-gray-800">${slide.content.clinical.symptoms}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-wide text-purple-500">Exámenes</p>
+                                            <p class="mobile-text text-gray-800">${slide.content.clinical.labs}</p>
                                         </div>
                                     </div>
+                                    <a href="${slide.content.links.caso}" target="_blank" class="mt-4 w-full flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-300 text-purple-900 font-bold px-5 py-3 rounded-xl shadow-md mobile-text">
+                                        <i data-lucide="microscope" class="w-5 h-5"></i> Ver lámina virtual
+                                    </a>
                                 </div>
-                                <div class="space-y-4">
-                                    <div class="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-500">
-                                        <h3 class="mobile-text font-bold text-blue-800 mb-3 flex items-center">
-                                            <i data-lucide="user" class="w-5 h-5 mr-2"></i>
-                                            Información Clínica
-                                        </h3>
-                                        <div class="space-y-2">
-                                            <p class="mobile-small"><strong>Paciente:</strong> ${slide.content.clinical.patient}</p>
-                                            <p class="mobile-small"><strong>Historial:</strong> ${slide.content.clinical.symptoms}</p>
-                                            <p class="mobile-small"><strong>Exámenes:</strong> ${slide.content.clinical.labs}</p>
-                                        </div>
-                                    </div>
-                                    <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500">
-                                        <h3 class="mobile-text font-bold text-green-800 mb-3 flex items-center">
-                                            <i data-lucide="help-circle" class="w-5 h-5 mr-2"></i>
-                                            Preguntas de Análisis
-                                        </h3>
-                                        <ol class="space-y-2">
-                                            ${slide.content.questions.map((q, i) => `
-                                                <li class="flex items-start gap-3">
-                                                    <span class="bg-green-200 text-green-800 rounded-full w-6 h-6 flex items-center justify-center mobile-small font-bold flex-shrink-0 mt-0.5">${i+1}</span>
-                                                    <span class="mobile-small text-gray-700 leading-relaxed">${q}</span>
-                                                </li>
-                                            `).join('')}
-                                        </ol>
-                                    </div>
+                                <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500 mb-4">
+                                    <h3 class="mobile-text font-bold text-green-800 mb-3 flex items-center">
+                                        <i data-lucide="help-circle" class="w-5 h-5 mr-2"></i>
+                                        Preguntas de análisis
+                                    </h3>
+                                    <ol class="space-y-2">
+                                        ${slide.content.questions.map((q, i) => `
+                                            <li class="flex items-start gap-3">
+                                                <span class="bg-green-200 text-green-800 rounded-full w-6 h-6 flex items-center justify-center mobile-small font-bold flex-shrink-0 mt-0.5">${i+1}</span>
+                                                <span class="mobile-small text-gray-700 leading-relaxed">${q}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ol>
                                 </div>
-                            </div>
-                            <div class="hidden md:block desktop-fit desktop-compact">
-                                <div class="flex flex-wrap items-center justify-between mb-4">
-                                    <h1 class="font-bold text-gray-800 text-xl md:text-2xl lg:text-3xl mb-2 md:mb-0">${slide.content.title}</h1>
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex items-center bg-purple-100 px-3 py-1 rounded-full">
-                                            <i data-lucide="microscope" class="w-5 h-5 text-red-600 mr-2"></i>
-                                            <span class="text-purple-800 font-bold text-sm md:text-base">${slide.content.concept}</span>
-                                        </div>
-                                        <a href="${slide.content.links.caso}" target="_blank" class="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-300 text-purple-900 font-bold text-sm md:text-base px-4 py-1.5 rounded-full shadow-md hover:shadow-lg transition-shadow">
-                                            <i data-lucide="microscope" class="w-4 h-4"></i>  Ver Lámina
+                                <div class="border-t border-purple-200 pt-3">
+                                    <p class="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2 flex items-center">
+                                        <i data-lucide="link" class="w-4 h-4 mr-1.5"></i>
+                                        Apoyo para investigar
+                                    </p>
+                                    <div class="grid grid-cols-1 gap-2">
+                                        <a href="${slide.content.links.histologia}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
+                                            <div class="flex items-center mb-1">
+                                                <i data-lucide="book-open" class="w-4 h-4 text-purple-600 mr-2 flex-shrink-0"></i>
+                                                <span class="text-sm font-semibold text-purple-600">Histología normal de referencia</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 leading-snug">${(slide.content.linkNotes || {}).histologia || ''}</p>
+                                        </a>
+                                        <a href="${slide.content.links.medline}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
+                                            <div class="flex items-center mb-1">
+                                                <i data-lucide="activity" class="w-4 h-4 text-green-600 mr-2 flex-shrink-0"></i>
+                                                <span class="text-sm font-semibold text-green-600">${(slide.content.linkLabels || {}).medline || 'MedlinePlus'}</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 leading-snug">${(slide.content.linkNotes || {}).medline || ''}</p>
+                                        </a>
+                                        <a href="${slide.content.links.msd}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
+                                            <div class="flex items-center mb-1">
+                                                <i data-lucide="clipboard-plus" class="w-4 h-4 text-green-600 mr-2 flex-shrink-0"></i>
+                                                <span class="text-sm font-semibold text-green-600">${(slide.content.linkLabels || {}).msd || 'MSD Manual Professional'}</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 leading-snug">${(slide.content.linkNotes || {}).msd || ''}</p>
                                         </a>
                                     </div>
                                 </div>
-                                <div class="mb-4">
-                                    <div class="bg-yellow-50 p-4 rounded-xl border-l-4 border-yellow-500">
-                                        <h3 class="font-bold text-yellow-800 mb-3 flex items-center">
-                                            <i data-lucide="link" class="w-5 h-5 mr-2"></i>
-                                            Enlaces de apoyo
-                                        </h3>
-                                        <div class="grid grid-cols-2 gap-3">
-                                            <a href="${slide.content.links.histologia}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="microscope" class="w-4 h-4 text-purple-600 mr-2 flex-shrink-0"></i>
-                                                    <span class="text-sm font-medium text-purple-600">Histología Referencia</span>
-                                                </div>
-                                            </a>
-                                            <a href="${slide.content.links.medline}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="activity" class="w-4 h-4 text-green-600 mr-2 flex-shrink-0"></i>
-                                                    <span class="text-sm font-medium text-green-600">Información complemententaria al caso</span>
-                                                </div>
-                                            </a>
-                                            <a href="${slide.content.links.msd}" target="_blank" class="link-card bg-white p-3 rounded-lg border block">
-                                                <div class="flex items-center">
-                                                    <i data-lucide="clipboard-plus" class="w-4 h-4 text-green-600 mr-2 flex-shrink-0"></i>
-                                                    <span class="text-sm font-medium text-green-600">Información complemententaria al caso</span>
-                                                </div>
-                                            </a>                                        
-                                        </div>
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit">
+                                <div class="flex flex-wrap items-center gap-3 mb-3">
+                                    <h1 class="font-bold text-gray-800 text-xl md:text-2xl lg:text-3xl">${slide.content.title}</h1>
+                                    <div class="flex items-center bg-purple-100 px-3 py-1 rounded-full">
+                                        <i data-lucide="microscope" class="w-4 h-4 text-yellow-500 mr-2"></i>
+                                        <span class="text-purple-800 font-bold text-sm tracking-wide">${slide.content.concept}</span>
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                    <div class="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-500">
-                                        <h3 class="font-bold text-blue-800 mb-3 flex items-center">
-                                            <i data-lucide="user" class="w-5 h-5 mr-2"></i>
-                                            Información Clínica
-                                        </h3>
-                                        <div class="space-y-2">
-                                            <p class="text-sm"><strong>Paciente:</strong> ${slide.content.clinical.patient}</p>
-                                            <p class="text-sm"><strong>Historial:</strong> ${slide.content.clinical.symptoms}</p>
-                                            <p class="text-sm"><strong>Exámenes:</strong> ${slide.content.clinical.labs}</p>
+                                <div class="bg-white rounded-xl shadow-lg border-l-4 border-purple-600 p-4 mb-2">
+                                    <div class="flex items-start gap-6">
+                                        <div class="flex-1">
+                                            <h3 class="font-bold text-purple-800 mb-3 flex items-center text-lg">
+                                                <i data-lucide="user" class="w-5 h-5 mr-2"></i>
+                                                Datos clínicos
+                                            </h3>
+                                            <div class="grid grid-cols-2 gap-x-6 gap-y-3">
+                                                <div>
+                                                    <p class="text-xs font-bold uppercase tracking-wide text-purple-500 mb-0.5">Paciente</p>
+                                                    <p class="text-base text-gray-800 leading-snug">${slide.content.clinical.patient}</p>
+                                                </div>
+                                                ${slide.content.clinical.sample ? `
+                                                <div>
+                                                    <p class="text-xs font-bold uppercase tracking-wide text-purple-500 mb-0.5">Muestra</p>
+                                                    <p class="text-base text-gray-800 leading-snug">${slide.content.clinical.sample}</p>
+                                                </div>` : ''}
+                                                <div>
+                                                    <p class="text-xs font-bold uppercase tracking-wide text-purple-500 mb-0.5">Cuadro clínico</p>
+                                                    <p class="text-base text-gray-800 leading-snug">${slide.content.clinical.symptoms}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs font-bold uppercase tracking-wide text-purple-500 mb-0.5">Exámenes</p>
+                                                    <p class="text-base text-gray-800 leading-snug">${slide.content.clinical.labs}</p>
+                                                </div>
+                                            </div>
                                         </div>
+                                        <a href="${slide.content.links.caso}" target="_blank" class="flex flex-col items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-300 text-purple-900 font-bold px-6 py-5 rounded-xl shadow-md hover:shadow-xl transition-shadow flex-shrink-0 w-44 text-center">
+                                            <i data-lucide="microscope" class="w-8 h-8"></i>
+                                            <span class="text-base leading-tight">Ver lámina virtual</span>
+                                        </a>
                                     </div>
-                                    <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500">
-                                        <h3 class="font-bold text-green-800 mb-3 flex items-center">
-                                            <i data-lucide="help-circle" class="w-5 h-5 mr-2"></i>
-                                            Preguntas de Análisis
-                                        </h3>
-                                        <ol class="space-y-2">
-                                            ${slide.content.questions.map((q, i) => `
-                                                <li class="flex items-start gap-2">
-                                                    <span class="bg-green-200 text-green-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">${i+1}</span>
-                                                    <span class="text-sm text-gray-700 leading-relaxed">${q}</span>
-                                                </li>
-                                            `).join('')}
-                                        </ol>
+                                </div>
+                                <div class="bg-green-50 p-3 rounded-xl border-l-4 border-green-500 mb-2">
+                                    <h3 class="font-bold text-green-800 mb-2 flex items-center text-lg">
+                                        <i data-lucide="help-circle" class="w-5 h-5 mr-2"></i>
+                                        Preguntas de análisis
+                                    </h3>
+                                    <ol class="grid grid-cols-2 gap-x-6 gap-y-2">
+                                        ${slide.content.questions.map((q, i) => `
+                                            <li class="flex items-start gap-2">
+                                                <span class="bg-green-200 text-green-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">${i+1}</span>
+                                                <span class="text-sm text-gray-700 leading-relaxed">${q}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ol>
+                                </div>
+                                <div class="border-t border-purple-200 pt-2">
+                                    <p class="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2 flex items-center">
+                                        <i data-lucide="link" class="w-4 h-4 mr-1.5"></i>
+                                        Apoyo para investigar
+                                    </p>
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <a href="${slide.content.links.histologia}" target="_blank" class="link-card bg-white p-2.5 rounded-lg border block">
+                                            <div class="flex items-center gap-2 mb-0.5">
+                                                <i data-lucide="book-open" class="w-4 h-4 text-purple-600 flex-shrink-0"></i>
+                                                <span class="text-sm font-semibold text-purple-600">Histología normal</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 leading-snug">${(slide.content.linkNotes || {}).histologia || ''}</p>
+                                        </a>
+                                        <a href="${slide.content.links.medline}" target="_blank" class="link-card bg-white p-2.5 rounded-lg border block">
+                                            <div class="flex items-center gap-2 mb-0.5">
+                                                <i data-lucide="activity" class="w-4 h-4 text-green-600 flex-shrink-0"></i>
+                                                <span class="text-sm font-semibold text-green-600">${(slide.content.linkLabels || {}).medline || 'MedlinePlus'}</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 leading-snug">${(slide.content.linkNotes || {}).medline || ''}</p>
+                                        </a>
+                                        <a href="${slide.content.links.msd}" target="_blank" class="link-card bg-white p-2.5 rounded-lg border block">
+                                            <div class="flex items-center gap-2 mb-0.5">
+                                                <i data-lucide="clipboard-plus" class="w-4 h-4 text-green-600 flex-shrink-0"></i>
+                                                <span class="text-sm font-semibold text-green-600">${(slide.content.linkLabels || {}).msd || 'MSD Manual'}</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 leading-snug">${(slide.content.linkNotes || {}).msd || ''}</p>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                         </div>`;
-                        break;
-                                case 'comparison':
+
+                case 'comparison':
                     return `
                         <div class="h-full md:overflow-y-hidden">
                             <div class="mobile-content md:hidden">
@@ -960,62 +1034,239 @@
                         </div>`;
                 case 'resources':
                     return `
-                        <div class="h-full md:overflow-y-hidden">
+                        <div class="h-full bg-gradient-to-br from-indigo-50 to-purple-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
                             <div class="mobile-content md:hidden">
-                                <div class="text-center mb-6">
-                                    <i data-lucide="library" class="w-16 h-16 mx-auto mb-4 text-yellow-400"></i>
-                                    <h1 class="mobile-title font-bold text-gray-800 mb-3">${slide.content.title}</h1>
+                                <div class="text-center mb-5">
+                                    <i data-lucide="library" class="w-14 h-14 mx-auto mb-3 text-yellow-400"></i>
+                                    <h1 class="mobile-title font-bold text-gray-800">${slide.content.title}</h1>
                                 </div>
-                                <div class="space-y-6">
-                                    <div class="bg-white p-4 rounded-xl shadow-lg">
-                                        <div class="flex items-center mb-4">
-                                            <i data-lucide="microscope" class="w-8 h-8 mr-3 text-yellow-400"></i>
-                                            <h3 class="mobile-subtitle font-bold text-gray-800">Bibliografía Recomendada</h3>
+                                <div class="space-y-5">
+                                    <div>
+                                        <h3 class="font-bold text-purple-800 mb-2 flex items-center">
+                                            <i data-lucide="book-marked" class="w-5 h-5 mr-2 text-yellow-500"></i>
+                                            Bibliografía
+                                        </h3>
+                                        <div class="space-y-3">
+                                            ${slide.content.bibliography.map(book => `
+                                                <a href="${book.url}" target="_blank" class="link-card block bg-white p-3 rounded-lg shadow-sm border-l-4 border-${book.color}-500">
+                                                    <span class="mobile-text font-semibold text-${book.color}-700 block mb-1">${book.title}</span>
+                                                    <p class="mobile-small text-gray-600">${book.chapter}</p>
+                                                </a>
+                                            `).join('')}
                                         </div>
-                                        <div class="space-y-4">
-                                            <div>
-                                                <a href="http://archive.org/details/Robbins.Cotran.Patologia.Estructural.y.Funcional.8a.EdBooksmedicos.org/page/n1301/mode/2up">
-                                                    Robbins & Cotran Patología Estructural y Funcional, 8va edición
-                                                </a>
-                                                <p class="mobile-small text-gray-600">Capítulo 28: Sistema Nervioso Central</p>
-                                            </div>
-                                            <div>
-                                                <a href="https://accessmedicina.mhmedical.com/content.aspx?bookid=3096&sectionid=258856358" target="_blank" class="mobile-text font-semibold text-green-700 hover:text-green-900 hover:underline block mb-2 transition-smooth">
-                                                    Patología. Un estudio de caso moderno, 2e
-                                                </a>
-                                                <p class="mobile-small text-gray-600">Capítulo 3: Hemostasia y trombosis</p>
-                                            </div>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-purple-800 mb-2 flex items-center">
+                                            <i data-lucide="globe" class="w-5 h-5 mr-2 text-yellow-500"></i>
+                                            Plataformas utilizadas en esta sesión
+                                        </h3>
+                                        <div class="space-y-2">
+                                            ${slide.content.platforms.map(p => `
+                                                <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-purple-400">
+                                                    <h4 class="text-sm font-semibold text-gray-800">${p.name}</h4>
+                                                    <p class="text-xs text-purple-600 break-words">🌐 ${p.url}</p>
+                                                    <p class="text-xs text-gray-600 leading-snug mt-0.5">${p.purpose}</p>
+                                                </div>
+                                            `).join('')}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="hidden md:block desktop-fit desktop-compact">
-                                <div class="desktop-title-with-icon">
-                                    <i data-lucide="library" class="desktop-title-icon w-12 h-12 text-yellow-400"></i>
-                                    <h1 class="desktop-main-title font-bold text-gray-800">${slide.content.title}</h1>
-                                </div>
-                                <div class="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-xl border border-purple-200 max-w-4xl mx-auto">
-                                    <div class="flex items-center mb-6">
-                                        <i data-lucide="microscope" class="w-8 h-8 mr-4 text-yellow-400"></i>
-                                        <h3 class="font-bold text-purple-800">Bibliografía Recomendada</h3>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit">
+                                <div class="max-w-6xl mx-auto w-full">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <i data-lucide="library" class="w-9 h-9 text-yellow-400 flex-shrink-0"></i>
+                                        <h1 class="text-3xl font-bold text-gray-800">${slide.content.title}</h1>
                                     </div>
-                                    <div class="space-y-6">
-                                        <a href="http://archive.org/details/Robbins.Cotran.Patologia.Estructural.y.Funcional.8a.EdBooksmedicos.org/page/n1301/mode/2up"" target="_blank" class="link-card bg-white p-5 rounded-lg shadow-sm border-l-4 border-purple-500 block">
-                                            <div class="text-xl font-semibold text-purple-700 hover:text-purple-900 hover:underline block mb-2 transition-smooth">
-                                                Robbins & Cotran Patología Estructural y Funcional, 8va edición
+                                    <div class="space-y-3">
+                                        <div>
+                                            <h3 class="text-base font-bold text-purple-800 mb-2 flex items-center">
+                                                <i data-lucide="book-marked" class="w-4 h-4 mr-2 text-yellow-500"></i>
+                                                Bibliografía
+                                            </h3>
+                                            <div class="grid grid-cols-2 gap-2.5">
+                                                ${slide.content.bibliography.map(book => `
+                                                    <a href="${book.url}" target="_blank" class="link-card bg-white p-2.5 rounded-lg shadow-sm border-l-4 border-${book.color}-500 block">
+                                                        <div class="text-sm font-semibold text-${book.color}-700 hover:underline leading-snug">${book.title}</div>
+                                                        <p class="text-xs text-gray-600 leading-snug mt-0.5">${book.chapter}</p>
+                                                    </a>
+                                                `).join('')}
                                             </div>
-                                            <p class="text-gray-600">Capítulo 28: Sistema Nervioso Central</p>
-                                        </a>
-                                        <a href="https://accessmedicina.mhmedical.com/content.aspx?bookid=3096&sectionid=258856358" target="_blank" class="link-card bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500 block">
-                                            <div class="text-xl font-semibold text-green-700 hover:text-green-900 hover:underline block mb-2 transition-smooth">
-                                                Patología. Un estudio de caso moderno, 2e
+                                        </div>
+                                        <div>
+                                            <h3 class="text-base font-bold text-purple-800 mb-2 flex items-center">
+                                                <i data-lucide="globe" class="w-4 h-4 mr-2 text-yellow-500"></i>
+                                                Plataformas utilizadas en esta sesión
+                                            </h3>
+                                            <div class="grid grid-cols-2 gap-2.5">
+                                                ${slide.content.platforms.map(p => `
+                                                    <div class="bg-white p-2.5 rounded-lg shadow-sm border-l-4 border-purple-400">
+                                                        <h4 class="text-sm font-semibold text-gray-800 leading-snug">${p.name}</h4>
+                                                        <p class="text-xs text-purple-600 break-words">🌐 ${p.url}</p>
+                                                        <p class="text-xs text-gray-600 leading-snug mt-0.5">${p.purpose}</p>
+                                                    </div>
+                                                `).join('')}
                                             </div>
-                                            <p class="text-gray-600">Capítulo 3: Hemostasia y trombosis</p>
-                                        </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>`;
+
+                case 'table':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-indigo-50 to-purple-50 md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="text-center mb-4">
+                                    <i data-lucide="table-2" class="w-12 h-12 mx-auto mb-3 text-yellow-400"></i>
+                                    <h1 class="mobile-title font-bold text-gray-800 mb-2">${slide.content.title}</h1>
+                                    ${slide.content.subtitle ? `<p class="mobile-small text-gray-600">${slide.content.subtitle}</p>` : ''}
+                                </div>
+                                <div class="space-y-3">
+                                    ${slide.content.rows.map(row => `
+                                        <div class="bg-white rounded-xl shadow-sm border-l-4 border-${row.color}-500 p-4">
+                                            <div class="flex items-center mb-3">
+                                                <i data-lucide="${row.icon}" class="w-5 h-5 text-${row.color}-500 mr-2"></i>
+                                                <h3 class="font-bold text-gray-800">${row.name}</h3>
+                                            </div>
+                                            <div class="space-y-2">
+                                                ${row.cells.map((cell, i) => `
+                                                    <div>
+                                                        <p class="text-xs font-bold uppercase tracking-wide text-${row.color}-600">${slide.content.headers[i+1]}</p>
+                                                        <p class="text-sm text-gray-700 leading-snug">${cell}</p>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                ${slide.content.note ? `
+                                    <div class="mt-4 bg-amber-50 border-2 border-amber-300 rounded-lg p-4">
+                                        <div class="flex items-start space-x-3">
+                                            <i data-lucide="lightbulb" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                                            <p class="text-sm text-amber-900 leading-snug">${slide.content.note}</p>
+                                        </div>
+                                    </div>` : ''}
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit">
+                                <div class="max-w-7xl mx-auto w-full mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="table-2" class="w-9 h-9 text-yellow-400 flex-shrink-0"></i>
+                                        <h1 class="text-3xl font-bold text-gray-800">${slide.content.title}</h1>
+                                    </div>
+                                    ${slide.content.subtitle ? `<p class="text-sm text-purple-600 mt-1">${slide.content.subtitle}</p>` : ''}
+                                </div>
+                                <div class="max-w-7xl mx-auto w-full overflow-hidden rounded-xl shadow-sm border border-purple-200">
+                                    <table class="w-full bg-white table-fixed">
+                                        <thead>
+                                            <tr class="bg-purple-900 text-white">
+                                                ${slide.content.headers.map((h, i) => `
+                                                    <th class="text-left text-xs xl:text-sm font-semibold px-2.5 py-2 ${i === 0 ? 'w-40' : ''}">${h}</th>
+                                                `).join('')}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${slide.content.rows.map((row, r) => `
+                                                <tr class="${r % 2 === 0 ? 'bg-white' : 'bg-purple-50'} align-top border-t border-purple-100">
+                                                    <td class="px-2.5 py-2 border-l-4 border-${row.color}-500">
+                                                        <div class="flex items-start gap-1.5">
+                                                            <i data-lucide="${row.icon}" class="w-4 h-4 text-${row.color}-500 flex-shrink-0 mt-0.5"></i>
+                                                            <span class="font-bold text-gray-800 text-sm leading-snug break-words min-w-0">${row.name}</span>
+                                                        </div>
+                                                    </td>
+                                                    ${row.cells.map(cell => `
+                                                        <td class="px-2.5 py-2 text-xs xl:text-sm text-gray-700 leading-snug">${cell}</td>
+                                                    `).join('')}
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                ${slide.content.note ? `
+                                    <div class="max-w-7xl mx-auto w-full mt-3 bg-amber-50 border-2 border-amber-300 rounded-lg p-2.5">
+                                        <div class="flex items-start space-x-2">
+                                            <i data-lucide="lightbulb" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                                            <p class="text-xs xl:text-sm text-amber-900 leading-snug">${slide.content.note}</p>
+                                        </div>
+                                    </div>` : ''}
+                            </div>
+                        </div>`;
+
+                case 'closing':
+                    return `
+                        <div class="h-full bg-gradient-to-br from-slate-50 to-white md:overflow-y-hidden">
+                            <!-- Mobile -->
+                            <div class="mobile-content md:hidden">
+                                <div class="flex items-center gap-3 mb-1">
+                                    <i data-lucide="footprints" class="w-7 h-7 text-yellow-400 flex-shrink-0"></i>
+                                    <h1 class="mobile-title font-bold text-gray-900">${slide.content.title}</h1>
+                                </div>
+                                ${slide.content.subtitle ? `<p class="text-sm text-gray-500 leading-snug mb-4">${slide.content.subtitle}</p>` : '<div class="mb-4"></div>'}
+                                ${slide.content.next ? `
+                                <div class="bg-white border-l-4 border-amber-400 rounded-r-lg shadow-sm px-4 py-3 mb-3">
+                                    <p class="text-[11px] font-semibold uppercase tracking-widest text-amber-600 mb-1.5"><span class="text-sm align-middle mr-1.5">📅</span>${slide.content.next.label || 'Próximo práctico'}</p>
+                                    <p class="text-lg font-semibold text-gray-900 leading-snug">${slide.content.next.title}</p>
+                                    <p class="text-sm font-semibold text-gray-700">${slide.content.next.date}</p>
+                                    ${slide.content.next.note ? `<p class="text-xs text-gray-500 mt-1 leading-snug">${slide.content.next.note}</p>` : ''}
+                                </div>` : ''}
+                                <div class="bg-white border-l-4 border-purple-400 rounded-r-lg shadow-sm px-4 py-3 mb-3">
+                                    <p class="text-[11px] font-semibold uppercase tracking-widest text-purple-600 mb-2"><span class="text-sm align-middle mr-1.5">📝</span>${slide.content.itemsLabel || 'Para la próxima sesión'}</p>
+                                    <ul class="space-y-2">
+                                        ${slide.content.items.map(item => `
+                                            <li class="flex gap-2.5">
+                                                <span class="mt-2 w-1.5 h-1.5 rounded-full bg-purple-300 flex-shrink-0"></span>
+                                                <span class="text-sm text-gray-700 leading-snug">${item}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                                ${slide.content.alert ? `
+                                <div class="bg-white border-l-4 border-red-400 rounded-r-lg shadow-sm px-4 py-3">
+                                    <p class="text-[11px] font-semibold uppercase tracking-widest text-red-600 mb-1.5"><span class="text-sm align-middle mr-1.5">⚠️</span>${slide.content.alert.title}</p>
+                                    ${slide.content.alert.items.map((a, i) => `<p class="text-sm ${i === 0 ? 'text-gray-900 font-medium' : 'text-gray-600 mt-1'} leading-snug">${a}</p>`).join('')}
+                                </div>` : ''}
+                            </div>
+                            <!-- Desktop -->
+                            <div class="hidden md:block desktop-fit">
+                                <div class="max-w-5xl mx-auto w-full">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="footprints" class="w-8 h-8 text-yellow-400 flex-shrink-0"></i>
+                                        <h1 class="text-3xl font-bold text-gray-900">${slide.content.title}</h1>
+                                    </div>
+                                    ${slide.content.subtitle ? `<p class="text-sm text-gray-500 mt-1 mb-4">${slide.content.subtitle}</p>` : '<div class="mb-4"></div>'}
+                                    ${slide.content.next ? `
+                                    <div class="bg-white border-l-4 border-amber-400 rounded-r-lg shadow-sm px-5 py-3 mb-3 flex items-center justify-between gap-6">
+                                        <div class="min-w-0">
+                                            <p class="text-[11px] font-semibold uppercase tracking-widest text-amber-600 mb-1"><span class="text-sm align-middle mr-1.5">📅</span>${slide.content.next.label || 'Próximo práctico'}</p>
+                                            <p class="text-xl font-semibold text-gray-900 leading-snug">${slide.content.next.title}</p>
+                                            ${slide.content.next.note ? `<p class="text-xs text-gray-500 mt-0.5">${slide.content.next.note}</p>` : ''}
+                                        </div>
+                                        <p class="text-base font-semibold text-gray-700 flex-shrink-0">${slide.content.next.date}</p>
+                                    </div>` : ''}
+                                    <div class="bg-white border-l-4 border-purple-400 rounded-r-lg shadow-sm px-5 py-3 mb-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-widest text-purple-600 mb-2"><span class="text-sm align-middle mr-1.5">📝</span>${slide.content.itemsLabel || 'Para la próxima sesión'}</p>
+                                        <ul class="grid grid-cols-2 gap-x-8 gap-y-2">
+                                            ${slide.content.items.map(item => `
+                                                <li class="flex gap-2.5">
+                                                    <span class="mt-2 w-1.5 h-1.5 rounded-full bg-purple-300 flex-shrink-0"></span>
+                                                    <span class="text-sm text-gray-700 leading-snug">${item}</span>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                    ${slide.content.alert ? `
+                                    <div class="bg-white border-l-4 border-red-400 rounded-r-lg shadow-sm px-5 py-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-widest text-red-600 mb-1"><span class="text-sm align-middle mr-1.5">⚠️</span>${slide.content.alert.title}</p>
+                                        ${slide.content.alert.items.map((a, i) => `<p class="text-sm ${i === 0 ? 'text-gray-900 font-medium' : 'text-gray-600 mt-1'} leading-snug">${a}</p>`).join('')}
+                                    </div>` : ''}
+                                </div>
+                            </div>
+                        </div>`;
+
                 case 'qa':
                     return `
                         <div class="h-full bg-gradient-to-br from-indigo-50 to-purple-50 md:overflow-y-hidden">
@@ -1142,6 +1393,34 @@
                 goToSlide(slides.length - 1);
             }
         });
-    </script>
+    
+        // Pantalla completa: boton del header y tecla F
+        (function () {
+            const fsBtn = document.getElementById('fullscreenBtn');
+            if (!fsBtn) return;
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            fsBtn.addEventListener('click', toggleFullscreen);
+            document.addEventListener('fullscreenchange', () => {
+                const icon = document.fullscreenElement ? 'minimize' : 'maximize';
+                fsBtn.innerHTML = '<i data-lucide="' + icon + '" class="w-5 h-5 text-yellow-400"></i>';
+                fsBtn.title = document.fullscreenElement ? 'Salir de pantalla completa (F)' : 'Pantalla completa (F)';
+                if (window.lucide) lucide.createIcons();
+            });
+            document.addEventListener('keydown', (e) => {
+                if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                    const t = e.target.tagName;
+                    if (t === 'INPUT' || t === 'TEXTAREA' || e.target.isContentEditable) return;
+                    e.preventDefault();
+                    toggleFullscreen();
+                }
+            });
+        })();
+</script>
 </body>
 </html>

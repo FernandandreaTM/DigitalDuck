@@ -6,6 +6,7 @@
     <title>Práctico IV: Muerte Celular</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="js/laminas-live.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -644,6 +645,8 @@
             setupTouchHandling();
             hideSwipeHint();
             setupDropdown();
+            // Si hay servidor, trae las laminas guardadas; si no, deja el contenido del archivo.
+            hydrateLaminas(slides, function() { renderSlide(); updateNavigation(); });
         });
         function setupDropdown() {
             const mobileMenuButton = document.getElementById('mobile-menu');

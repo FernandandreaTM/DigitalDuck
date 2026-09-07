@@ -602,7 +602,7 @@
             setupTouchHandling();
             hideSwipeHint();
             // Si hay servidor, trae las laminas guardadas; si no, deja el contenido del archivo.
-            hydrateLaminas(slides, function() { renderSlide(); updateNavigation(); });
+            if (typeof hydrateLaminas === 'function') hydrateLaminas(slides, function() { renderSlide(); updateNavigation(); });
         });
 
         function hideSwipeHint() {

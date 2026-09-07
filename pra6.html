@@ -639,7 +639,7 @@
             hideSwipeHint();
             setupDropdown();
             // Si hay servidor, trae las laminas guardadas; si no, deja el contenido del archivo.
-            hydrateLaminas(slides, function() { renderSlide(); updateNavigation(); });
+            if (typeof hydrateLaminas === 'function') hydrateLaminas(slides, function() { renderSlide(); updateNavigation(); });
         });
         function setupDropdown() {
             const mobileMenuButton = document.getElementById('mobile-menu');

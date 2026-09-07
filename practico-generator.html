@@ -1479,19 +1479,19 @@ const LAMINAS_BANK = {
           "role": "histologia",
           "label": "Histología normal",
           "url": "https://www.histologyguide.com/slideview/MH-143-kidney/16-slide-1.html",
-          "note": ""
+          "note": "Riñón normal: corteza, glomérulos y túbulos sin cicatriz, el patrón contra el que se reconoce la fibrosis y la atrofia tubular"
         },
         {
           "role": "clinica",
           "label": "MedlinePlus",
           "url": "https://medlineplus.gov/ency/article/003579.htm",
-          "note": ""
+          "note": "Qué mide un examen de orina completo y qué hallazgos apuntan a una infección urinaria"
         },
         {
           "role": "referencia",
           "label": "MSD Manual",
           "url": "https://www.msdmanuals.com/professional/infectious-diseases/urinary-tract-infections-utis/chronic-pyelonephritis",
-          "note": ""
+          "note": "Pielonefritis crónica: por qué las infecciones repetidas y el reflujo terminan cicatrizando el riñón"
         }
       ]
     },
@@ -1545,19 +1545,19 @@ const LAMINAS_BANK = {
           "role": "histologia",
           "label": "Histología normal",
           "url": "https://histologyguide.com/slideview/MH-171-oviduct/18-slide-1.html",
-          "note": ""
+          "note": "Trompa uterina normal: pliegues mucosos y epitelio ciliado, para dimensionar la destrucción y el exudado"
         },
         {
           "role": "clinica",
           "label": "MedlinePlus",
           "url": "https://medlineplus.gov/pelvicinflammatorydisease.html",
-          "note": ""
+          "note": "Qué es la enfermedad inflamatoria pélvica y cómo la infección asciende desde el cuello uterino"
         },
         {
           "role": "referencia",
           "label": "MSD Manual",
           "url": "https://www.msdmanuals.com/professional/gynecology-and-obstetrics/vaginitis-cervicitis-and-pelvic-inflammatory-disease/pelvic-inflammatory-disease-pid",
-          "note": ""
+          "note": "Enfermedad inflamatoria pélvica: agentes causales y por qué se llega a formar un absceso tubo-ovárico"
         }
       ]
     },
@@ -1610,19 +1610,19 @@ const LAMINAS_BANK = {
           "role": "histologia",
           "label": "Histología normal",
           "url": "https://histologyguide.com/slideview/MH-151-thyroid/13-slide-1.html",
-          "note": ""
+          "note": "Tiroides normal: folículos con coloide y epitelio cúbico, sin infiltrado linfoide ni centros germinales"
         },
         {
           "role": "clinica",
           "label": "MedlinePlus",
           "url": "https://medlineplus.gov/ency/article/003684.htm",
-          "note": ""
+          "note": "Qué mide la TSH y por qué se eleva cuando la glándula deja de producir hormona suficiente"
         },
         {
           "role": "referencia",
           "label": "MSD Manual",
           "url": "https://www.msdmanuals.com/professional/endocrine-and-metabolic-disorders/thyroid-disorders/hashimoto-thyroiditis",
-          "note": ""
+          "note": "Tiroiditis de Hashimoto: mecanismo autoinmune, papel de los anticuerpos anti-TPO y evolución al hipotiroidismo"
         }
       ]
     },
@@ -1666,27 +1666,27 @@ const LAMINAS_BANK = {
         },
         {
           "role": "histologia",
-          "label": "Histoquímica (enzima oxidativa mitocondrial - NADH-TR/SDH)",
+          "label": "Histoquímica (NADH-TR / SDH)",
           "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FSlide_Library%2FNeuropath_collection%2FMisc1%2F34633.svs",
-          "note": ""
+          "note": "La misma biopsia con tinción oxidativa: deja ver la agrupación de fibras por tipo que sigue a la reinervación"
+        },
+        {
+          "role": "histologia",
+          "label": "Histología normal",
+          "url": "https://histologyguide.com/slideview/MH-055a-skeletal-muscle/04-slide-1.html?b=ax1x1x3x35783x41961x-1",
+          "note": "Músculo esquelético normal: calibre uniforme y mosaico de tipos de fibra, referencia para reconocer la atrofia en grupos"
         },
         {
           "role": "clinica",
-          "label": "Histología normal",
-          "url": "https://histologyguide.com/slideview/MH-055a-skeletal-muscle/04-slide-1.html?b=ax1x1x3x35783x41961x-1",
-          "note": ""
-        },
-        {
-          "role": "referencia",
           "label": "MedlinePlus",
           "url": "https://medlineplus.gov/lab-tests/creatine-kinase/",
-          "note": ""
+          "note": "Qué indica una creatina quinasa levemente elevada y por qué no alcanza las cifras de una distrofia"
         },
         {
           "role": "referencia",
           "label": "MSD Manual",
           "url": "https://www.msdmanuals.com/professional/neurologic-disorders/peripheral-nervous-system-and-motor-unit-disorders/amyotrophic-lateral-sclerosis-als-and-other-motor-neuron-diseases-mnds",
-          "note": ""
+          "note": "Enfermedades de motoneurona: cómo la pérdida de inervación atrofia el músculo y qué las separa de una miopatía"
         }
       ]
     }
@@ -4200,6 +4200,16 @@ function generateFullHTML() {
             .desktop-title-icon { flex-shrink: 0; }
             .desktop-main-title { text-align: left; }
         }
+        .dropdown-menu { position: absolute; right: 1rem; top: 3.5rem; background-color: white; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); padding: 0.5rem 0; z-index: 50; min-width: 200px; display: none; }
+        .dropdown-menu.show { display: block; }
+        .dropdown-item { display: block; width: 100%; padding: 0.375rem 0.875rem; text-align: left; color: #4b154a; font-weight: 500; transition: background-color 0.2s; }
+        .dropdown-item:hover { background-color: #f5e6e1; }
+        .desktop-dropdown-trigger { display: none; }
+        @media (min-width: 769px) {
+            .desktop-dropdown-trigger { display: flex; align-items: center; padding: 0.375rem 0.875rem; background-color: #4b154a; border-radius: 0.5rem; font-weight: 500; transition: background-color 0.2s; cursor: pointer; }
+            .desktop-dropdown-trigger:hover { background-color: #621c62; }
+            .desktop-dropdown-trigger span { margin-right: 0.5rem; }
+        }
         .swipe-hint { display: none; }
         @media (max-width: 768px) {
             .swipe-hint { display: block; position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.7); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.75rem; z-index: 1000; animation: fadeIn 2s ease-in-out; }
@@ -4221,6 +4231,16 @@ function generateFullHTML() {
                     <i data-lucide="maximize" class="w-5 h-5 text-yellow-400"></i>
                 </button>
                 <span id="slide-counter" class="text-sm md:text-base font-mono whitespace-nowrap">1 / ${state.slides.length}</span>
+                <div class="relative">
+                    <button id="mobile-menu" class="md:hidden nav-button p-1.5 rounded-lg hover:bg-purple-800 transition-colors flex items-center justify-center">
+                        <i data-lucide="menu" class="w-5 h-5 text-yellow-400"></i>
+                    </button>
+                    <button id="desktop-menu" class="hidden md:flex desktop-dropdown-trigger">
+                        <span class="text-yellow-200">Ir a Lámina</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-yellow-200"></i>
+                    </button>
+                    <div id="dropdownMenu" class="dropdown-menu"></div>
+                </div>
             </div>
         </div>
         <div id="slideContent" class="content-area animate-fade-in"></div>
@@ -4256,6 +4276,7 @@ function generateFullHTML() {
         let currentSlide = 0;
         let touchStartX = 0;
         let touchStartY = 0;
+        let isDropdownOpen = false;
 
         document.addEventListener('DOMContentLoaded', function() {
             lucide.createIcons();
@@ -4263,7 +4284,55 @@ function generateFullHTML() {
             updateNavigation();
             setupTouchHandling();
             hideSwipeHint();
+            setupDropdown();
         });
+
+        // El menu "Ir a Lamina" se arma en tiempo de ejecucion con las laminas de caso del
+        // practico; si no hay ninguna, no se muestra el boton.
+        function setupDropdown() {
+            const menu = document.getElementById('dropdownMenu');
+            const mobileMenuButton = document.getElementById('mobile-menu');
+            const desktopMenuButton = document.getElementById('desktop-menu');
+            if (!menu || !mobileMenuButton || !desktopMenuButton) return;
+
+            const casos = [];
+            slides.forEach(function(s, i) {
+                if (s.type === 'case') casos.push({index: i, title: (s.content && s.content.title) || ('Lámina ' + (i + 1))});
+            });
+            if (!casos.length) {
+                mobileMenuButton.style.display = 'none';
+                desktopMenuButton.style.display = 'none';
+                return;
+            }
+            casos.forEach(function(c) {
+                const b = document.createElement('button');
+                b.className = 'dropdown-item';
+                b.setAttribute('data-slide', c.index);
+                b.textContent = c.title;
+                menu.appendChild(b);
+            });
+
+            function toggleDropdown() {
+                isDropdownOpen = !isDropdownOpen;
+                menu.classList.toggle('show', isDropdownOpen);
+            }
+            function closeDropdown() {
+                isDropdownOpen = false;
+                menu.classList.remove('show');
+            }
+            mobileMenuButton.addEventListener('click', function(e) { e.stopPropagation(); toggleDropdown(); });
+            desktopMenuButton.addEventListener('click', function(e) { e.stopPropagation(); toggleDropdown(); });
+            menu.querySelectorAll('.dropdown-item[data-slide]').forEach(function(item) {
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    goToSlide(parseInt(item.getAttribute('data-slide'), 10));
+                    closeDropdown();
+                });
+            });
+            document.addEventListener('click', function(e) {
+                if (isDropdownOpen && !menu.contains(e.target) && !mobileMenuButton.contains(e.target) && !desktopMenuButton.contains(e.target)) closeDropdown();
+            });
+        }
 
         function hideSwipeHint() {
             setTimeout(() => {

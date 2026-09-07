@@ -1167,19 +1167,19 @@
           "role": "histologia",
           "label": "Histología normal",
           "url": "https://www.histologyguide.com/slideview/MH-143-kidney/16-slide-1.html",
-          "note": ""
+          "note": "Riñón normal: corteza, glomérulos y túbulos sin cicatriz, el patrón contra el que se reconoce la fibrosis y la atrofia tubular"
         },
         {
           "role": "clinica",
           "label": "MedlinePlus",
           "url": "https://medlineplus.gov/ency/article/003579.htm",
-          "note": ""
+          "note": "Qué mide un examen de orina completo y qué hallazgos apuntan a una infección urinaria"
         },
         {
           "role": "referencia",
           "label": "MSD Manual",
           "url": "https://www.msdmanuals.com/professional/infectious-diseases/urinary-tract-infections-utis/chronic-pyelonephritis",
-          "note": ""
+          "note": "Pielonefritis crónica: por qué las infecciones repetidas y el reflujo terminan cicatrizando el riñón"
         }
       ]
     },
@@ -1233,19 +1233,19 @@
           "role": "histologia",
           "label": "Histología normal",
           "url": "https://histologyguide.com/slideview/MH-171-oviduct/18-slide-1.html",
-          "note": ""
+          "note": "Trompa uterina normal: pliegues mucosos y epitelio ciliado, para dimensionar la destrucción y el exudado"
         },
         {
           "role": "clinica",
           "label": "MedlinePlus",
           "url": "https://medlineplus.gov/pelvicinflammatorydisease.html",
-          "note": ""
+          "note": "Qué es la enfermedad inflamatoria pélvica y cómo la infección asciende desde el cuello uterino"
         },
         {
           "role": "referencia",
           "label": "MSD Manual",
           "url": "https://www.msdmanuals.com/professional/gynecology-and-obstetrics/vaginitis-cervicitis-and-pelvic-inflammatory-disease/pelvic-inflammatory-disease-pid",
-          "note": ""
+          "note": "Enfermedad inflamatoria pélvica: agentes causales y por qué se llega a formar un absceso tubo-ovárico"
         }
       ]
     },
@@ -1298,19 +1298,19 @@
           "role": "histologia",
           "label": "Histología normal",
           "url": "https://histologyguide.com/slideview/MH-151-thyroid/13-slide-1.html",
-          "note": ""
+          "note": "Tiroides normal: folículos con coloide y epitelio cúbico, sin infiltrado linfoide ni centros germinales"
         },
         {
           "role": "clinica",
           "label": "MedlinePlus",
           "url": "https://medlineplus.gov/ency/article/003684.htm",
-          "note": ""
+          "note": "Qué mide la TSH y por qué se eleva cuando la glándula deja de producir hormona suficiente"
         },
         {
           "role": "referencia",
           "label": "MSD Manual",
           "url": "https://www.msdmanuals.com/professional/endocrine-and-metabolic-disorders/thyroid-disorders/hashimoto-thyroiditis",
-          "note": ""
+          "note": "Tiroiditis de Hashimoto: mecanismo autoinmune, papel de los anticuerpos anti-TPO y evolución al hipotiroidismo"
         }
       ]
     },
@@ -1354,27 +1354,27 @@
         },
         {
           "role": "histologia",
-          "label": "Histoquímica (enzima oxidativa mitocondrial - NADH-TR/SDH)",
+          "label": "Histoquímica (NADH-TR / SDH)",
           "url": "https://www.virtualpathology.leeds.ac.uk/slides/library/view.php?path=%2FResearch_4%2FSlide_Library%2FNeuropath_collection%2FMisc1%2F34633.svs",
-          "note": ""
+          "note": "La misma biopsia con tinción oxidativa: deja ver la agrupación de fibras por tipo que sigue a la reinervación"
+        },
+        {
+          "role": "histologia",
+          "label": "Histología normal",
+          "url": "https://histologyguide.com/slideview/MH-055a-skeletal-muscle/04-slide-1.html?b=ax1x1x3x35783x41961x-1",
+          "note": "Músculo esquelético normal: calibre uniforme y mosaico de tipos de fibra, referencia para reconocer la atrofia en grupos"
         },
         {
           "role": "clinica",
-          "label": "Histología normal",
-          "url": "https://histologyguide.com/slideview/MH-055a-skeletal-muscle/04-slide-1.html?b=ax1x1x3x35783x41961x-1",
-          "note": ""
-        },
-        {
-          "role": "referencia",
           "label": "MedlinePlus",
           "url": "https://medlineplus.gov/lab-tests/creatine-kinase/",
-          "note": ""
+          "note": "Qué indica una creatina quinasa levemente elevada y por qué no alcanza las cifras de una distrofia"
         },
         {
           "role": "referencia",
           "label": "MSD Manual",
           "url": "https://www.msdmanuals.com/professional/neurologic-disorders/peripheral-nervous-system-and-motor-unit-disorders/amyotrophic-lateral-sclerosis-als-and-other-motor-neuron-diseases-mnds",
-          "note": ""
+          "note": "Enfermedades de motoneurona: cómo la pérdida de inervación atrofia el músculo y qué las separa de una miopatía"
         }
       ]
     }

@@ -364,8 +364,8 @@
 
         function renderLaminaCard(l) {
             const allLinks = l.links || [];
-            const primary = allLinks[0];
-            const secondary = allLinks.slice(1);
+            const primary = allLinks.find(k => k.role === 'caso') || allLinks[0];
+            const secondary = allLinks.filter(k => k !== primary);
             const secondaryHtml = secondary.map(lnk =>
                 `<a href="${lnk.url}" target="_blank">${lnk.label}</a>`
             ).join('');
@@ -383,6 +383,7 @@
                     </div>
                     <div class="lamina-card-body">
                         <p><strong>Paciente:</strong> ${patientLine(cl)}</p>
+                        ${cl.sample ? `<p><strong>Muestra:</strong> ${cl.sample}</p>` : ''}
                         ${cl.symptoms ? `<p><strong>Síntomas:</strong> ${cl.symptoms}</p>` : ''}
                         ${labsList.length ? `<div class="lamina-list-block"><strong>Laboratorio:</strong><ul>${fieldListHTML(labsList)}</ul></div>` : ''}
                         ${imgList.length ? `<div class="lamina-list-block"><strong>Estudios de imagen:</strong><ul>${fieldListHTML(imgList)}</ul></div>` : ''}

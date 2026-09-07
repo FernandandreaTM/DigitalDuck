@@ -52,6 +52,7 @@ $sel_tema     = $edit['tema_id'] ?? '';
     <div class="field"><label>Sitio de biopsia</label><input name="clinical_sitio_biopsia" value="<?= $v('clinical_sitio_biopsia') ?>"></div>
   </div>
   <div class="field"><label>Descripción libre del paciente (opcional, se usa si no hay edad/sexo)</label><input name="clinical_patient" value="<?= $v('clinical_patient') ?>"></div>
+  <div class="field"><label>Muestra — texto libre (opcional, se usa si no hay tipo/sitio de biopsia)</label><input name="clinical_sample" value="<?= $v('clinical_sample') ?>"></div>
   <div class="field"><label>Síntomas</label><textarea name="clinical_symptoms"><?= $v('clinical_symptoms') ?></textarea></div>
 
   <p class="sub-h">Hallazgos (JSON: [{"value":"...","url":"..."}])</p>
@@ -62,7 +63,7 @@ $sel_tema     = $edit['tema_id'] ?? '';
 
   <div class="field"><label>Preguntas de análisis (una por línea)</label><textarea name="questions_text"><?= htmlspecialchars($questions_text ?? '') ?></textarea></div>
 
-  <div class="field"><label>Enlaces (JSON: [{"label":"...","url":"..."}])</label><textarea class="mono" name="links_json"><?= $v('links_json', '[]') ?></textarea></div>
+  <div class="field"><label>Enlaces (JSON: [{"role":"caso|histologia|clinica|referencia","label":"...","url":"...","note":"qué aporta al caso"}]) — el de rol "caso" es la lámina virtual; los demás llevan nota</label><textarea class="mono" name="links_json"><?= $v('links_json', '[]') ?></textarea></div>
 
   <div class="btn-row"><button type="submit" class="btn btn-yellow">Guardar lámina</button></div>
 </form>

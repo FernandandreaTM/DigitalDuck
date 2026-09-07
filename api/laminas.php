@@ -24,6 +24,7 @@ $laminas = array_map(function ($r) {
             'sexo'         => $r['clinical_sexo'],
             'tipoBiopsia'  => $r['clinical_tipo_biopsia'],
             'sitioBiopsia' => $r['clinical_sitio_biopsia'],
+            'sample'       => $r['clinical_sample'] ?? null,
             'patient'      => $r['clinical_patient'],
             'symptoms'     => $r['clinical_symptoms'],
             'labs'         => json_decode($r['labs_json'] ?? '[]', true) ?: [],

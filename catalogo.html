@@ -337,14 +337,15 @@
            legado clinical.patient. */
         function patientLine(clinical) {
             if (!clinical) return '';
-            const structured = clinical.edad || clinical.sexo || clinical.sitioBiopsia || clinical.tipoBiopsia;
+            const structured = clinical.edad || clinical.sexo || ((clinical.sitioBiopsia || clinical.tipoBiopsia) && !clinical.sample);
             if (!structured) return clinical.patient || '';
             let base = '';
             if (clinical.sexo && clinical.edad) base = clinical.sexo + ' de ' + clinical.edad + ' años';
             else if (clinical.sexo) base = clinical.sexo;
             else if (clinical.edad) base = clinical.edad + ' años';
             let bx = '';
-            if (clinical.tipoBiopsia && clinical.sitioBiopsia) bx = 'biopsia ' + clinical.tipoBiopsia + ' de ' + clinical.sitioBiopsia;
+            if (clinical.sample) bx = '';
+            else if (clinical.tipoBiopsia && clinical.sitioBiopsia) bx = 'biopsia ' + clinical.tipoBiopsia + ' de ' + clinical.sitioBiopsia;
             else if (clinical.tipoBiopsia) bx = 'biopsia ' + clinical.tipoBiopsia;
             else if (clinical.sitioBiopsia) bx = 'biopsia de ' + clinical.sitioBiopsia;
             return [base, bx].filter(Boolean).join(', ');

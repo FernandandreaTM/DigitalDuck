@@ -55,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $clinical_tipo  = trim($_POST['clinical_tipo_biopsia'] ?? '');
         $clinical_sitio = trim($_POST['clinical_sitio_biopsia'] ?? '');
         $clinical_pat   = trim($_POST['clinical_patient'] ?? '');
+        $clinical_samp  = trim($_POST['clinical_sample'] ?? '');
         $clinical_symp  = trim($_POST['clinical_symptoms'] ?? '');
         $labs_json      = json_or_empty($_POST['labs_json'] ?? '[]');
         $imagen_json    = json_or_empty($_POST['imagenologia_json'] ?? '[]');
@@ -66,22 +67,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $slug, $practico, $indice, $unidad_numero ?: null, $unidad_nombre ?: null,
             $tema_id ?: null, $tema_nombre ?: null, $title, $concept ?: null,
             $clinical_edad ?: null, $clinical_sexo ?: null, $clinical_tipo ?: null, $clinical_sitio ?: null,
-            $clinical_pat ?: null, $clinical_symp ?: null,
+            $clinical_pat ?: null, $clinical_samp ?: null, $clinical_symp ?: null,
             $labs_json, $imagen_json, $questions_json, $links_json, $orden
         ];
 
         if ($id > 0) {
             $pdo->prepare("UPDATE laminas SET slug=?,practico=?,indice_en_practico=?,unidad_numero=?,unidad_nombre=?,
                 tema_id=?,tema_nombre=?,title=?,concept=?,clinical_edad=?,clinical_sexo=?,clinical_tipo_biopsia=?,
-                clinical_sitio_biopsia=?,clinical_patient=?,clinical_symptoms=?,labs_json=?,imagenologia_json=?,
+                clinical_sitio_biopsia=?,clinical_patient=?,clinical_sample=?,clinical_symptoms=?,labs_json=?,imagenologia_json=?,
                 questions_json=?,links_json=?,orden=?,updated_at=datetime('now') WHERE id=?")
                 ->execute([...$params, $id]);
             $msg = 'Lámina actualizada.';
         } else {
             $pdo->prepare("INSERT INTO laminas (slug,practico,indice_en_practico,unidad_numero,unidad_nombre,
                 tema_id,tema_nombre,title,concept,clinical_edad,clinical_sexo,clinical_tipo_biopsia,
-                clinical_sitio_biopsia,clinical_patient,clinical_symptoms,labs_json,imagenologia_json,
-                questions_json,links_json,orden) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+                clinical_sitio_biopsia,clinical_patient,clinical_sample,clinical_symptoms,labs_json,imagenologia_json,
+                questions_json,links_json,orden) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
                 ->execute($params);
             $id = (int)$pdo->lastInsertId();
             $msg = 'Lámina creada.';
@@ -134,7 +135,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $tema_id ?: null, $tema_nombre ?: null, $title, trim($data['concept'] ?? '') ?: null,
             trim($clinical['edad'] ?? '') ?: null, trim($clinical['sexo'] ?? '') ?: null,
             trim($clinical['tipoBiopsia'] ?? '') ?: null, trim($clinical['sitioBiopsia'] ?? '') ?: null,
-            trim($clinical['patient'] ?? '') ?: null, trim($clinical['symptoms'] ?? '') ?: null,
+            trim($clinical['patient'] ?? '') ?: null, trim($clinical['sample'] ?? '') ?: null,
+            trim($clinical['symptoms'] ?? '') ?: null,
             $labs_json, $imagen_json, $questions_json, $links_json,
         ];
 
@@ -146,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($existing_id) {
             $pdo->prepare("UPDATE laminas SET slug=?,practico=?,indice_en_practico=?,unidad_numero=?,unidad_nombre=?,
                 tema_id=?,tema_nombre=?,title=?,concept=?,clinical_edad=?,clinical_sexo=?,clinical_tipo_biopsia=?,
-                clinical_sitio_biopsia=?,clinical_patient=?,clinical_symptoms=?,labs_json=?,imagenologia_json=?,
+                clinical_sitio_biopsia=?,clinical_patient=?,clinical_sample=?,clinical_symptoms=?,labs_json=?,imagenologia_json=?,
                 questions_json=?,links_json=?,updated_at=datetime('now') WHERE id=?")
                 ->execute([...$params, $existing_id]);
             $id  = $existing_id;
@@ -155,8 +157,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $orden = (int)($pdo->query('SELECT COALESCE(MAX(orden),0) FROM laminas')->fetchColumn()) + 1;
             $pdo->prepare("INSERT INTO laminas (slug,practico,indice_en_practico,unidad_numero,unidad_nombre,
                 tema_id,tema_nombre,title,concept,clinical_edad,clinical_sexo,clinical_tipo_biopsia,
-                clinical_sitio_biopsia,clinical_patient,clinical_symptoms,labs_json,imagenologia_json,
-                questions_json,links_json,orden) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+                clinical_sitio_biopsia,clinical_patient,clinical_sample,clinical_symptoms,labs_json,imagenologia_json,
+                questions_json,links_json,orden) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
                 ->execute([...$params, $orden]);
             $id  = (int)$pdo->lastInsertId();
             $msg = 'Lámina creada desde el JSON.';

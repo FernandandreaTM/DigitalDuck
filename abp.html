@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABP 2026 - DigitalDuck</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/practicos.css">
+    <style>
+        .abp-info { background: white; border-radius: 16px; box-shadow: 0 6px 20px rgba(61,38,69,.12); padding: 1.5rem 2rem; margin-bottom: 2.5rem; }
+        .abp-info h2 { margin: 0 0 .8rem; color: var(--color-dark); font-size: 1.3rem; }
+        .abp-info table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+        .abp-info td { padding: .45rem .6rem; border-bottom: 1px solid #eee; vertical-align: top; }
+        .abp-info td:first-child { font-weight: 700; white-space: nowrap; width: 9rem; }
+        .abp-section-title { text-align: center; color: var(--color-dark); margin: 0 0 1.5rem; }
+        .abp-docs { margin-top: 1rem; font-size: .9rem; text-align: left; }
+        .abp-docs summary { cursor: pointer; font-weight: 600; color: var(--color-secondary); }
+        .abp-docs ul { margin: .6rem 0 0 1.1rem; padding: 0; columns: 1; }
+        .abp-docs li { margin: .25rem 0; }
+        .abp-docs a { color: var(--color-dark); }
+        .practicos-grid + .abp-section-title { margin-top: 3rem; }
+        .abp-links { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: center; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo-container">
+                <img src="images/logo2.png" alt="DigitalDuck Logo" class="logo-dd">
+                <img src="images/logouach.png" alt="UACH Logo" class="logo-uach">
+            </div>
+            <div class="nav-right">
+                <ul class="nav-links" id="navLinks"></ul>
+                <a href="catalogo.html" class="nav-pill"><span class="nav-pill-icon">🔬</span><span class="pill-label">CATÁLOGO</span></a>
+                <div class="nav-pill-wrap">
+                    <button class="nav-pill" id="practicosPillToggle" aria-haspopup="true" aria-expanded="false">
+                        <span class="nav-pill-icon">📋</span><span class="pill-label">PRÁCTICOS</span> <span class="pill-caret">▾</span>
+                    </button>
+                    <div class="practicos-pill-dropdown" id="practicosPillDropdown">
+                        <div class="practicos-pill-dropdown-content" id="practicosPillDropdownContent"></div>
+                    </div>
+                </div>
+                <a href="admin/login.php" class="admin-link" title="Panel de administración" aria-label="Panel de administración">🔒</a>
+            </div>
+            <button class="menu-toggle" id="menuToggle"><span></span><span></span><span></span></button>
+        </nav>
+    </header>
+
+    <div class="page-header">
+        <h1>ABP 2026 · HOSPITAL DE COLINA CITY</h1>
+        <p>Aprendizaje Basado en Problemas · Patología Básica ETMP148. Cada subgrupo recibe la carpeta clínica de un paciente y debe reconstruir su historia hasta llegar al diagnóstico.</p>
+    </div>
+
+    <div class="practicos-container">
+        <div class="abp-info">
+            <h2>Fechas clave</h2>
+            <table>
+                <tr><td>Jue 26 nov</td><td>Sesión 1: entrega de carpetas, organización del subgrupo</td></tr>
+                <tr><td>Jue 3 dic</td><td>Sesión 2: tutoría y preparación de la cápsula</td></tr>
+                <tr><td>Vie 4 dic · 23:59</td><td>Plazo para subir la cápsula (máximo 10 minutos)</td></tr>
+                <tr><td>Mié 9 dic</td><td>Prueba escrita en sala sobre los 4 casos</td></tr>
+                <tr><td>Evaluación</td><td>Cápsula 40 % · Prueba escrita 60 %</td></tr>
+            </table>
+        </div>
+
+        <h2 class="abp-section-title">Material de la actividad</h2>
+        <div class="practicos-grid">
+            <div class="practico-card"><div class="practico-header"><div class="practico-number">1</div><h3 class="practico-title">Instrucciones</h3></div>
+                <div class="practico-body"><div class="practico-icon">📘</div><p class="practico-description">Organización, calendario, cápsula y evaluación.</p>
+                <div class="abp-links"><a href="abp2026/Instrucciones_ABP_2026.pdf" target="_blank" class="practico-link">VER PDF</a><a href="abp2026/Instrucciones_ABP_2026.pptx" class="practico-link">PPT</a></div></div></div>
+            <div class="practico-card"><div class="practico-header"><div class="practico-number">2</div><h3 class="practico-title">Rúbrica de la cápsula</h3></div>
+                <div class="practico-body"><div class="practico-icon">✅</div><p class="practico-description">Criterios, pesos y niveles de desempeño.</p>
+                <a href="abp2026/Rubrica_capsula_ABP_2026.pdf" target="_blank" class="practico-link">VER RÚBRICA</a></div></div>
+            <div class="practico-card"><div class="practico-header"><div class="practico-number">3</div><h3 class="practico-title">Esqueleto del PPT</h3></div>
+                <div class="practico-body"><div class="practico-icon">🎞️</div><p class="practico-description">Láminas guía para armar la presentación de la cápsula.</p>
+                <a href="abp2026/Esqueleto_capsula_ABP_2026.pptx" class="practico-link">DESCARGAR PPT</a></div></div>
+        </div>
+
+        <h2 class="abp-section-title">Carpetas clínicas</h2>
+        <div class="practicos-grid">
+<div class="practico-card">
+  <div class="practico-header"><div class="practico-number">CASO 1</div><h3 class="practico-title">Don Luis, 64 años · Calbuco</h3></div>
+  <div class="practico-body"><div class="practico-icon">🗂️</div>
+    <p class="practico-description">Carpeta clínica del Hospital de Colina City · 16 documentos.</p>
+    <a href="abp2026/Caso_1_carpeta_clinica.zip" class="practico-link">DESCARGAR CARPETA (ZIP)</a>
+    <details class="abp-docs"><summary>Ver documentos uno por uno</summary><ul><li><a href="abp2026/caso1/Acta_comite_oncologico.pdf" target="_blank">Acta comite oncologico</a></li><li><a href="abp2026/caso1/Biopsia_endoscopica_gastrica.pdf" target="_blank">Biopsia endoscopica gastrica</a></li><li><a href="abp2026/caso1/Biopsia_pieza_quirurgica.pdf" target="_blank">Biopsia pieza quirurgica</a></li><li><a href="abp2026/caso1/Colonoscopia.pdf" target="_blank">Colonoscopia</a></li><li><a href="abp2026/caso1/Consulta_policlinico_medicina_interna.pdf" target="_blank">Consulta policlinico medicina interna</a></li><li><a href="abp2026/caso1/Ecografia_abdominal.pdf" target="_blank">Ecografia abdominal</a></li><li><a href="abp2026/caso1/Endoscopia_digestiva_alta.pdf" target="_blank">Endoscopia digestiva alta</a></li><li><a href="abp2026/caso1/Examenes_preoperatorios.pdf" target="_blank">Examenes preoperatorios</a></li><li><a href="abp2026/caso1/Hemograma.pdf" target="_blank">Hemograma</a></li><li><a href="abp2026/caso1/Marcadores_tumorales.pdf" target="_blank">Marcadores tumorales</a></li><li><a href="abp2026/caso1/Perfil_bioquimico_y_hepatico.pdf" target="_blank">Perfil bioquimico y hepatico</a></li><li><a href="abp2026/caso1/Perfil_de_fierro_B12_y_folato.pdf" target="_blank">Perfil de fierro B12 y folato</a></li><li><a href="abp2026/caso1/Protocolo_operatorio.pdf" target="_blank">Protocolo operatorio</a></li><li><a href="abp2026/caso1/Sangre_oculta_en_deposiciones.pdf" target="_blank">Sangre oculta en deposiciones</a></li><li><a href="abp2026/caso1/Serologia_enfermedad_celiaca.pdf" target="_blank">Serologia enfermedad celiaca</a></li><li><a href="abp2026/caso1/TAC_torax_abdomen_pelvis.pdf" target="_blank">TAC torax abdomen pelvis</a></li></ul></details>
+  </div></div><div class="practico-card">
+  <div class="practico-header"><div class="practico-number">CASO 2</div><h3 class="practico-title">Don Héctor, 56 años · Puerto Varas</h3></div>
+  <div class="practico-body"><div class="practico-icon">🗂️</div>
+    <p class="practico-description">Carpeta clínica del Hospital de Colina City · 11 documentos.</p>
+    <a href="abp2026/Caso_2_carpeta_clinica.zip" class="practico-link">DESCARGAR CARPETA (ZIP)</a>
+    <details class="abp-docs"><summary>Ver documentos uno por uno</summary><ul><li><a href="abp2026/caso2/Atencion_servicio_de_urgencia.pdf" target="_blank">Atencion servicio de urgencia</a></li><li><a href="abp2026/caso2/Control_cardiovascular_CESFAM.pdf" target="_blank">Control cardiovascular CESFAM</a></li><li><a href="abp2026/caso2/Coronariografia_y_angioplastia.pdf" target="_blank">Coronariografia y angioplastia</a></li><li><a href="abp2026/caso2/Curva_de_biomarcadores_cardiacos.pdf" target="_blank">Curva de biomarcadores cardiacos</a></li><li><a href="abp2026/caso2/Ecocardiograma.pdf" target="_blank">Ecocardiograma</a></li><li><a href="abp2026/caso2/Electrocardiograma_ingreso.pdf" target="_blank">Electrocardiograma ingreso</a></li><li><a href="abp2026/caso2/Evolucion_unidad_coronaria.pdf" target="_blank">Evolucion unidad coronaria</a></li><li><a href="abp2026/caso2/Laboratorio_de_urgencia.pdf" target="_blank">Laboratorio de urgencia</a></li><li><a href="abp2026/caso2/Material_aspirado_coronario_anatomia_patologica.pdf" target="_blank">Material aspirado coronario anatomia patologica</a></li><li><a href="abp2026/caso2/Perfil_lipidico_y_HbA1c.pdf" target="_blank">Perfil lipidico y HbA1c</a></li><li><a href="abp2026/caso2/Radiografia_de_torax_portatil.pdf" target="_blank">Radiografia de torax portatil</a></li></ul></details>
+  </div></div><div class="practico-card">
+  <div class="practico-header"><div class="practico-number">CASO 3</div><h3 class="practico-title">Sra. Marcela, 47 años · Alerce</h3></div>
+  <div class="practico-body"><div class="practico-icon">🗂️</div>
+    <p class="practico-description">Carpeta clínica del Hospital de Colina City · 12 documentos.</p>
+    <a href="abp2026/Caso_3_carpeta_clinica.zip" class="practico-link">DESCARGAR CARPETA (ZIP)</a>
+    <details class="abp-docs"><summary>Ver documentos uno por uno</summary><ul><li><a href="abp2026/caso3/Atencion_servicio_de_urgencia.pdf" target="_blank">Atencion servicio de urgencia</a></li><li><a href="abp2026/caso3/Consulta_CESFAM_previa.pdf" target="_blank">Consulta CESFAM previa</a></li><li><a href="abp2026/caso3/Cultivo_de_bilis.pdf" target="_blank">Cultivo de bilis</a></li><li><a href="abp2026/caso3/ECG_y_troponina.pdf" target="_blank">ECG y troponina</a></li><li><a href="abp2026/caso3/Ecografia_abdominal_de_urgencia.pdf" target="_blank">Ecografia abdominal de urgencia</a></li><li><a href="abp2026/caso3/Hemocultivos.pdf" target="_blank">Hemocultivos</a></li><li><a href="abp2026/caso3/Hemograma_y_PCR.pdf" target="_blank">Hemograma y PCR</a></li><li><a href="abp2026/caso3/Orina_completa_y_test_de_embarazo.pdf" target="_blank">Orina completa y test de embarazo</a></li><li><a href="abp2026/caso3/Perfil_hepatico_lipasa_y_amilasa.pdf" target="_blank">Perfil hepatico lipasa y amilasa</a></li><li><a href="abp2026/caso3/Protocolo_operatorio.pdf" target="_blank">Protocolo operatorio</a></li><li><a href="abp2026/caso3/Radiografia_de_torax.pdf" target="_blank">Radiografia de torax</a></li><li><a href="abp2026/caso3/Vesicula_biliar_anatomia_patologica.pdf" target="_blank">Vesicula biliar anatomia patologica</a></li></ul></details>
+  </div></div><div class="practico-card">
+  <div class="practico-header"><div class="practico-number">CASO 4</div><h3 class="practico-title">Don José, 58 años · Ancud</h3></div>
+  <div class="practico-body"><div class="practico-icon">🗂️</div>
+    <p class="practico-description">Carpeta clínica del Hospital de Colina City · 11 documentos.</p>
+    <a href="abp2026/Caso_4_carpeta_clinica.zip" class="practico-link">DESCARGAR CARPETA (ZIP)</a>
+    <details class="abp-docs"><summary>Ver documentos uno por uno</summary><ul><li><a href="abp2026/caso4/Atencion_servicio_de_urgencia.pdf" target="_blank">Atencion servicio de urgencia</a></li><li><a href="abp2026/caso4/Biopsia_hepatica.pdf" target="_blank">Biopsia hepatica</a></li><li><a href="abp2026/caso4/Control_CESFAM_2024.pdf" target="_blank">Control CESFAM 2024</a></li><li><a href="abp2026/caso4/Ecografia_abdominal_doppler.pdf" target="_blank">Ecografia abdominal doppler</a></li><li><a href="abp2026/caso4/Endoscopia_digestiva_alta_de_urgencia.pdf" target="_blank">Endoscopia digestiva alta de urgencia</a></li><li><a href="abp2026/caso4/Estudio_hepatico_complementario.pdf" target="_blank">Estudio hepatico complementario</a></li><li><a href="abp2026/caso4/Evolucion_hospitalaria.pdf" target="_blank">Evolucion hospitalaria</a></li><li><a href="abp2026/caso4/Hemograma_y_coagulacion.pdf" target="_blank">Hemograma y coagulacion</a></li><li><a href="abp2026/caso4/Liquido_ascitico.pdf" target="_blank">Liquido ascitico</a></li><li><a href="abp2026/caso4/Perfil_hepatico_y_bioquimico.pdf" target="_blank">Perfil hepatico y bioquimico</a></li><li><a href="abp2026/caso4/Serologia_viral_hepatica.pdf" target="_blank">Serologia viral hepatica</a></li></ul></details>
+  </div></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-text">
+            <p>&copy; 2026 DigitalDuck - Universidad Austral de Chile, Puerto Montt</p>
+            <p>TecMedHUB & Escuela de Tecnología Médica</p>
+            <p style="margin-top: .5rem; font-size: .8rem; opacity: .85;">Hospital de Colina City es una institución ficticia creada con fines docentes.</p>
+        </div>
+    </footer>
+
+    <script src="js/nav.js"></script>
+    <script>
+        renderNav('index.html');
+        initPracticosNav();
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        menuToggle.addEventListener('click', function() {
+            this.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

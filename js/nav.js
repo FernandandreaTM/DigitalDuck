@@ -37,7 +37,14 @@ function renderPracticosPill(practicos) {
                 <span class="practico-num">${p.num}</span>
                 <span class="practico-name">${p.name}</span>
             </a>
-        `));
+        `))
+        // Enlace fijo a la actividad ABP (no viene del backend)
+        .concat([`
+            <a href="abp.html" class="practico-item">
+                <span class="practico-num">ABP</span>
+                <span class="practico-name">ABP 2026</span>
+            </a>
+        `]);
     content.innerHTML = items.join('');
 }
 
